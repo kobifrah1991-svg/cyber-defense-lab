@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="מעבדת הגנה של HackerBot — אימון אבטחת מידע הגנתי אינטראקטיבי בעברית">
+  <title>HackerBot Defense Lab · מעבדת הגנה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+  <div class="bg-layers" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-orb o1"></div>
+    <div class="bg-orb o2"></div>
+    <div class="bg-orb o3"></div>
+    <div class="bg-scanlines"></div>
+  </div>
+
+  <div id="app">
+    <header class="site-header">
+      <a href="#" class="logo" id="logoBtn" title="חזרה ללוח הבקרה">
+        <div class="logo-icon">🛡️</div>
+        <div class="logo-text">HackerBot<span>Defense Lab</span></div>
+      </a>
+      <div class="header-stats">
+        <div class="stat-pill">
+          <div>
+            <div class="label">רמה</div>
+            <div class="value" id="hdrLevel">1</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div>
+            <div class="label">XP</div>
+            <div class="value" id="hdrXp">0</div>
+          </div>
+          <div class="xp-bar-wrap" title="התקדמות לרמה הבאה">
+            <div class="xp-bar-fill" id="hdrXpBar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HOME DASHBOARD -->
+    <main class="view active" id="view-home">
+      <div class="container">
+        <section class="hero">
+          <div class="hero-badge">🛡️ אימון הגנה בלבד · Defense-Only</div>
+          <h1>מעבדת הגנה</h1>
+          <p>
+            חדרי תרגול אינטראקטיביים בהשראת UX של חדרי למידה —
+            סימולציות גרפיות, XP, והתקדמות. בלי מעבדות תקיפה, בלי payloads, בלי CTF פריצה.
+          </p>
+          <div class="progress-overview">
+            <div class="prog-stat">
+              <div class="num"><span id="dashCompleted">0</span>/<span id="dashTotal">5</span></div>
+              <div class="lbl">חדרים הושלמו</div>
+            </div>
+            <div class="prog-stat">
+              <div class="num" id="dashAvg">0</div>
+              <div class="lbl">ציון ממוצע</div>
+            </div>
+            <div class="prog-stat">
+              <div class="num" id="dashXp">0</div>
+              <div class="lbl">סך XP</div>
+            </div>
+            <div class="prog-stat">
+              <div class="num" id="dashLevel">1</div>
+              <div class="lbl">רמה</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rooms-section">
+          <h2>🚪 חדרי האימון</h2>
+          <div class="rooms-grid" id="roomsGrid"></div>
+        </section>
+
+        <div class="reset-wrap">
+          <button class="btn btn-ghost btn-sm" id="btnReset">איפוס התקדמות</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ROOM VIEW -->
+    <main class="view" id="view-room">
+      <div class="container">
+        <div class="room-topbar">
+          <button class="btn btn-ghost" id="btnBackHome">← לוח הבקרה</button>
+          <div class="room-title-block" style="flex:1;">
+            <h1 id="roomTitle">חדר</h1>
+            <div class="room-meta">
+              <span class="diff-badge easy" id="roomDiff">קל</span>
+              <span class="room-xp" id="roomXpBadge">+0 XP</span>
+            </div>
+          </div>
+        </div>
+        <div id="roomMount"></div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span class="shield">🛡️</span> HackerBot Defense Lab · מעבדת הגנה ·
+      תוכן הגנתי בלבד — אין מדריכי תקיפה, exploits או payloads
+    </footer>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/rooms-meta.js"></script>
+  <script src="js/room1.js"></script>
+  <script src="js/room2.js"></script>
+  <script src="js/room3.js"></script>
+  <script src="js/room4.js"></script>
+  <script src="js/room5.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
