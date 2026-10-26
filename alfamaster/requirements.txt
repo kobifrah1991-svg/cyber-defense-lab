@@ -1,0 +1,4 @@
+# AlfaMaster authorized-testing core has no third-party Python deps.
+# It drives external CLI tools when present: nmap, iw, tshark, nmcli.
+# Optional system packages (Kali/Parrot):
+#   sudo apt install nmap tshark aircrack-ng iw
