@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alfamaster"
+version = "0.1.0"
+description = "Cross-platform security & network orchestrator (authorized-testing core)"
+readme = "alfamaster/README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+# The core has no third-party runtime dependencies; it drives external CLI
+# tools (nmap, tshark, iw) when present on PATH.
+dependencies = []
+
+[project.optional-dependencies]
+# Tooling used only to build standalone executables (.exe / binaries).
+build = ["pyinstaller>=6.0"]
+
+[project.scripts]
+# Installs an `alfamaster` command on PATH:  pip install -e .
+alfamaster = "alfamaster.cli:main"
+
+[tool.setuptools]
+# Ship only the AlfaMaster package; the legacy web lab in the repo root
+# is unrelated and is not part of this distribution.
+packages = ["alfamaster", "alfamaster.tools"]

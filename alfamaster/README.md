@@ -17,6 +17,41 @@ python3 -m alfamaster.cli info --lang he
 python3 -m alfamaster.cli scan 192.168.1.0/24 --profile service_os
 ```
 
+## Install
+
+Run from the **repository root**.
+
+**Linux (Kali / Parrot / Debian / Ubuntu):**
+```bash
+alfamaster/setup.sh          # installs nmap/tshark/iw/aircrack-ng + verifies
+```
+
+**Windows 10 / 11:**
+```bat
+alfamaster\setup.bat         REM checks Python, Npcap, nmap, tshark
+```
+
+**As a pip package (any OS):**
+```bash
+pip install -e .             # adds an `alfamaster` command on PATH
+alfamaster info --lang he
+```
+
+## Build standalone executables (EXE and friends)
+
+Produces a single self-contained binary via PyInstaller — no Python needed
+on the target machine.
+
+| OS | Command | Output |
+|----|---------|--------|
+| Windows | `build\build_exe.bat` | `dist\alfamaster.exe` |
+| Linux | `build/build.sh` | `dist/alfamaster` |
+| macOS | `build/build.sh` | `dist/alfamaster` (run from Terminal) |
+
+Note: build on each target OS — PyInstaller does not cross-compile. The
+executable still calls the external tools (nmap, tshark) from the host's
+PATH; it bundles the suite, not those third-party tools.
+
 Targets are validated (IP / CIDR / hostname) and every tool is invoked
 with an explicit argv list — never through a shell — so there is no
 command-injection surface.
