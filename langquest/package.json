@@ -2,7 +2,7 @@
   "name": "langquest",
   "version": "1.0.0",
   "private": true,
-  "description": "LangQuest \u2014 spoken-language micro-lessons (web, PWA and Android)",
+  "description": "LangQuest — spoken-language micro-lessons (web, PWA and Android)",
   "scripts": {
     "build:web": "node scripts/media.mjs && node scripts/build-web.mjs",
     "sync": "npm run build:web && npx cap sync android",
@@ -18,7 +18,9 @@
     "@capacitor/app": "^8.1.2",
     "@capacitor/browser": "^8.0.0",
     "@capacitor/core": "^8.5.3",
+    "@capacitor/filesystem": "^8.1.5",
     "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/share": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.4"
   },

@@ -212,7 +212,10 @@
   function gameResult(ok) {
     S.gameTries++;
     if (ok) {
-      if (S.gameFirstTry[S.pi] == null) S.gameFirstTry[S.pi] = S.gameTries === 1;
+      if (S.gameFirstTry[S.pi] == null) {
+        S.gameFirstTry[S.pi] = S.gameTries === 1;
+        if (S.gameTries === 1) LQEngage.track('perfect');
+      }
       setNext(true);
       toast(S.gameTries === 1 ? t('lesson.correct') : t('lesson.correct2'), 1400);
     } else {
@@ -333,6 +336,8 @@
       accent: S.accent,
       onResult: (score) => {
         S.voice[S.pi] = Math.max(S.voice[S.pi] || 0, score);
+        if (score >= 90) LQEngage.track('voice90');
+        if (score >= 100) LQEngage.track('voice100');
         if (score < S.pace.pass + 10) markMissed(S.pi);
         setNext(true);
       }
@@ -350,6 +355,7 @@
     LQStore.addXp(xp);
     LQApp.refreshHeader();
     burst();
+    setTimeout(() => LQEngage.track('lesson'), 900);
     const { meta, onExit, missed, teacher } = S;
     const lang = S.lang;
     stop();

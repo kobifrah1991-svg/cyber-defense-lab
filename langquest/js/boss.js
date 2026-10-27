@@ -172,6 +172,7 @@
       LQStore.updateStation(B.lang, B.stationId, { boss: true, bestBoss: total });
       if (!prev.boss) LQStore.addXp(50);
       burst(['👑', '🏆', '⭐', '🎉']);
+      setTimeout(() => LQEngage.track('boss'), 900);
     }
     LQApp.refreshHeader();
     const ctl = $('.boss-controls', B.root);

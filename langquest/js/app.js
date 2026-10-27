@@ -8,6 +8,7 @@
   const view = $('#view');
   let current = 'map';
   let lastInteraction = Date.now();
+  let tickCount = 0;
 
   function lang() { return LQStore.getSettings().lang; }
 
@@ -30,6 +31,7 @@
     else if (name === 'boss') LQBoss.start(view, params.lang, params.station, back);
     else if (name === 'vault') renderVault();
     else if (name === 'review') startReview();
+    else if (name === 'awards') LQEngage.renderAwards(view, () => go('map'));
     else if (name === 'onboarding') LQOnboarding.start(view, () => {
       go('map');
       LQUI.burst(['🗺️', '✨', '⭐']);
@@ -55,7 +57,7 @@
       ? t('hdr.streakDone', { n: st.count })
       : t('hdr.streakTip', { m: Math.floor(st.todaySec / 60), g: st.goalSec / 60, n: st.count });
     document.body.classList.toggle('onboarding', current === 'onboarding');
-    $('#hdrXp').innerHTML = `⭐ <b>${LQStore.getXp()}</b>`;
+    $('#hdrXp').innerHTML = `⭐ <b>${LQStore.getXp()}</b><small class="lv-chip">${LQEngage.level().n}</small>`;
     $('#hdrVault').innerHTML = `📒${due ? `<i class="badge">${due}</i>` : ''}`;
   }
 
@@ -119,6 +121,8 @@
         </ol>
       </section>
       </div><aside class="map-side">
+      ${LQEngage.questsCard()}
+      ${LQEngage.leagueCard()}
       <section class="goal card">
           <div class="goal-top"><span class="big-fire ${st.doneToday ? 'lit' : ''}">🔥</span><div><b>${t('map.streakDays', { n: st.count })}</b><small>${t('map.best', { n: st.best })}</small></div></div>
           <div class="bar"><i style="width:${Math.min(100, Math.round(100 * st.todaySec / st.goalSec))}%"></i></div>
@@ -147,6 +151,7 @@
     $$('[data-lesson]', view).forEach(b => b.onclick = () => go('lesson', { lang: L.id, station: b.dataset.lesson }));
     $$('[data-boss]', view).forEach(b => b.onclick = () => go('boss', { lang: L.id, station: b.dataset.boss }));
     $$('[data-act=paywall]', view).forEach(b => b.onclick = openPaywall);
+    $$('.quests, .league', view).forEach(c => { c.onclick = () => go('awards'); c.classList.add('clickable'); });
     const r = $('[data-act=review]', view);
     if (r) r.onclick = () => go('review');
     $('[data-act=vault]', view).onclick = () => go('vault');
@@ -251,6 +256,7 @@
         $$('[data-k]', view).forEach(b => b.onclick = () => {
           const ok = b.dataset.k === '1';
           LQStore.vaultReview(it.id, ok);
+          LQEngage.track('review');
           if (ok) knew++;
           idx++;
           card();
@@ -508,6 +514,8 @@
   setInterval(() => {
     if (document.hidden || !LEARNING_VIEWS.includes(current)) return;
     if (Date.now() - lastInteraction > 90000) return;
+    tickCount++;
+    if (tickCount % 6 === 0) LQEngage.track('tick');   // the "practise N minutes" quest
     if (LQStore.addActiveSeconds(5)) {
       toast(t('streak.reached', { n: LQStore.getProfile().minutes }), 3500);
       burst(['🔥', '⭐', '🔥']);
@@ -551,6 +559,8 @@
   $('#hdrLang').onclick = openLangPicker;
   $('#hdrSettings').onclick = openSettings;
   $('#hdrVault').onclick = () => go('vault');
+  $('#hdrXp').onclick = () => go('awards');
+  LQEngage.freezeNotice();
   $('#logoBtn').onclick = e => { e.preventDefault(); go('map'); };
   LQAudio.onVoices(() => { if ($('#modal[open] [data-f=voice]')) openSettings(); });
 

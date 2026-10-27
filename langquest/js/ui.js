@@ -42,6 +42,7 @@
 
   function showWordPop(anchor, word, accent) {
     closePop();
+    if (window.LQEngage) LQEngage.track('word');
     LQAudio.speak(word.clean, { accent, rate: LQStore.getSettings().slowRate, weights: [word.syl.length] });
     if (!word.meaning) return;
     pop = document.createElement('div');

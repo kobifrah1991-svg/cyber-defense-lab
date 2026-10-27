@@ -15,6 +15,8 @@ const LQ_DEFAULT = {
   progress: {},         // lang → station → { lesson, boss, bestVoice, bestBoss }
   streak: { count: 0, best: 0, lastGoalDay: null, today: null, todaySec: 0 },
   vault: {},            // "lang:station:idx" → { box, due, added, reviews }
+  // motivation: daily quests, streak freezes, XP per day (weekly league), counters and badges
+  engage: { freezes: 0, freezeUsed: null, quests: null, xpDays: {}, counters: {}, badges: {} },
   profile: {
     onboarded: false,
     known: [{ lang: 'he', level: 4 }],   // languages the learner already speaks
@@ -43,6 +45,7 @@ function lqLoad() {
       ...s,
       settings: { ...d.settings, ...s.settings, accent: { ...d.settings.accent, ...(s.settings || {}).accent } },
       streak: { ...d.streak, ...s.streak },
+      engage: { ...d.engage, ...s.engage },
       profile: {
         ...d.profile,
         ...s.profile,
@@ -156,6 +159,8 @@ function goalSec() { return (lqState.profile.minutes || 5) * 60; }
 
 function addXp(n) {
   lqState.xp += n;
+  const day = dayKey();
+  lqState.engage.xpDays[day] = (lqState.engage.xpDays[day] || 0) + n;
   lqSave();
   return lqState.xp;
 }
@@ -170,8 +175,22 @@ function rollDay() {
     s.today = today;
     s.todaySec = 0;
   }
-  // streak breaks if the goal was missed on a full day in between
-  if (s.lastGoalDay && dayDiff(s.lastGoalDay, today) > 1) s.count = 0;
+  // a missed full day breaks the streak — unless streak freezes cover every missed day
+  if (s.lastGoalDay && s.count > 0) {
+    const missed = dayDiff(s.lastGoalDay, today) - 1;
+    if (missed > 0) {
+      const e = lqState.engage;
+      if (e.freezes >= missed) {
+        e.freezes -= missed;
+        e.freezeUsed = { day: today, n: missed };
+        const y = new Date(); y.setDate(y.getDate() - 1);
+        s.lastGoalDay = dayKey(y);
+      } else {
+        s.count = 0;
+      }
+      lqSave();
+    }
+  }
 }
 
 /** Add active learning seconds. Returns true the moment today's goal is reached. */
@@ -187,6 +206,7 @@ function addActiveSeconds(sec) {
     s.best = Math.max(s.best, s.count);
     s.lastGoalDay = s.today;
     lqState.xp += 20;
+    lqState.engage.xpDays[s.today] = (lqState.engage.xpDays[s.today] || 0) + 20;
     reached = true;
   }
   lqSave();
@@ -244,6 +264,10 @@ function vaultList(lang) {
     .map(([id, v]) => ({ id, ...v, isDue: v.due <= today }));
 }
 
+/* ---------- engagement state (logic lives in engage.js) ---------- */
+function getEngage() { rollDay(); return lqState.engage; }
+function saveEngage() { lqSave(); }
+
 function resetAll() {
   lqState = structuredClone(LQ_DEFAULT);
   lqSave();
@@ -256,5 +280,6 @@ window.LQStore = {
   addXp, getXp,
   addActiveSeconds, getStreak,
   vaultId, inVault, vaultAdd, vaultRemove, vaultReview, vaultList,
+  getEngage, saveEngage,
   resetAll, SRS_INTERVALS
 };
