@@ -58,6 +58,19 @@ cyber-defense-lab/
 
 ---
 
-## LangQuest
+## המוצרים בריפו
 
-בתיקייה [`langquest/`](langquest/) נמצאת לומדה נפרדת לשפה מדוברת (אנגלית / ספרדית) — קריוקי, מצב צב, פירוק הברות, בדיקת הגייה במיקרופון ו־Audio Boss. ראו [`langquest/README.md`](langquest/README.md).
+| מוצר | תיקייה | מה זה |
+|---|---|---|
+| 🛡️ HackerBot Defense Lab | [`/`](index.html) | מעבדת אימון בהגנת סייבר בעברית — חדרי תרגול אינטראקטיביים |
+| 🗺️ LangQuest | [`langquest/`](langquest/) | לומדה ללימוד שפות: אפליקציית ווב/PWA, APK לאנדרואיד ואתר מכירה |
+
+### LangQuest
+
+לומדה לשפה מדוברת ולשפה מורחבת — אנגלית, ספרדית ואיטלקית, בממשק עברית / English / العربية / Русский:
+- **שלב 1 — שפה מדוברת**: 10 תחנות מסע עם מורים, קריוקי, מצב צב, פירוק הברות ותעתיק, בדיקת הגייה ו-Audio Boss.
+- **שלב 2 — שפה מורחבת ודקדוק (Premium)**: 10 יחידות דקדוק A1–A2 לכל שפה.
+- מנוי Premium, שיחה חופשית עם מורה AI, משימות יומיות, ליגה ותזכורות.
+
+מבנה: אפליקציה ב-[`langquest/`](langquest/), אתר מכירה ב-[`langquest/site/`](langquest/site/), שרת רישיונות ומורה AI ב-[`langquest/server/`](langquest/server/), ו-APK נבנה אוטומטית ב-GitHub Actions ([`.github/workflows/langquest-android.yml`](.github/workflows/langquest-android.yml)).
+פרטים מלאים: [`langquest/README.md`](langquest/README.md).
