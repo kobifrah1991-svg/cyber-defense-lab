@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification icon: white speech bubble with sound waves (status-bar icons must be single-colour) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4,3h16a2,2 0,0 1,2 2v10a2,2 0,0 1,-2 2H9l-4.5,4V17H4a2,2 0,0 1,-2 -2V5A2,2 0,0 1,4 3zM8,8.5v3h1.5v-3zM11.25,6.5v7h1.5v-7zM14.5,8v4h1.5V8z" />
+</vector>

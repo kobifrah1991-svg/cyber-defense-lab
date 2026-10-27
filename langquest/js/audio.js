@@ -6,8 +6,11 @@
  *  - Live Voice Check: SpeechRecognition + fuzzy word alignment → per-word green/red + score
  */
 (function () {
-  const synth = window.speechSynthesis || null;
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  // Android app: native engines (the system WebView has no speech recognition and unreliable TTS)
+  const nativeTts = LQNative.plugin('TextToSpeech');
+  const nativeStt = LQNative.plugin('SpeechRecognition');
+  const synth = nativeTts ? null : window.speechSynthesis || null;
+  const Recognition = nativeStt ? null : window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
   const NATURAL_HINTS = ['natural', 'neural', 'premium', 'enhanced', 'online', 'google', 'siri', 'wavenet'];
   const ACCENT_FALLBACKS = { 'es-MX': ['es-US', 'es-419'], 'en-GB': ['en-IE', 'en-AU'], 'fr-CA': [] };
@@ -89,6 +92,7 @@
     clearTimers();
     document.documentElement.classList.remove('is-speaking');
     if (synth) synth.cancel();
+    if (nativeTts) nativeTts.stop().catch(() => {});
   }
 
   function tokenOffsets(text) {
@@ -131,6 +135,14 @@
         if (opts.onEnd) opts.onEnd();
         resolve();
       };
+
+      if (nativeTts) {
+        speaking(true);
+        runEstimator();
+        nativeTts.speak({ text, lang: opts.accent || 'en-US', rate, pitch: 1, volume: 1, category: 'playback' })
+          .then(finish, finish);
+        return;
+      }
 
       if (!synth) {
         speaking(true);
@@ -232,7 +244,21 @@
 
   /** listen(accent) → Promise<string[]> (alternative transcripts). Rejects with an error code. */
   let activeRec = null;
+  async function listenNative(accent) {
+    stop();
+    let perm = await nativeStt.checkPermissions();
+    if (perm.speechRecognition !== 'granted') perm = await nativeStt.requestPermissions();
+    if (perm.speechRecognition !== 'granted') throw new Error('not-allowed');
+    const { available } = await nativeStt.available();
+    if (!available) throw new Error('unsupported');
+    const res = await nativeStt.start({ language: accent, maxResults: 5, partialResults: false, popup: false });
+    const matches = (res && res.matches) || [];
+    if (!matches.length) throw new Error('no-speech');
+    return matches;
+  }
+
   function listen(accent) {
+    if (nativeStt) return listenNative(accent);
     if (!Recognition) return Promise.reject(new Error('unsupported'));
     stop();
     if (activeRec) { try { activeRec.abort(); } catch { /* noop */ } }
@@ -263,6 +289,7 @@
   }
 
   function cancelListen() {
+    if (nativeStt) { nativeStt.stop().catch(() => {}); return; }
     if (activeRec) { try { activeRec.abort(); } catch { /* noop */ } }
   }
 
@@ -272,8 +299,8 @@
     voicesFor,
     pickVoice,
     onVoices: fn => voiceListeners.push(fn),
-    hasTTS: !!synth,
-    canListen: !!Recognition,
+    hasTTS: !!(synth || nativeTts),
+    canListen: !!(Recognition || nativeStt),
     listen,
     cancelListen,
     bestScore,

@@ -24,11 +24,25 @@
   const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
 
   /* ---------- notifications ---------- */
+  // Android app: real scheduled notifications, delivered even when the app is closed
+  const LN = LQNative.plugin('LocalNotifications');
+  const NATIVE_BASE_ID = 4100;
+  let nativePerm = 'default';
+
+  const mapPerm = p => (p === 'granted' ? 'granted' : p === 'denied' ? 'denied' : 'default');
+
   function permission() {
+    if (LN) return nativePerm;
     return 'Notification' in window ? Notification.permission : 'unsupported';
   }
 
   async function requestPermission() {
+    if (LN) {
+      const r = await LN.requestPermissions().catch(() => ({ display: 'denied' }));
+      nativePerm = mapPerm(r.display);
+      await syncNative();
+      return nativePerm;
+    }
     if (!('Notification' in window)) return 'unsupported';
     if (Notification.permission === 'default') {
       try { return await Notification.requestPermission(); } catch { return Notification.permission; }
@@ -36,8 +50,38 @@
     return Notification.permission;
   }
 
+  /** Re-create the weekly native notifications from the reminder settings. */
+  async function syncNative() {
+    if (!LN) return;
+    try {
+      const pending = await LN.getPending();
+      const ours = pending.notifications.filter(n => n.id >= NATIVE_BASE_ID && n.id < NATIVE_BASE_ID + 100);
+      if (ours.length) await LN.cancel({ notifications: ours.map(n => ({ id: n.id })) });
+      const r = LQStore.getProfile().reminder;
+      if (!r.enabled || nativePerm !== 'granted') return;
+      const { title, body } = reminderText();
+      const notifications = [];
+      r.days.forEach(d => r.times.forEach((time, i) => {
+        const [hour, minute] = time.split(':').map(Number);
+        notifications.push({
+          id: NATIVE_BASE_ID + d * 10 + i, title, body, smallIcon: 'ic_stat_langquest',
+          schedule: { on: { weekday: d + 1, hour, minute }, allowWhileIdle: true }   // Capacitor: 1 = Sunday
+        });
+      }));
+      if (notifications.length) await LN.schedule({ notifications });
+    } catch { /* plugin unavailable on this device */ }
+  }
+
+  if (LN) {
+    LN.checkPermissions().then(p => { nativePerm = mapPerm(p.display); syncNative(); }).catch(() => {});
+  }
+
   async function notify(title, body) {
     if (permission() !== 'granted') return false;
+    if (LN) {
+      await LN.schedule({ notifications: [{ id: NATIVE_BASE_ID + 99, title, body, smallIcon: 'ic_stat_langquest', schedule: { at: new Date(Date.now() + 1500) } }] });
+      return true;
+    }
     const opts = {
       body,
       tag: 'langquest-reminder',
@@ -92,7 +136,7 @@
       LQStore.setReminder({ fired });
       if (LQStore.getStreak().doneToday) continue;
       const { title, body } = reminderText();
-      notify(title, body);
+      if (!LN) notify(title, body);   // the app already has a scheduled system notification
       dueListeners.forEach(fn => fn(t));
     }
   }
@@ -202,7 +246,7 @@
               <button class="btn ghost sm" data-r="ics">${t('rem.ics')}</button>
               ${r.times.map(t => `<a class="btn ghost sm" target="_blank" rel="noopener" href="${esc(googleLink(t))}">Google Calendar ${esc(t)}</a>`).join('')}
             </div>
-            <p class="muted small">${t('rem.note')}</p>
+            <p class="muted small">${t(LN ? 'rem.noteNative' : 'rem.note')}</p>
           </div>
         </div>`;
 
@@ -245,7 +289,7 @@
       if (test) test.onclick = () => { const { title, body } = reminderText(); notify(title, body); };
       $('[data-r=ics]', container).onclick = downloadIcs;
     };
-    const changed = () => { draw(); if (onChange) onChange(); };
+    const changed = () => { draw(); syncNative(); if (onChange) onChange(); };
     draw();
   }
 
@@ -259,6 +303,7 @@
   window.LQReminders = {
     editor, summary, pendingSlot, notify, requestPermission, permission, buildIcs, googleLink,
     onDue: fn => dueListeners.push(fn),
+    syncNative,
     tick
   };
 })();

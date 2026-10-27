@@ -1,0 +1,12 @@
+langquest/node_modules/
+langquest/www/
+langquest/android/app/build/
+langquest/android/build/
+langquest/android/.gradle/
+langquest/android/local.properties
+langquest/android/app/src/main/assets/public/
+langquest/android/app/src/main/assets/capacitor.config.json
+langquest/android/app/src/main/assets/capacitor.plugins.json
+langquest/android/capacitor-cordova-android-plugins/
+*.keystore
+*.jks

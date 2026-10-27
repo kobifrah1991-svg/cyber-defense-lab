@@ -1,0 +1,20 @@
+{
+  "appId": "app.langquest.learn",
+  "appName": "LangQuest",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#fdf8f1"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 900,
+      "backgroundColor": "#0e7490",
+      "showSpinner": false
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_langquest",
+      "iconColor": "#0e7490"
+    }
+  }
+}

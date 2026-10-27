@@ -151,6 +151,7 @@
     const accent = LQUI.currentAccent();
     const v = LQAudio.pickVoice(accent);
     LQAudio.speak(p.text, { accent, rate: 1 });
+    if (LQNative.isNative) return;
     if (!LQAudio.hasTTS) toast(t('voice.noTts'));
     else if (!v) toast(t('voice.noVoice', { a: accent }));
     else toast(`🔊 ${v.name}`);
@@ -489,6 +490,7 @@
       if (other) LQStore.setSetting('lang', other.id);
     }
     refreshHeader();
+    LQReminders.syncNative();   // notification text follows the interface language
     if (current === 'map' || current === 'vault') go(current);
   }
 
@@ -526,6 +528,18 @@
     installEvent = null;
     $('#hdrInstall').classList.add('hidden');
   };
+
+  /* ---------- Android app shell ---------- */
+  if (LQNative.isNative) {
+    const App = LQNative.plugin('App');
+    if (App) App.addListener('backButton', () => {
+      if (modal.open) return closeModal();
+      if (current !== 'map' && current !== 'onboarding') return go('map');
+      App.minimizeApp();
+    });
+    const Splash = LQNative.plugin('SplashScreen');
+    if (Splash) setTimeout(() => Splash.hide(), 300);
+  }
 
   /* ---------- boot ---------- */
   $('#hdrLang').onclick = openLangPicker;

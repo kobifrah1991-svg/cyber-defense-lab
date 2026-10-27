@@ -1,0 +1,72 @@
+name: LangQuest Android
+
+on:
+  push:
+    paths:
+      - 'langquest/**'
+      - '.github/workflows/langquest-android.yml'
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: langquest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: langquest/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install
+        run: npm ci
+
+      - name: License server tests
+        run: npm run test:server
+
+      - name: Copy web app into the Android project
+        run: npm run sync
+
+      - name: Build debug APK
+        working-directory: langquest/android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      # Signed release APK + Play Store bundle — only when the signing secrets are configured:
+      # ANDROID_KEYSTORE_BASE64 (base64 of the .jks), ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+      - name: Build signed release APK + AAB
+        if: env.KEYSTORE_BASE64 != ''
+        working-directory: langquest/android
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          ./gradlew assembleRelease bundleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.jks" \
+            -Pandroid.injected.signing.store.password="$STORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: langquest-android
+          path: |
+            langquest/android/app/build/outputs/apk/**/*.apk
+            langquest/android/app/build/outputs/bundle/**/*.aab
+          if-no-files-found: error
