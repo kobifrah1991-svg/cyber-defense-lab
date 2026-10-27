@@ -1,0 +1,141 @@
+/* LangQuest — sales model (freemium) and entitlements
+ *
+ *  Free:    the first FREE_STATIONS stations of every language (lesson + Boss), phrasebook, reminders
+ *  Premium: every station and Boss in every language (monthly / yearly / lifetime)
+ *
+ *  Purchase flow (web & APK distributed outside Google Play):
+ *    1. "Buy" opens a Stripe Payment Link (CONFIG.checkout[plan]).
+ *    2. The Payment Link's success URL returns to the app with ?session_id={CHECKOUT_SESSION_ID}.
+ *    3. The app asks the license server (server/license-worker.js) to verify the session; the server
+ *       answers with a signed license key, stored locally and re-validated periodically.
+ *    4. "Restore" accepts that license key on another device.
+ *  Until CONFIG is filled in, purchases run in demo mode on localhost only (clearly labelled).
+ *  Google Play builds must use Play Billing for in-app digital purchases instead — see README.
+ */
+(function () {
+  const CONFIG = {
+    // Stripe Payment Links (https://dashboard.stripe.com/payment-links) — one per plan
+    checkout: { monthly: '', yearly: '', lifetime: '' },
+    // Deployed server/license-worker.js, e.g. 'https://langquest-license.<you>.workers.dev'
+    licenseApi: '',
+    // Public download URL of the signed APK (GitHub Release asset or your site)
+    apkUrl: '',
+    revalidateDays: 3
+  };
+
+  const FREE_STATIONS = 2;
+
+  const PLANS = [
+    { id: 'monthly', price: { ILS: 24.9, USD: 6.99 }, period: 'month' },
+    { id: 'yearly', price: { ILS: 149, USD: 39.99 }, period: 'year', best: true },
+    { id: 'lifetime', price: { ILS: 299, USD: 79 }, period: 'once' }
+  ];
+
+  const KEY = 'langquest_license_v1';
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; }
+  }
+
+  function save(lic) {
+    try {
+      if (lic) localStorage.setItem(KEY, JSON.stringify(lic));
+      else localStorage.removeItem(KEY);
+    } catch { /* private mode */ }
+  }
+
+  const isLocal = () => ['localhost', '127.0.0.1', ''].includes(location.hostname) || location.protocol === 'file:';
+  const configured = () => !!CONFIG.licenseApi && PLANS.every(p => !!CONFIG.checkout[p.id]);
+  const demoMode = () => !configured() && isLocal();
+
+  function license() {
+    const lic = load();
+    if (!lic) return null;
+    if (lic.plan !== 'lifetime' && lic.exp && lic.exp * 1000 < Date.now()) return null;
+    return lic;
+  }
+
+  function isPremium() { return !!license(); }
+
+  function stationIsFree(index) { return index < FREE_STATIONS; }
+
+  function canOpen(index) { return stationIsFree(index) || isPremium(); }
+
+  function currency() {
+    const ui = window.LQI18n ? LQI18n.ui() : 'he';
+    return ui === 'he' ? 'ILS' : 'USD';
+  }
+
+  function priceLabel(plan) {
+    const cur = currency();
+    const ui = window.LQI18n ? LQI18n.ui() : 'he';
+    const locale = { he: 'he-IL', en: 'en-US', ar: 'ar', ru: 'ru-RU' }[ui] || 'en-US';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: cur, maximumFractionDigits: 2 }).format(plan.price[cur]);
+  }
+
+  /* ---------- server calls ---------- */
+  async function callApi(params) {
+    const url = CONFIG.licenseApi.replace(/\/$/, '') + '/verify?' + new URLSearchParams(params);
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.ok) throw new Error(body.error || 'verify_failed');
+    return body;   // { ok, plan, exp, token }
+  }
+
+  function store(body) {
+    const lic = { plan: body.plan, exp: body.exp || null, token: body.token, checkedAt: Date.now() };
+    save(lic);
+    return lic;
+  }
+
+  /** Returns from Stripe Checkout with ?session_id=… → verify and store the license. */
+  async function handleReturn() {
+    const params = new URLSearchParams(location.search);
+    const sid = params.get('session_id');
+    if (!sid || !CONFIG.licenseApi) return null;
+    params.delete('session_id');
+    history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash);
+    return store(await callApi({ session_id: sid }));
+  }
+
+  /** Activate on another device with the license key shown in settings. */
+  async function restore(token) {
+    if (demoMode() && token.startsWith('DEMO-')) return store({ plan: token.split('-')[1] || 'lifetime', exp: null, token });
+    if (!CONFIG.licenseApi) throw new Error('not_configured');
+    return store(await callApi({ token: token.trim() }));
+  }
+
+  /** Re-check subscriptions every few days so cancelled ones stop working. */
+  async function revalidate() {
+    const lic = load();
+    if (!lic || !CONFIG.licenseApi || lic.token.startsWith('DEMO-')) return;
+    if (Date.now() - (lic.checkedAt || 0) < CONFIG.revalidateDays * 86400000) return;
+    try { store(await callApi({ token: lic.token })); }
+    catch (e) { if (e.message === 'inactive' || e.message === 'invalid_token') save(null); }   // offline → keep
+  }
+
+  /** Start a purchase. Returns 'redirect' | 'demo' | 'unavailable'. */
+  function buy(planId) {
+    if (demoMode()) {
+      const plan = PLANS.find(p => p.id === planId);
+      const exp = plan.period === 'once' ? null : Math.floor(Date.now() / 1000) + (plan.period === 'year' ? 365 : 31) * 86400;
+      store({ plan: planId, exp, token: `DEMO-${planId}-${Date.now().toString(36)}` });
+      return 'demo';
+    }
+    const link = CONFIG.checkout[planId];
+    if (!link) return 'unavailable';
+    const url = new URL(link);
+    if (window.LQI18n) url.searchParams.set('locale', LQI18n.ui());
+    if (window.LQNative && LQNative.isNative) LQNative.openExternal(url.toString());
+    else location.href = url.toString();
+    return 'redirect';
+  }
+
+  function signOut() { save(null); }
+
+  window.LQCommerce = {
+    CONFIG, PLANS, FREE_STATIONS,
+    license, isPremium, stationIsFree, canOpen, priceLabel, demoMode, configured,
+    handleReturn, restore, revalidate, buy, signOut
+  };
+})();

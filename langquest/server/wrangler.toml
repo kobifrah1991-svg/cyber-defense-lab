@@ -1,0 +1,10 @@
+# Deploy:  npx wrangler deploy
+# Secrets: npx wrangler secret put STRIPE_SECRET_KEY / LICENSE_SECRET
+name = "langquest-license"
+main = "license-worker.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+# Stripe price id → plan (create the three prices in Stripe, then paste their ids here)
+PRICE_PLANS = '{"price_monthly_xxx":"monthly","price_yearly_xxx":"yearly","price_lifetime_xxx":"lifetime"}'
+ALLOWED_ORIGINS = "https://localhost,http://localhost:8080"

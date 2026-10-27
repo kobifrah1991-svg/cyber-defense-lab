@@ -2,7 +2,15 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0e7490" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="LangQuest">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="description" content="LangQuest — לומדה אינטראקטיבית לשפה מדוברת: שמיעה, הגייה, קריוקי, פירוק הברות ובדיקת דיבור חיה">
   <title>LangQuest · שפה מדוברת</title>
   <link rel="stylesheet" href="css/langquest.css">
@@ -15,6 +23,7 @@
       <span class="logo-txt">Lang<b>Quest</b></span>
     </a>
     <nav class="hdr">
+      <button class="hdr-btn hidden" id="hdrInstall" data-i18n-title="pwa.install">📲</button>
       <button class="hdr-btn" id="hdrLang" data-i18n-title="hdr.lang"></button>
       <button class="hdr-btn" id="hdrStreak" type="button"></button>
       <span class="hdr-btn static" id="hdrXp" data-i18n-title="hdr.xp"></span>
@@ -32,8 +41,10 @@
   <script src="js/data.js"></script>
   <script src="js/store.js"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/native.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/commerce.js"></script>
   <script src="js/reminders.js"></script>
   <script src="js/onboarding.js"></script>
   <script src="js/lesson.js"></script>

@@ -15,7 +15,7 @@
   const dueListeners = [];
   let swReg = null;
 
-  if (navigator.serviceWorker && location.protocol.startsWith('http')) {
+  if (navigator.serviceWorker && location.protocol.startsWith('http') && !LQNative.isNative) {
     navigator.serviceWorker.register('sw.js').then(r => { swReg = r; }).catch(() => {});
   }
 
