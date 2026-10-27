@@ -16,6 +16,7 @@
   function go(name, params = {}) {
     LQLesson.stop();
     LQBoss.stop();
+    LQTutor.stop();
     LQAudio.stop();
     LQUI.closePop();
     current = name;
@@ -32,6 +33,10 @@
     else if (name === 'vault') renderVault();
     else if (name === 'review') startReview();
     else if (name === 'awards') LQEngage.renderAwards(view, () => go('map'));
+    else if (name === 'chat') {
+      if (!LQCommerce.isPremium() && !LQCommerce.demoMode()) { current = 'map'; renderMap(); refreshHeader(); return openPaywall(); }
+      LQTutor.start(view, params, () => go('map'));
+    }
     else if (name === 'onboarding') LQOnboarding.start(view, () => {
       go('map');
       LQUI.burst(['🗺️', '✨', '⭐']);
@@ -121,6 +126,7 @@
         </ol>
       </section>
       </div><aside class="map-side">
+      ${chatCard()}
       ${LQEngage.questsCard()}
       ${LQEngage.leagueCard()}
       <section class="goal card">
@@ -151,10 +157,24 @@
     $$('[data-lesson]', view).forEach(b => b.onclick = () => go('lesson', { lang: L.id, station: b.dataset.lesson }));
     $$('[data-boss]', view).forEach(b => b.onclick = () => go('boss', { lang: L.id, station: b.dataset.boss }));
     $$('[data-act=paywall]', view).forEach(b => b.onclick = openPaywall);
+    const chatBtn = $('[data-act=chat]', view);
+    if (chatBtn) chatBtn.onclick = () => go('chat', { scenario: 'free' });
     $$('.quests, .league', view).forEach(c => { c.onclick = () => go('awards'); c.classList.add('clickable'); });
     const r = $('[data-act=review]', view);
     if (r) r.onclick = () => go('review');
     $('[data-act=vault]', view).onclick = () => go('vault');
+  }
+
+  function chatCard() {
+    const tc = LQUI.currentTeacher();
+    if (!tc) return '';
+    const locked = !LQCommerce.isPremium() && !LQCommerce.demoMode();
+    return `
+      <section class="card chat-cta">
+        ${LQUI.teacherAvatar(tc, 52, false)}
+        <div><h3>💬 ${esc(t('chat.title', { name: tc.name }))}</h3><small class="muted">${esc(t('chat.sub', { name: tc.name }))}</small></div>
+        <button class="btn ${locked ? 'premium' : 'primary'} sm" data-act="chat">${locked ? t('pay.badge') : t('chat.start')}</button>
+      </section>`;
   }
 
   function testVoice() {

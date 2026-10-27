@@ -18,6 +18,8 @@
     checkout: { monthly: '', yearly: '', lifetime: '' },
     // Deployed server/license-worker.js, e.g. 'https://langquest-license.<you>.workers.dev'
     licenseApi: '',
+    // AI tutor endpoint; defaults to licenseApi + '/tutor'
+    tutorApi: '',
     // Public download URL of the signed APK (GitHub Release asset or your site)
     apkUrl: '',
     revalidateDays: 3,

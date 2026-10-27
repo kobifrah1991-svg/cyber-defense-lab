@@ -23,7 +23,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: langquest/package-lock.json
+          cache-dependency-path: |
+            langquest/package-lock.json
+            langquest/server/package-lock.json
 
       - uses: actions/setup-java@v5
         with:
@@ -37,6 +39,10 @@ jobs:
           packages: 'platform-tools platforms;android-36'
 
       - name: Install
+        run: npm ci
+
+      - name: Install license server
+        working-directory: langquest/server
         run: npm ci
 
       - name: License server tests

@@ -2,16 +2,20 @@
  *
  *  GET /verify?session_id=cs_…   after Stripe Checkout: confirms payment, returns a signed license key
  *  GET /verify?token=…           re-validates a license key (subscription still active?) and refreshes it
+ *  POST /tutor                   AI conversation partner for Premium licenses (see tutor.js)
  *
  *  Secrets / vars (wrangler secret put …):
  *    STRIPE_SECRET_KEY   sk_live_… (or sk_test_…)
  *    LICENSE_SECRET      long random string used to sign license keys (HMAC-SHA256)
  *    PRICE_PLANS         JSON: {"price_123":"monthly","price_456":"yearly","price_789":"lifetime"}
  *    ALLOWED_ORIGINS     comma-separated, e.g. "https://langquest.app,https://localhost"
+ *    ANTHROPIC_API_KEY   for the AI tutor (wrangler secret put ANTHROPIC_API_KEY)
+ *    TUTOR_KV            optional KV namespace binding → daily message cap (TUTOR_DAILY_LIMIT, default 60)
  *
  *  A license key is base64url(payload).base64url(hmac); payload = { plan, exp, sub?, cus, iat }.
  *  It carries no personal data beyond Stripe's opaque customer/subscription ids.
  */
+import { tutorTurn, underDailyCap, makeClient } from './tutor.js';
 
 const enc = new TextEncoder();
 const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -80,7 +84,8 @@ function cors(env, req) {
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
   return {
     'Access-Control-Allow-Origin': allowed.includes(origin) ? origin : (allowed[0] || '*'),
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
     Vary: 'Origin'
   };
 }
@@ -89,11 +94,26 @@ function json(body, status, headers) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...headers } });
 }
 
+/** POST /tutor — only for a valid, unexpired license. `deps.client` is injectable for tests. */
+export async function handleTutor(req, env, h, deps = {}) {
+  let input;
+  try { input = await req.json(); } catch { return json({ ok: false, error: 'bad_json' }, 400, h); }
+  const lic = await verifyToken(input && input.token, env.LICENSE_SECRET);
+  if (!lic) return json({ ok: false, error: 'invalid_token' }, 401, h);
+  if (lic.plan !== 'lifetime' && lic.exp && lic.exp * 1000 < Date.now()) return json({ ok: false, error: 'expired' }, 402, h);
+  if (!(await underDailyCap(env, lic.sub || lic.cus || 'anon'))) return json({ ok: false, error: 'daily_limit' }, 429, h);
+  const { status, body } = await tutorTurn(deps.client || makeClient(env), input);
+  return json(body, status, h);
+}
+
 export default {
   async fetch(req, env) {
     const h = cors(env, req);
     if (req.method === 'OPTIONS') return new Response(null, { headers: h });
     const url = new URL(req.url);
+    if (url.pathname === '/tutor' && req.method === 'POST') {
+      try { return await handleTutor(req, env, h); } catch { return json({ ok: false, error: 'server_error' }, 502, h); }
+    }
     if (url.pathname !== '/verify' || req.method !== 'GET') return json({ ok: false, error: 'not_found' }, 404, h);
     try {
       let payload;

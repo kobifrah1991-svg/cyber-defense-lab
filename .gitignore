@@ -10,3 +10,4 @@ langquest/android/app/src/main/assets/capacitor.plugins.json
 langquest/android/capacitor-cordova-android-plugins/
 *.keystore
 *.jks
+langquest/server/node_modules/
