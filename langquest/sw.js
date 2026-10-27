@@ -4,11 +4,11 @@
  *  - Reminders: focuses the app when a notification is clicked
  * Bump VERSION on release so old caches are dropped.
  */
-const VERSION = 'lq-v11';
+const VERSION = 'lq-v12';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/langquest.css',
-  './js/data.js', './js/store.js', './js/i18n.js', './js/audio.js', './js/native.js', './js/ui.js',
-  './js/commerce.js', './js/engage.js', './js/reminders.js', './js/onboarding.js', './js/lesson.js', './js/boss.js', './js/tutor.js', './js/app.js',
+  './js/data.js', './js/grammar.js', './js/store.js', './js/i18n.js', './js/audio.js', './js/native.js', './js/ui.js',
+  './js/commerce.js', './js/engage.js', './js/reminders.js', './js/onboarding.js', './js/lesson.js', './js/course.js', './js/boss.js', './js/tutor.js', './js/app.js',
   './icons/icon-192.png', './icons/icon-512.png', './img/media.json'
 ];
 

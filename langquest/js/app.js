@@ -3,7 +3,7 @@
   const { esc, $, $$, karaoke, translitLine, toast, burst, shuffle } = LQUI;
   const { STATIONS, LANGS } = LQData;
   const { t, f, tr } = LQI18n;
-  const LEARNING_VIEWS = ['lesson', 'boss', 'review'];
+  const LEARNING_VIEWS = ['lesson', 'boss', 'review', 'grammar'];
 
   const view = $('#view');
   let current = 'map';
@@ -15,6 +15,7 @@
   /* ---------- router ---------- */
   function go(name, params = {}) {
     LQLesson.stop();
+    LQCourse.stop();
     LQBoss.stop();
     LQTutor.stop();
     LQAudio.stop();
@@ -30,6 +31,11 @@
     }
     if (name === 'lesson') LQLesson.start(view, params.lang, params.station, back);
     else if (name === 'boss') LQBoss.start(view, params.lang, params.station, back);
+    else if (name === 'grammar') {
+      // Chapter 2 (expanded language & grammar) is Premium only
+      if (!LQCommerce.isPremium()) { current = 'map'; renderMap(); refreshHeader(); return openPaywall(); }
+      LQCourse.start(view, params.lang, params.unit, back);
+    }
     else if (name === 'vault') renderVault();
     else if (name === 'review') startReview();
     else if (name === 'awards') LQEngage.renderAwards(view, () => go('map'));
@@ -101,7 +107,7 @@
       </section>
 
       <section class="map card">
-        <div class="map-head"><h2>${t('map.mapTitle')}</h2><span class="muted">${t('map.stationsCount', { d: doneCount, n: STATIONS.length })}</span></div>
+        <div class="map-head"><h2><span class="chapter-tag">${t('gr.chapter1')}</span> ${t('map.mapTitle')}</h2><span class="muted">${t('map.stationsCount', { d: doneCount, n: STATIONS.length })}</span></div>
         <ol class="path">
           ${STATIONS.map((x, i) => {
             const p = LQStore.stationProgress(L.id, x.id);
@@ -125,6 +131,7 @@
           }).join('')}
         </ol>
       </section>
+      ${LQCourse.mapCard(L.id)}
       </div><aside class="map-side">
       ${chatCard()}
       ${LQEngage.questsCard()}
@@ -156,6 +163,7 @@
     if (dueBtn) dueBtn.onclick = () => (nextStation ? go('lesson', { lang: L.id, station: nextStation.id }) : go(due ? 'review' : 'map'));
     $$('[data-lesson]', view).forEach(b => b.onclick = () => go('lesson', { lang: L.id, station: b.dataset.lesson }));
     $$('[data-boss]', view).forEach(b => b.onclick = () => go('boss', { lang: L.id, station: b.dataset.boss }));
+    $$('[data-unit]', view).forEach(b => b.onclick = () => go('grammar', { lang: L.id, unit: b.dataset.unit }));
     $$('[data-act=paywall]', view).forEach(b => b.onclick = openPaywall);
     const chatBtn = $('[data-act=chat]', view);
     if (chatBtn) chatBtn.onclick = () => go('chat', { scenario: 'free' });
@@ -440,7 +448,7 @@
       <div class="paywall">
         <h2>${t('pay.title')}</h2>
         <p class="muted">${t('pay.sub')}</p>
-        <ul class="perks">${['pay.f1', 'pay.f2', 'pay.f3', 'pay.f4'].map(k => `<li>✅ ${t(k)}</li>`).join('')}</ul>
+        <ul class="perks">${['pay.f1', 'pay.f5', 'pay.f2', 'pay.f4', 'pay.f3'].map(k => `<li>✅ ${t(k)}</li>`).join('')}</ul>
         <div class="plans">
           ${C.PLANS.map(p => `
             <div class="plan-card ${p.best ? 'best' : ''}">

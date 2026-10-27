@@ -614,3 +614,35 @@ img, svg, video { max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Chapter 2: expanded language & grammar ---------- */
+.chapter-tag { display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .02em; color: var(--sun); background: var(--sun-soft); border-radius: 999px; padding: 2px 10px; vertical-align: middle; }
+.course .units { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.unit { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: var(--bg-2); border: 2px solid transparent; min-width: 0; }
+.unit.open { border-color: var(--sun); }
+.unit.done { border-color: var(--ok); }
+.unit.locked { opacity: .72; }
+.unit-ico { font-size: 1.5rem; flex: none; }
+.unit-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.unit-body b { font-size: .95rem; overflow-wrap: anywhere; }
+.gr-prem { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 14px; background: #fef3c7; color: #92400e; font-weight: 700; }
+.lv-tag { justify-self: end; font-size: .78rem; font-weight: 800; color: var(--sun); background: var(--sun-soft); border-radius: 999px; padding: 2px 10px; }
+.gr-rules { margin: 0 0 14px; padding-inline-start: 22px; display: grid; gap: 10px; font-size: 1.05rem; line-height: 1.6; }
+.gr-table-wrap { overflow-x: auto; }
+.gr-table { border-collapse: separate; border-spacing: 4px; margin: 6px auto 0; }
+.gr-table td { padding: 8px 12px; border-radius: 10px; background: var(--bg-2); font-weight: 700; cursor: pointer; }
+.gr-table td:first-child { color: var(--muted); }
+.gr-table td:hover { background: var(--sun-soft); }
+.gr-ex { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.gr-ex:last-child { border-bottom: 0; }
+.gr-ex > div:last-child { flex: 1; min-width: 0; }
+.gr-ex .translation { text-align: start; font-size: .98rem; }
+.gr-ex-ctl { display: flex; gap: 4px; flex: none; }
+.gr-drill { text-align: center; font-size: 1.5rem; font-weight: 700; margin: 12px 0; overflow-wrap: anywhere; }
+.gr-drill .gap { display: inline-block; min-width: 3ch; margin: 0 4px; color: var(--sun); border-bottom: 3px solid var(--sun); }
+.gr-drill .gap.filled { color: var(--ok); border-color: var(--ok); }
+.note.ok { color: var(--ok); font-weight: 700; }
+@media (max-width: 420px) {
+  .gr-drill { font-size: 1.2rem; }
+  .gr-ex { flex-direction: column; align-items: stretch; }
+}

@@ -13,6 +13,7 @@ const LQ_DEFAULT = {
   },
   xp: 0,
   progress: {},         // lang → station → { lesson, boss, bestVoice, bestBoss }
+  grammar: {},          // lang → chapter-2 unit → { done, best }
   streak: { count: 0, best: 0, lastGoalDay: null, today: null, todaySec: 0 },
   vault: {},            // "lang:station:idx" → { box, due, added, reviews }
   // motivation: daily quests, streak freezes, XP per day (weekly league), counters and badges
@@ -97,6 +98,18 @@ function updateStation(lang, station, patch) {
     lesson: prev.lesson || !!patch.lesson,
     boss: prev.boss || !!patch.boss
   };
+  lqSave();
+}
+
+function grammarProgress(lang, unit) {
+  return ((lqState.grammar || {})[lang] || {})[unit] || { done: false, best: 0 };
+}
+
+function updateGrammar(lang, unit, patch) {
+  lqState.grammar = lqState.grammar || {};
+  lqState.grammar[lang] = lqState.grammar[lang] || {};
+  const prev = grammarProgress(lang, unit);
+  lqState.grammar[lang][unit] = { done: prev.done || !!patch.done, best: Math.max(prev.best || 0, patch.best || 0) };
   lqSave();
 }
 
@@ -275,7 +288,7 @@ function resetAll() {
 
 window.LQStore = {
   getSettings, setSetting, setAccent, setVoice,
-  stationProgress, updateStation, isStationUnlocked,
+  stationProgress, updateStation, isStationUnlocked, grammarProgress, updateGrammar,
   getProfile, updateProfile, setReminder, getLevel, setLevel, getPace, dayKey,
   addXp, getXp,
   addActiveSeconds, getStreak,
