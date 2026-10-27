@@ -24,6 +24,8 @@
       root, lang, stationId, meta, onExit,
       accent: LQUI.currentAccent(),
       pace: LQStore.getPace(lang),
+      teacher: LQUI.currentTeacher(),
+      scene: true,
       phrases: LQData.LANGS[lang].stations[stationId].phrases,
       step: 0, pi: 0,
       canNext: true,
@@ -48,9 +50,33 @@
     }
   }
 
+  /** Opening scene: the teacher sets up the story of this station. */
+  function renderScene() {
+    const tc = S.teacher;
+    const city = tc ? (tc.city[LQI18n.ui()] || tc.city.en) : '';
+    S.root.innerHTML = `
+      <section class="lesson">
+        <div class="lesson-top">
+          <button class="btn ghost sm" data-act="exit">${t('common.exit')}</button>
+          <div class="lesson-title">${S.meta.icon} ${esc(f(S.meta, 'name'))}</div>
+          <span></span>
+        </div>
+        <div class="card scene">
+          ${tc ? LQUI.teacherAvatar(tc, 120) : ''}
+          ${tc ? `<div class="scene-name">${esc(tc.name)} <small class="muted">📍 ${esc(city)}</small></div>` : ''}
+          <p class="scene-text">${esc(t('story.' + S.stationId, { city }))}</p>
+          <div class="scene-preview" dir="ltr">${S.phrases.map(p => `<span>${p.emoji} ${esc(p.text)}</span>`).join('')}</div>
+          <button class="btn primary big-cta" data-act="go">${t('story.start')}</button>
+        </div>
+      </section>`;
+    $('[data-act=exit]', S.root).onclick = () => { const cb = S.onExit; stop(); cb(); };
+    $('[data-act=go]', S.root).onclick = () => { S.scene = false; render(); };
+  }
+
   function render() {
     LQAudio.stop();
     LQUI.closePop();
+    if (S.scene) return renderScene();
     const step = STEPS[S.step];
     const game = GAMES[S.pi % GAMES.length];
     const hint = step.id === 'game' ? t(`game.${game}.hint`) : t(`step.${step.id}.hint`);
@@ -64,7 +90,7 @@
         <ol class="stepper">
           ${STEPS.map((s, i) => `<li class="${i < S.step ? 'done' : i === S.step ? 'cur' : ''}"><span>${s.icon}</span><em>${t('step.' + s.id)}</em></li>`).join('')}
         </ol>
-        <div class="step-hint">${step.id === 'game' ? `<b>${t('game.' + game)}</b> · ` : ''}${esc(hint)}</div>
+        ${LQUI.teacherSays(S.teacher, `${step.id === 'game' ? `<b>${t('game.' + game)}</b> · ` : ''}${esc(hint)}`)}
         <div class="card step-body"></div>
         <div class="lesson-nav">
           <button class="btn primary" data-act="next">${isLast() ? t('common.finish') : t('common.next')}</button>
@@ -324,13 +350,14 @@
     LQStore.addXp(xp);
     LQApp.refreshHeader();
     burst();
-    const { meta, onExit, missed } = S;
+    const { meta, onExit, missed, teacher } = S;
     const lang = S.lang;
     stop();
     LQApp.view.innerHTML = `
       <section class="card finish">
         <div class="finish-emoji">${meta.icon}</div>
         <h2>${esc(t('fin.title', { name: f(meta, 'name') }))}</h2>
+        ${LQUI.teacherSays(teacher, esc(t('teach.done')), 52)}
         <div class="stats">
           <div><b>+${xp}</b><span>XP</span></div>
           <div><b>${avgVoice}%</b><span>${t('fin.accuracy')}</span></div>

@@ -415,6 +415,49 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   .onb-steps li { justify-content: center; }
 }
 
+/* ---------- teachers & characters ---------- */
+.t-ava {
+  --sz: 56px; --h: 200;
+  position: relative; flex: none; display: inline-grid; place-items: center;
+  width: var(--sz); height: var(--sz); border-radius: 50%; overflow: hidden;
+  background: linear-gradient(145deg, hsl(var(--h) 55% 62%), hsl(calc(var(--h) + 40) 60% 42%));
+  box-shadow: 0 0 0 3px var(--card), 0 4px 14px rgba(0, 0, 0, .15);
+  transition: box-shadow .25s;
+}
+.t-ava > b { color: #fff; font-family: var(--font-lat); font-weight: 800; font-size: calc(var(--sz) * .42); letter-spacing: -.02em; }
+.t-ava > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+html.is-speaking .t-ava.live { box-shadow: 0 0 0 3px var(--card), 0 0 0 6px var(--sun), 0 0 22px var(--sun); animation: talk 0.9s ease-in-out infinite; }
+@keyframes talk { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+.teacher-pick { margin-top: 12px; }
+.tp-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.teachers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.teacher-card {
+  display: flex; gap: 12px; align-items: center; text-align: start; cursor: pointer;
+  border: 2px solid var(--line); background: var(--card); border-radius: 18px; padding: 10px 14px;
+  transition: border-color .2s, transform .2s, background .2s;
+}
+.teacher-card:hover { transform: translateY(-2px); }
+.teacher-card.on { border-color: var(--sea); background: var(--sea-soft); }
+.tc-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tc-body b { font-size: 1.1rem; }
+.tc-body small { line-height: 1.35; }
+
+.teacher-tip { display: flex; gap: 10px; align-items: flex-end; margin: 4px 0 14px; }
+.tip-bubble { background: var(--card); border: 1px solid var(--line); border-radius: 18px; border-end-start-radius: 4px; padding: 8px 14px; box-shadow: var(--shadow); font-size: .95rem; }
+.tip-bubble b { display: block; color: var(--sea); font-size: .85rem; }
+.finish .teacher-tip { justify-content: center; text-align: start; }
+
+.scene { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; padding-block: 28px; }
+.scene-name { font-weight: 800; font-size: 1.3rem; }
+.scene-name small { display: block; font-weight: 500; font-size: .85rem; }
+.scene-text { font-size: 1.2rem; max-width: 560px; margin: 4px 0; line-height: 1.6; }
+.scene-preview { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.scene-preview span { background: var(--bg-2); border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: .9rem; }
+.big-cta { font-size: 1.15rem; padding: 14px 34px; margin-top: 8px; }
+.trial { color: var(--ok); font-weight: 700; }
+.msg .ava .t-ava { box-shadow: none; }
+
 /* ---------- premium ---------- */
 .btn.premium { background: linear-gradient(135deg, var(--gold), var(--sun)); border-color: var(--sun); color: #fff; }
 .prem-badge { font-size: .7rem; font-weight: 800; color: #92400e; background: #fef3c7; border-radius: 999px; padding: 2px 8px; vertical-align: middle; }

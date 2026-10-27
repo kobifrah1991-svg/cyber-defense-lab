@@ -20,7 +20,9 @@
     licenseApi: '',
     // Public download URL of the signed APK (GitHub Release asset or your site)
     apkUrl: '',
-    revalidateDays: 3
+    revalidateDays: 3,
+    // free trial on subscriptions — set the same number of days on the Stripe prices / Payment Links
+    trialDays: 3
   };
 
   const FREE_STATIONS = 2;

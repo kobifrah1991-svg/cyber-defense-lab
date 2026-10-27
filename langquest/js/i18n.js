@@ -20,6 +20,17 @@
       'common.toVault': '📒 לאוסף', 'common.again': '🔁 שוב', 'common.close': 'סגירה', 'common.save': 'שמירה',
       'common.remove': 'הסרה', 'common.soon': 'בקרוב', 'common.minutes': '{n} דקות', 'common.normal': '▶️ רגיל',
       'common.slow': '🐢 איטי', 'common.play': '▶️ שמע', 'common.replay': '🔊 השמע שוב', 'common.uiLang': 'שפת הממשק',
+      'teach.choose': 'בחרו מורה',
+      'teach.yours': 'המורה שלך',
+      'story.start': 'יאללה, מתחילים! ←',
+      'teach.done': 'כל הכבוד! עכשיו נתרגל שיחה אמיתית עם ה-Boss 👑',
+      'story.airport': 'נחתנו ב{city}! ✈️ התחנה הראשונה: ביקורת דרכונים. בואו נלמד מה אומרים לפקיד.',
+      'story.hotel': 'הגענו למלון ב{city} 🏨 בואו נעשה צ׳ק־אין, נברר מתי ארוחת הבוקר ונבקש מגבת.',
+      'story.restaurant': 'ערב ב{city} 🍽️ מוצאים שולחן, מבקשים תפריט ובסוף — את החשבון.',
+      'story.shopping': 'יום קניות ב{city} 🛍️ שואלים על מידה, על מחיר ומשלמים בכרטיס.',
+      'story.emergency': 'לפעמים צריך עזרה מהר 🚑 בואו נלמד לבקש רופא, אמבולנס ובית מרקחת.',
+      'pay.trial': '{n} ימי ניסיון חינם',
+      'pay.startTrial': 'התחילו ניסיון חינם',
       'pay.badge': '⭐ Premium', 'pay.locked': 'תחנת Premium', 'pay.title': '⭐ LangQuest Premium',
       'pay.sub': 'פתחו את כל התחנות, כל אתגרי ה-Boss וכל השפות.', 'pay.f1': 'כל 5 התחנות בכל שפה', 'pay.f2': 'כל אתגרי ה-Audio Boss',
       'pay.f3': 'שפות חדשות ברגע שהן יוצאות', 'pay.f4': 'תומכים בפיתוח הלומדה ❤️', 'pay.free': 'בחינם: {n} התחנות הראשונות בכל שפה, כולל ה-Boss שלהן',
@@ -149,6 +160,17 @@
       'common.toVault': '📒 Phrasebook', 'common.again': '🔁 Again', 'common.close': 'Close', 'common.save': 'Save',
       'common.remove': 'Remove', 'common.soon': 'Coming soon', 'common.minutes': '{n} min', 'common.normal': '▶️ Normal',
       'common.slow': '🐢 Slow', 'common.play': '▶️ Listen', 'common.replay': '🔊 Play again', 'common.uiLang': 'Interface language',
+      'teach.choose': 'Choose your teacher',
+      'teach.yours': 'Your teacher',
+      'story.start': 'Let\'s go! →',
+      'teach.done': 'Well done! Now let\'s practise a real conversation with the Boss 👑',
+      'story.airport': 'We just landed in {city}! ✈️ First stop: passport control. Let\'s learn what to say to the officer.',
+      'story.hotel': 'We\'ve reached our hotel in {city} 🏨 Let\'s check in, ask about breakfast and get a towel.',
+      'story.restaurant': 'Dinner time in {city} 🍽️ We\'ll get a table, ask for the menu and, at the end, the check.',
+      'story.shopping': 'Shopping day in {city} 🛍️ We\'ll ask for a size, check the price and pay by card.',
+      'story.emergency': 'Sometimes you need help fast 🚑 Let\'s learn to ask for a doctor, an ambulance and a pharmacy.',
+      'pay.trial': '{n}-day free trial',
+      'pay.startTrial': 'Start free trial',
       'pay.badge': '⭐ Premium', 'pay.locked': 'Premium stop', 'pay.title': '⭐ LangQuest Premium',
       'pay.sub': 'Unlock every stop, every Boss challenge and every language.', 'pay.f1': 'All 5 stops in every language', 'pay.f2': 'Every Audio Boss challenge',
       'pay.f3': 'New languages as soon as they launch', 'pay.f4': 'Support the app ❤️', 'pay.free': 'Free: the first {n} stops of every language, Bosses included',
@@ -197,7 +219,7 @@
       'set.reminders': '⏰ Reminders ({s})', 'set.profile': '👤 Edit language profile', 'set.voiceTitle': '🔊 Voice & pronunciation',
       'set.accent': 'Accent ({lang})', 'set.voice': 'Narrator', 'set.noVoices': 'No voices for this accent on this device',
       'set.voiceHint': 'Voices labelled Natural / Neural / Online sound the most natural.',
-      'set.slow': 'Turtle mode speed 🐢:', 'set.translit': 'Show Hebrew transliteration',
+      'set.slow': 'Turtle mode speed 🐢:', 'set.translit': 'Show pronunciation respelling',
       'set.test': '🔊 Test', 'set.testSlow': '🐢 Slow test',
       'set.micYes': '🎙️ Speech recognition is available in this browser.',
       'set.micNo': "🎙️ Speech recognition isn't available here — try Chrome or Edge.",
@@ -280,6 +302,17 @@
       'common.toVault': '📒 دفتر العبارات', 'common.again': '🔁 مرة أخرى', 'common.close': 'إغلاق', 'common.save': 'حفظ',
       'common.remove': 'حذف', 'common.soon': 'قريبًا', 'common.minutes': '{n} دقائق', 'common.normal': '▶️ عادي',
       'common.slow': '🐢 بطيء', 'common.play': '▶️ استمع', 'common.replay': '🔊 أعد التشغيل', 'common.uiLang': 'لغة الواجهة',
+      'teach.choose': 'اختاروا معلّمكم',
+      'teach.yours': 'معلّمكم',
+      'story.start': 'هيا نبدأ! ←',
+      'teach.done': 'أحسنتم! الآن لنتدرب على محادثة حقيقية مع الزعيم 👑',
+      'story.airport': 'وصلنا للتو إلى {city}! ✈️ المحطة الأولى: مراقبة الجوازات. لنتعلم ماذا نقول للموظف.',
+      'story.hotel': 'وصلنا إلى الفندق في {city} 🏨 لنسجّل الدخول ونسأل عن الفطور ونطلب منشفة.',
+      'story.restaurant': 'وقت العشاء في {city} 🍽️ نحجز طاولة ونطلب قائمة الطعام وفي النهاية الحساب.',
+      'story.shopping': 'يوم تسوق في {city} 🛍️ نسأل عن المقاس والسعر وندفع بالبطاقة.',
+      'story.emergency': 'أحيانًا نحتاج إلى المساعدة بسرعة 🚑 لنتعلم كيف نطلب طبيبًا وسيارة إسعاف وصيدلية.',
+      'pay.trial': 'تجربة مجانية لمدة {n} أيام',
+      'pay.startTrial': 'ابدأوا التجربة المجانية',
       'pay.badge': '⭐ Premium', 'pay.locked': 'محطة Premium', 'pay.title': '⭐ LangQuest Premium',
       'pay.sub': 'افتحوا كل المحطات وكل تحديات الزعيم وكل اللغات.', 'pay.f1': 'كل المحطات الخمس في كل لغة', 'pay.f2': 'كل تحديات Audio Boss',
       'pay.f3': 'لغات جديدة فور صدورها', 'pay.f4': 'ادعموا تطوير التطبيق ❤️', 'pay.free': 'مجانًا: أول {n} محطات في كل لغة، مع تحديات الزعيم الخاصة بها',
@@ -328,7 +361,7 @@
       'set.reminders': '⏰ التذكيرات ({s})', 'set.profile': '👤 تعديل ملف اللغات', 'set.voiceTitle': '🔊 الصوت والنطق',
       'set.accent': 'اللهجة ({lang})', 'set.voice': 'الراوي', 'set.noVoices': 'لا توجد أصوات لهذه اللهجة على الجهاز',
       'set.voiceHint': 'الأصوات الموسومة Natural / Neural / Online هي الأكثر طبيعية.',
-      'set.slow': 'سرعة وضع السلحفاة 🐢:', 'set.translit': 'إظهار النقحرة العبرية',
+      'set.slow': 'سرعة وضع السلحفاة 🐢:', 'set.translit': 'إظهار النطق بالحروف العربية',
       'set.test': '🔊 تجربة', 'set.testSlow': '🐢 تجربة بطيئة',
       'set.micYes': '🎙️ التعرف على الكلام متاح في هذا المتصفح.', 'set.micNo': '🎙️ التعرف على الكلام غير متاح هنا — جرّبوا Chrome أو Edge.',
       'set.reset': 'إعادة ضبط كل التقدم', 'set.resetConfirm': 'إعادة ضبط كل التقدم والسلسلة ودفتر العبارات؟',
@@ -409,6 +442,17 @@
       'common.toVault': '📒 Разговорник', 'common.again': '🔁 Ещё раз', 'common.close': 'Закрыть', 'common.save': 'Сохранить',
       'common.remove': 'Удалить', 'common.soon': 'Скоро', 'common.minutes': '{n} мин', 'common.normal': '▶️ Обычно',
       'common.slow': '🐢 Медленно', 'common.play': '▶️ Слушать', 'common.replay': '🔊 Ещё раз', 'common.uiLang': 'Язык интерфейса',
+      'teach.choose': 'Выберите преподавателя',
+      'teach.yours': 'Ваш преподаватель',
+      'story.start': 'Поехали! →',
+      'teach.done': 'Отлично! Теперь потренируемся в настоящем диалоге с Боссом 👑',
+      'story.airport': 'Мы только что прилетели — {city}! ✈️ Первая остановка: паспортный контроль. Учимся, что сказать офицеру.',
+      'story.hotel': 'Мы в отеле — {city} 🏨 Заселяемся, узнаём про завтрак и просим полотенце.',
+      'story.restaurant': 'Ужин — {city} 🍽️ Берём столик, просим меню, а в конце — счёт.',
+      'story.shopping': 'День покупок — {city} 🛍️ Спрашиваем размер, цену и платим картой.',
+      'story.emergency': 'Иногда помощь нужна срочно 🚑 Учимся звать врача, скорую и искать аптеку.',
+      'pay.trial': '{n} дня бесплатно',
+      'pay.startTrial': 'Начать бесплатный период',
       'pay.badge': '⭐ Premium', 'pay.locked': 'Остановка Premium', 'pay.title': '⭐ LangQuest Premium',
       'pay.sub': 'Откройте все остановки, все битвы с Боссом и все языки.', 'pay.f1': 'Все 5 остановок в каждом языке', 'pay.f2': 'Все битвы Audio Boss',
       'pay.f3': 'Новые языки сразу после выхода', 'pay.f4': 'Поддержите развитие приложения ❤️', 'pay.free': 'Бесплатно: первые {n} остановки каждого языка, включая Боссов',
@@ -457,7 +501,7 @@
       'set.reminders': '⏰ Напоминания ({s})', 'set.profile': '👤 Изменить языковой профиль', 'set.voiceTitle': '🔊 Голос и произношение',
       'set.accent': 'Акцент ({lang})', 'set.voice': 'Диктор', 'set.noVoices': 'На устройстве нет голосов для этого акцента',
       'set.voiceHint': 'Голоса с пометкой Natural / Neural / Online звучат естественнее всего.',
-      'set.slow': 'Скорость режима черепахи 🐢:', 'set.translit': 'Показывать транслитерацию на иврите',
+      'set.slow': 'Скорость режима черепахи 🐢:', 'set.translit': 'Показывать транскрипцию кириллицей',
       'set.test': '🔊 Проверка', 'set.testSlow': '🐢 Медленная проверка',
       'set.micYes': '🎙️ Распознавание речи доступно в этом браузере.', 'set.micNo': '🎙️ Распознавание речи недоступно — попробуйте Chrome или Edge.',
       'set.reset': 'Сбросить весь прогресс', 'set.resetConfirm': 'Сбросить весь прогресс, серию и разговорник?',
@@ -569,9 +613,15 @@
     return (item.tr && (item.tr[u] || item.tr.he)) || '';
   }
 
-  /** Hebrew niqqud transliteration only makes sense for a Hebrew base language. */
+  /** Syllables of a word written in the learner's own script (Hebrew niqqud, Arabic, Cyrillic, respelling). */
+  function translit(word) {
+    const u = ui();
+    const tl = u === 'he' ? word.he : word['tl_' + u];
+    return tl && tl.length && tl[0] ? tl : null;
+  }
+
   function showTranslit() {
-    return ui() === 'he' && LQStore.getSettings().translit;
+    return LQStore.getSettings().translit;
   }
 
   function apply() {
@@ -587,6 +637,6 @@
     apply();
   }
 
-  window.LQI18n = { UI_LANGS, t, f, tr, ui, setUi, apply, showTranslit, detect };
+  window.LQI18n = { UI_LANGS, t, f, tr, ui, setUi, apply, showTranslit, translit, detect };
   apply();
 })();

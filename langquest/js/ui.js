@@ -17,9 +17,11 @@
       : `<span>${esc(s)}</span>`)).join('<i class="dot">·</i>');
   }
 
+  /** The word's syllables in the learner's own script, stressed syllable highlighted. */
   function heHtml(word) {
-    if (!word.he.length || !word.he[0]) return '';
-    return word.he.map((s, k) => (k === word.stress && word.he.length > 1
+    const tl = LQI18n.translit(word);
+    if (!tl) return '';
+    return tl.map((s, k) => (k === word.stress && tl.length > 1
       ? `<b class="stress">${esc(s)}</b>`
       : `<span>${esc(s)}</span>`)).join('<i class="dot">·</i>');
   }
@@ -46,7 +48,7 @@
     pop.className = 'word-pop';
     pop.innerHTML = `
       <div class="wp-word" dir="ltr">${sylHtml(word)}</div>
-      ${LQI18n.showTranslit() ? `<div class="wp-he">${heHtml(word)}</div>` : ''}
+      ${LQI18n.showTranslit() && heHtml(word) ? `<div class="wp-he">${heHtml(word)}</div>` : ''}
       <div class="wp-meaning">${esc(LQI18n.f(word, 'meaning'))}</div>
       <div class="wp-actions">
         <button class="chip" data-r="1">${t('common.normal')}</button>
@@ -96,6 +98,7 @@
         closePop();
         return LQAudio.speak(opts.text, {
           accent: opts.accent,
+          gender: opts.gender,
           rate,
           weights: words.map(w => w.syl.length),
           onWord: highlight
@@ -228,6 +231,55 @@
     return kara;
   }
 
+  /* ---------- teachers & characters ---------- */
+  /**
+   * Portrait: realistic photo when present (img/teachers/<id>.webp, img/npc/<station>.webp),
+   * otherwise a neutral monogram / emoji. `.live` portraits glow while the narrator is speaking.
+   */
+  function portrait({ src, alt, fallback, hue = 200, size = 56, live = false }) {
+    return `<span class="t-ava${live ? ' live' : ''}" style="--h:${hue};--sz:${size}px" role="img" aria-label="${esc(alt)}">
+      <b>${esc(fallback)}</b><img src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>`;
+  }
+
+  function teacherAvatar(teacher, size = 56, live = true) {
+    return portrait({ src: `img/teachers/${teacher.id}.webp`, alt: teacher.name, fallback: teacher.name[0], hue: teacher.hue, size, live });
+  }
+
+  function npcAvatar(station, size = 48) {
+    return portrait({ src: `img/npc/${station.id}.webp`, alt: LQI18n.f(station, 'name'), fallback: station.npc, hue: 260, size, live: true });
+  }
+
+  function currentTeacher() {
+    const s = LQStore.getSettings();
+    return LQData.teacherFor(s.lang, currentAccent());
+  }
+
+  /** Teacher picker (also picks the accent). */
+  function teacherCards(langId, selectedAccent) {
+    const L = LQData.LANGS[langId];
+    return `<div class="teachers">${(LQData.TEACHERS[langId] || []).map(tc => {
+      const acc = L.accents.find(a => a.code === tc.accent) || {};
+      const on = tc.accent === selectedAccent;
+      return `
+        <button class="teacher-card ${on ? 'on' : ''}" data-teacher="${tc.id}" data-accent="${tc.accent}" aria-pressed="${on}">
+          ${teacherAvatar(tc, 64, false)}
+          <span class="tc-body">
+            <b>${esc(tc.name)} <span class="tc-flag">${acc.flag || ''}</span></b>
+            <small>📍 ${esc(tc.city[LQI18n.ui()] || tc.city.en)} · ${esc(LQI18n.f(acc, 'label') || '')}</small>
+            <small class="muted">${esc(tc.bio[LQI18n.ui()] || tc.bio.en)}</small>
+          </span>
+        </button>`;
+    }).join('')}</div>`;
+  }
+
+  /** Teacher speech bubble used for step guidance and story scenes. */
+  function teacherSays(teacher, html, size = 44) {
+    if (!teacher) return `<div class="step-hint">${html}</div>`;
+    return `<div class="teacher-tip">${teacherAvatar(teacher, size)}<div class="tip-bubble"><b>${esc(teacher.name)}</b><span>${html}</span></div></div>`;
+  }
+
+  document.addEventListener('lq:speaking', e => document.documentElement.classList.toggle('is-speaking', !!e.detail));
+
   /* ---------- toast & celebration ---------- */
   function toast(msg, ms = 2600) {
     const t = document.createElement('div');
@@ -266,6 +318,7 @@
     esc, $, $$, currentAccent,
     sylHtml, heHtml, translitLine,
     karaoke, breakdown, bindBreakdown, voiceCheck,
-    showWordPop, closePop, toast, burst, shuffle, micError
+    showWordPop, closePop, toast, burst, shuffle, micError,
+    portrait, teacherAvatar, npcAvatar, currentTeacher, teacherCards, teacherSays
   };
 })();

@@ -79,9 +79,9 @@
         <div>
           <h1>${esc(t('map.title', { lang: f(L, 'name') }))} <span class="flag">${L.flag}</span></h1>
           <p class="muted">${t('map.sub')}</p>
-          <div class="accent-pick" role="radiogroup" aria-label="${t('map.accent')}">
-            ${L.accents.map(a => `<button role="radio" aria-checked="${s.accent[L.id] === a.code}" class="pill ${s.accent[L.id] === a.code ? 'on' : ''}" data-accent="${a.code}">${a.flag} ${esc(f(a, 'label'))}</button>`).join('')}
-            <button class="pill ghost" data-act="test">${t('map.testVoice')}</button>
+          <div class="teacher-pick">
+            <div class="tp-head"><b>${t('teach.choose')}</b><button class="pill ghost" data-act="test">${t('map.testVoice')}</button></div>
+            ${LQUI.teacherCards(L.id, s.accent[L.id] || L.accents[0].code)}
           </div>
           <button class="pace-pill" data-act="level" title="${t('map.changeLevel')}">${t('map.levelPill', { li: lvl.icon, level: esc(f(lvl, 'name')), pi: pace.icon, pace: esc(f(pace, 'name')) })} <span class="muted">✎</span></button>
         </div>
@@ -346,7 +346,7 @@
       <label class="field"><span>${t('set.slow')} <b data-out>${Math.round(s.slowRate * 100)}%</b></span>
         <input type="range" min="0.5" max="0.7" step="0.05" value="${s.slowRate}" data-f="rate">
       </label>
-      ${LQI18n.ui() === 'he' ? `<label class="field check"><input type="checkbox" data-f="translit" ${s.translit ? 'checked' : ''}> <span>${t('set.translit')}</span></label>` : ''}
+      <label class="field check"><input type="checkbox" data-f="translit" ${s.translit ? 'checked' : ''}> <span>${t('set.translit')}</span></label>
       <div class="row">
         <button class="btn ghost" data-act="test">${t('set.test')}</button>
         <button class="btn ghost" data-act="test-slow">${t('set.testSlow')}</button>
@@ -415,7 +415,8 @@
               <b>${t('pay.' + p.id)}</b>
               <div class="plan-price">${esc(C.priceLabel(p))}</div>
               <small class="muted">${t(PERIOD[p.period])}</small>
-              <button class="btn ${p.best ? 'primary' : 'ghost'}" data-buy="${p.id}">${t('pay.buy')}</button>
+              ${p.period !== 'once' && C.CONFIG.trialDays ? `<small class="trial">🎁 ${t('pay.trial', { n: C.CONFIG.trialDays })}</small>` : ''}
+              <button class="btn ${p.best ? 'primary' : 'ghost'}" data-buy="${p.id}">${p.period !== 'once' && C.CONFIG.trialDays ? t('pay.startTrial') : t('pay.buy')}</button>
             </div>`).join('')}
         </div>
         <p class="muted small">${esc(t('pay.free', { n: C.FREE_STATIONS }))}</p>

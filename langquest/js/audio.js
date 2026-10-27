@@ -26,31 +26,54 @@
 
   const normLang = l => (l || '').replace('_', '-').toLowerCase();
 
-  function voiceScore(v) {
+  // common voice names by gender across Chrome / Edge / Safari / Android
+  const FEMALE = ['female', 'woman', 'aria', 'jenny', 'sonia', 'libby', 'maisie', 'samantha', 'victoria', 'karen', 'moira', 'tessa',
+    'zira', 'hazel', 'susan', 'ava', 'allison', 'elvira', 'dalia', 'paulina', 'monica', 'mónica', 'helena', 'laura', 'lucia', 'lucía',
+    'sabina', 'marisol', 'renata', 'esperanza', 'ximena', 'abril', 'larissa', 'emma', 'michelle', 'ana'];
+  const MALE = ['male', ' man', 'guy', 'ryan', 'thomas', 'daniel', 'alex', 'fred', 'arthur', 'oliver', 'george', 'mark', 'david',
+    'eric', 'christopher', 'alvaro', 'álvaro', 'jorge', 'pablo', 'raul', 'raúl', 'diego', 'gerardo', 'liberto', 'tristan', 'jamie', 'juan', 'carlos'];
+
+  function voiceGender(v) {
+    const n = ' ' + v.name.toLowerCase();
+    if (FEMALE.some(h => n.includes(h)) && !n.includes(' male')) return 'f';
+    if (MALE.some(h => n.includes(h))) return 'm';
+    return null;
+  }
+
+  function voiceScore(v, gender) {
     const n = v.name.toLowerCase();
     let s = 0;
     NATURAL_HINTS.forEach((h, i) => { if (n.includes(h)) s += 10 - i; });
     if (v.localService === false) s += 2;
+    if (gender && voiceGender(v) === gender) s += 30;
     return s;
   }
 
-  /** Voices for an accent, best first. Falls back to sibling accents, then to the base language. */
-  function voicesFor(accentCode) {
+  /** Voices for an accent, best first (matching `gender` when given). Falls back to sibling accents, then the base language. */
+  function voicesFor(accentCode, gender) {
     const code = normLang(accentCode);
+    const by = (a, b) => voiceScore(b, gender) - voiceScore(a, gender);
     const tiers = [[code], (ACCENT_FALLBACKS[accentCode] || []).map(normLang)];
     for (const tier of tiers) {
       const found = voices.filter(v => tier.includes(normLang(v.lang)));
-      if (found.length) return found.sort((a, b) => voiceScore(b) - voiceScore(a));
+      if (found.length) return found.sort(by);
     }
     const base = code.split('-')[0];
-    return voices.filter(v => normLang(v.lang).split('-')[0] === base).sort((a, b) => voiceScore(b) - voiceScore(a));
+    return voices.filter(v => normLang(v.lang).split('-')[0] === base).sort(by);
   }
 
-  function pickVoice(accentCode) {
-    const preferred = LQStore.getSettings().voice[accentCode];
-    const list = voicesFor(accentCode);
+  /** The narrator: the learner's chosen voice, else one matching the teacher's (or a character's) gender. */
+  function pickVoice(accentCode, gender) {
+    const preferred = gender ? null : LQStore.getSettings().voice[accentCode];
+    if (!gender) {
+      const tc = LQData.teacherFor(LQStore.getSettings().lang, accentCode);
+      if (tc && tc.accent === accentCode) gender = tc.gender;
+    }
+    const list = voicesFor(accentCode, gender);
     return list.find(v => v.name === preferred) || list[0] || null;
   }
+
+  const speaking = on => document.dispatchEvent(new CustomEvent('lq:speaking', { detail: on }));
 
   /* ---------- speech synthesis with karaoke ---------- */
   let session = 0;
@@ -64,6 +87,7 @@
   function stop() {
     session++;
     clearTimers();
+    document.documentElement.classList.remove('is-speaking');
     if (synth) synth.cancel();
   }
 
@@ -102,26 +126,28 @@
       const finish = () => {
         if (my !== session) return resolve();
         clearTimers();
+        speaking(false);
         onWord(-1);
         if (opts.onEnd) opts.onEnd();
         resolve();
       };
 
       if (!synth) {
+        speaking(true);
         const total = runEstimator();
         timers.push(setTimeout(finish, total * 1000 + 200));
         return;
       }
 
       const u = new SpeechSynthesisUtterance(text);
-      const voice = pickVoice(opts.accent);
+      const voice = pickVoice(opts.accent, opts.gender);
       if (voice) u.voice = voice;
       u.lang = opts.accent || (voice && voice.lang) || 'en-US';
       u.rate = rate;
       u.pitch = 1;
 
       let started = false;
-      u.onstart = () => { started = true; clearTimers(); if (!boundaryMode) runEstimator(); };
+      u.onstart = () => { started = true; clearTimers(); speaking(true); if (!boundaryMode) runEstimator(); };
       u.onboundary = e => {
         if (e.name && e.name !== 'word') return;
         if (!boundaryMode) { boundaryMode = true; clearTimers(); }
@@ -137,6 +163,7 @@
       // Watchdog: some engines never start (no voices installed) — fall back to a silent timed highlight
       setTimeout(() => {
         if (my !== session || started) return;
+        speaking(true);
         const total = runEstimator();
         timers.push(setTimeout(finish, total * 1000 + 200));
       }, 1500);

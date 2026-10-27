@@ -154,7 +154,14 @@
             <span class="lc-ico">${l.icon}</span>
             <span><b>${esc(f(l, 'name'))}</b> <small dir="ltr">${l.cefr}</small><br><small class="muted">${esc(f(l, 'desc'))}</small></span>
           </button>`).join('')}
-      </div>`;
+      </div>
+      ${T && LQData.TEACHERS[O.target] ? `<h3 class="sub">${t('teach.choose')}</h3>${LQUI.teacherCards(O.target, LQStore.getSettings().accent[O.target] || T.accents[0].code)}` : ''}`;
+    $$('[data-accent]', body).forEach(b => b.onclick = () => {
+      LQStore.setAccent(O.target, b.dataset.accent);
+      stepTarget(body);
+      const tc = LQData.TEACHERS[O.target].find(x => x.id === b.dataset.teacher);
+      LQAudio.speak(LQData.LANGS[O.target].stations.airport.phrases[0].text, { accent: tc.accent });
+    });
     $$('[data-lang]', body).forEach(b => b.onclick = () => {
       O.target = b.dataset.lang;
       const stored = LQStore.getLevel(O.target);

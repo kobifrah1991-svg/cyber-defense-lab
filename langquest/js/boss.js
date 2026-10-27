@@ -29,7 +29,7 @@
           <div class="pdots">${B.boss.turns.map(() => '<i></i>').join('')}</div>
         </div>
         <div class="card boss">
-          <div class="boss-npc"><span class="npc-ava">${B.meta.npc}</span><div><b>${esc(f(B.boss, 'title'))}</b><small>${esc(t('boss.ai', { lang: f(LQData.LANGS[lang], 'name') }))}</small></div></div>
+          <div class="boss-npc">${LQUI.npcAvatar(B.meta, 56)}<div><b>${esc(f(B.boss, 'title'))}</b><small>${esc(t('boss.ai', { lang: f(LQData.LANGS[lang], 'name') }))}</small></div></div>
           <div class="chat" aria-live="polite"></div>
           <div class="boss-controls"></div>
         </div>
@@ -56,10 +56,10 @@
     const my = B;
     const row = document.createElement('div');
     row.className = 'msg npc';
-    row.innerHTML = `<span class="ava">${B.meta.npc}</span><div class="bubble"><div class="bk"></div><div class="bhe">${esc(tr(line))}</div><button class="replay" title="${t('boss.replay')}">🔊</button></div>`;
+    row.innerHTML = `<span class="ava">${LQUI.npcAvatar(B.meta, 36)}</span><div class="bubble"><div class="bk"></div><div class="bhe">${esc(tr(line))}</div><button class="replay" title="${t('boss.replay')}">🔊</button></div>`;
     chat().appendChild(row);
     scrollChat();
-    const k = karaoke($('.bk', row), { text, accent: B.accent });
+    const k = karaoke($('.bk', row), { text, accent: B.accent, gender: B.meta.npcGender });
     $('.replay', row).onclick = () => k.play(1);
     return k.play(1).then(() => new Promise(r => setTimeout(r, 250))).then(() => { if (B !== my) throw new Error('left'); });
   }

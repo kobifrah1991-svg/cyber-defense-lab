@@ -29,11 +29,11 @@ function P(text, he, emoji, words) {
 }
 
 const STATIONS = [
-  { id: 'airport', name: 'שדה תעופה', name_en: 'Airport', name_ar: 'المطار', name_ru: 'Аэропорт', icon: '✈️', npc: '🛂' },
-  { id: 'hotel', name: 'מלון', name_en: 'Hotel', name_ar: 'الفندق', name_ru: 'Отель', icon: '🏨', npc: '🛎️' },
-  { id: 'restaurant', name: 'מסעדה', name_en: 'Restaurant', name_ar: 'المطعم', name_ru: 'Ресторан', icon: '🍽️', npc: '🧑‍🍳' },
-  { id: 'shopping', name: 'קניות', name_en: 'Shopping', name_ar: 'التسوق', name_ru: 'Покупки', icon: '🛍️', npc: '🧑‍💼' },
-  { id: 'emergency', name: 'חירום ורפואה', name_en: 'Emergency & health', name_ar: 'الطوارئ والصحة', name_ru: 'Экстренная помощь', icon: '🚑', npc: '🧑‍⚕️' }
+  { id: 'airport', npcGender: 'm', name: 'שדה תעופה', name_en: 'Airport', name_ar: 'المطار', name_ru: 'Аэропорт', icon: '✈️', npc: '🛂' },
+  { id: 'hotel', npcGender: 'f', name: 'מלון', name_en: 'Hotel', name_ar: 'الفندق', name_ru: 'Отель', icon: '🏨', npc: '🛎️' },
+  { id: 'restaurant', npcGender: 'm', name: 'מסעדה', name_en: 'Restaurant', name_ar: 'المطعم', name_ru: 'Ресторан', icon: '🍽️', npc: '🧑‍🍳' },
+  { id: 'shopping', npcGender: 'f', name: 'קניות', name_en: 'Shopping', name_ar: 'التسوق', name_ru: 'Покупки', icon: '🛍️', npc: '🧑‍💼' },
+  { id: 'emergency', npcGender: 'f', name: 'חירום ורפואה', name_en: 'Emergency & health', name_ar: 'الطوارئ والصحة', name_ru: 'Экстренная помощь', icon: '🚑', npc: '🧑‍⚕️' }
 ];
 
 const LANGS = {
@@ -617,6 +617,77 @@ const TRANSLATIONS = {
   }
 };
 
+/* ---------- transliteration in the learner's own script ----------
+ * Hebrew niqqud lives inline (word.he). Other base languages: TRANSLIT[base][target][word] = 'syl·syl'
+ * with the same syllable count as the word, so the stress marker lines up.
+ * Arabic uses پ for /p/ and ڤ for /v/; English is a simple respelling.
+ */
+const TRANSLIT = {
+  ar: {
+    en: {
+      'here': 'هِير', 'is': 'إِز', 'my': 'ماي', 'passport': 'پاس·پورت', 'i': 'آي', 'have': 'هاڤ', 'a': 'أ', 'an': 'أن',
+      'connecting': 'كَ·نِك·تِنغ', 'flight': 'فلايت', 'where': 'وِير', 'the': 'ذا', 'gate': 'غيت',
+      'reservation': 'رِ·زِر·ڤي·شِن', 'what': 'ووت', 'time': 'تايم', 'breakfast': 'بريك·فَست', 'could': 'كُد',
+      'another': 'أ·نا·ذَر', 'towel': 'تا·وِل', 'table': 'تي·بِل', 'for': 'فور', 'two': 'تو', 'please': 'پليز',
+      'can': 'كان', 'see': 'سي', 'menu': 'مِن·يو', 'check': 'تشيك', 'do': 'دو', 'you': 'يو', 'this': 'ذِس',
+      'in': 'إن', 'medium': 'مي·دي·أم', 'how': 'هاو', 'much': 'ماتش', 'does': 'داز', 'cost': 'كوست', 'pay': 'پاي',
+      'by': 'باي', 'card': 'كارد', 'need': 'نيد', 'doctor': 'دوك·تور', 'call': 'كول', 'ambulance': 'أم·بيو·لَنس',
+      'nearest': 'ني·رِست', 'pharmacy': 'فار·ما·سي'
+    },
+    es: {
+      'aquí': 'أ·كي', 'está': 'إس·تا', 'mi': 'مي', 'pasaporte': 'پا·سا·پور·تي', 'tengo': 'تين·غو', 'un': 'أون',
+      'vuelo': 'بوي·لو', 'de': 'دي', 'conexión': 'كو·نيك·سيون', 'dónde': 'دون·دي', 'la': 'لا', 'puerta': 'پوير·تا',
+      'embarque': 'إم·بار·كي', 'una': 'أو·نا', 'reserva': 'ري·سير·با', 'a': 'آ', 'qué': 'كي', 'hora': 'أو·را',
+      'es': 'إس', 'el': 'إل', 'desayuno': 'دي·سا·يو·نو', 'me': 'مي', 'puede': 'پوي·دي', 'dar': 'دار',
+      'otra': 'أو·ترا', 'toalla': 'تو·آ·يا', 'mesa': 'مي·سا', 'para': 'پا·را', 'dos': 'دوس', 'por': 'پور',
+      'favor': 'فا·بور', 'trae': 'ترا·إي', 'carta': 'كار·تا', 'cuenta': 'كوين·تا', 'lo': 'لو', 'tiene': 'تيي·ني',
+      'en': 'إن', 'talla': 'تا·يا', 'mediana': 'مي·ديا·نا', 'cuánto': 'كوان·تو', 'cuesta': 'كويس·تا',
+      'esto': 'إس·تو', 'puedo': 'پوي·دو', 'pagar': 'پا·غار', 'con': 'كون', 'tarjeta': 'تار·خي·تا',
+      'necesito': 'ني·سي·سي·تو', 'médico': 'مي·دي·كو', 'llame': 'يا·مي', 'ambulancia': 'أم·بو·لان·سيا',
+      'farmacia': 'فار·ما·سيا', 'más': 'ماس', 'cercana': 'سير·كا·نا'
+    }
+  },
+  ru: {
+    en: {
+      'here': 'хир', 'is': 'из', 'my': 'май', 'passport': 'пасс·порт', 'i': 'ай', 'have': 'хэв', 'a': 'э', 'an': 'эн',
+      'connecting': 'кэ·нэк·тинг', 'flight': 'флайт', 'where': 'уэр', 'the': 'зэ', 'gate': 'гейт',
+      'reservation': 'рэ·зэр·вэй·шн', 'what': 'уот', 'time': 'тайм', 'breakfast': 'брэк·фэст', 'could': 'куд',
+      'another': 'э·на·зэр', 'towel': 'та·уэл', 'table': 'тэй·бл', 'for': 'фо', 'two': 'ту', 'please': 'плиз',
+      'can': 'кэн', 'see': 'си', 'menu': 'мэн·ю', 'check': 'чек', 'do': 'ду', 'you': 'ю', 'this': 'зис',
+      'in': 'ин', 'medium': 'ми·ди·эм', 'how': 'хау', 'much': 'мач', 'does': 'даз', 'cost': 'кост', 'pay': 'пэй',
+      'by': 'бай', 'card': 'кард', 'need': 'нид', 'doctor': 'док·тэр', 'call': 'кол', 'ambulance': 'эм·бью·ленс',
+      'nearest': 'ни·рэст', 'pharmacy': 'фар·мэ·си'
+    },
+    es: {
+      'aquí': 'а·ки', 'está': 'эс·та', 'mi': 'ми', 'pasaporte': 'па·са·пор·тэ', 'tengo': 'тэн·го', 'un': 'ун',
+      'vuelo': 'буэ·ло', 'de': 'дэ', 'conexión': 'ко·нэк·сьон', 'dónde': 'дон·дэ', 'la': 'ла', 'puerta': 'пуэр·та',
+      'embarque': 'эм·бар·кэ', 'una': 'у·на', 'reserva': 'рэ·сэр·ба', 'a': 'а', 'qué': 'кэ', 'hora': 'о·ра',
+      'es': 'эс', 'el': 'эль', 'desayuno': 'дэ·са·ю·но', 'me': 'мэ', 'puede': 'пуэ·дэ', 'dar': 'дар',
+      'otra': 'о·тра', 'toalla': 'то·а·я', 'mesa': 'мэ·са', 'para': 'па·ра', 'dos': 'дос', 'por': 'пор',
+      'favor': 'фа·бор', 'trae': 'тра·э', 'carta': 'кар·та', 'cuenta': 'куэн·та', 'lo': 'ло', 'tiene': 'тье·нэ',
+      'en': 'эн', 'talla': 'та·я', 'mediana': 'мэ·дья·на', 'cuánto': 'куан·то', 'cuesta': 'куэс·та',
+      'esto': 'эс·то', 'puedo': 'пуэ·до', 'pagar': 'па·гар', 'con': 'кон', 'tarjeta': 'тар·хэ·та',
+      'necesito': 'нэ·сэ·си·то', 'médico': 'мэ·ди·ко', 'llame': 'я·мэ', 'ambulancia': 'ам·бу·лан·сья',
+      'farmacia': 'фар·ма·сья', 'más': 'мас', 'cercana': 'сэр·ка·на'
+    }
+  },
+  en: {
+    es: {
+      'aquí': 'ah·kee', 'está': 'ehs·tah', 'mi': 'mee', 'pasaporte': 'pah·sah·pohr·teh', 'tengo': 'tehn·goh',
+      'un': 'oon', 'vuelo': 'bweh·loh', 'de': 'deh', 'conexión': 'koh·nehk·syohn', 'dónde': 'dohn·deh', 'la': 'lah',
+      'puerta': 'pwehr·tah', 'embarque': 'ehm·bahr·keh', 'una': 'oo·nah', 'reserva': 'reh·sehr·bah', 'a': 'ah',
+      'qué': 'keh', 'hora': 'oh·rah', 'es': 'ehs', 'el': 'ehl', 'desayuno': 'deh·sah·yoo·noh', 'me': 'meh',
+      'puede': 'pweh·deh', 'dar': 'dahr', 'otra': 'oh·trah', 'toalla': 'toh·ah·yah', 'mesa': 'meh·sah',
+      'para': 'pah·rah', 'dos': 'dohs', 'por': 'pohr', 'favor': 'fah·bohr', 'trae': 'trah·eh', 'carta': 'kahr·tah',
+      'cuenta': 'kwehn·tah', 'lo': 'loh', 'tiene': 'tyeh·neh', 'en': 'ehn', 'talla': 'tah·yah',
+      'mediana': 'meh·dyah·nah', 'cuánto': 'kwahn·toh', 'cuesta': 'kwehs·tah', 'esto': 'ehs·toh',
+      'puedo': 'pweh·doh', 'pagar': 'pah·gahr', 'con': 'kohn', 'tarjeta': 'tahr·heh·tah',
+      'necesito': 'neh·seh·see·toh', 'médico': 'meh·dee·koh', 'llame': 'yah·meh', 'ambulancia': 'ahm·boo·lahn·syah',
+      'farmacia': 'fahr·mah·syah', 'más': 'mahs', 'cercana': 'sehr·kah·nah'
+    }
+  }
+};
+
 // attach translations: phrase.tr / line.tr = { he, en, … }, word.meaning_<lang>
 Object.values(LANGS).forEach(L => Object.values(L.stations).forEach(st => {
   const attach = (text, he) => {
@@ -630,15 +701,52 @@ Object.values(LANGS).forEach(L => Object.values(L.stations).forEach(st => {
       const g = ((T.words || {})[L.id] || {})[w.clean.toLowerCase()];
       if (g) w['meaning_' + ui] = g;
     }));
+    p.words.forEach(w => Object.entries(TRANSLIT).forEach(([ui, T]) => {
+      const tl = (T[L.id] || {})[w.clean.toLowerCase()];
+      if (tl) w['tl_' + ui] = tl.split('·');
+    }));
   });
   const line = ([text, he]) => ({ text, tr: attach(text, he) });
   st.boss.intro = line(st.boss.intro);
   st.boss.turns.forEach(tn => { tn.reply = line(tn.reply); });
 }));
 
+/* ---------- teachers ----------
+ * Each target language has teachers; picking a teacher picks the accent and the narrator's voice gender.
+ * Portraits are realistic photos at img/teachers/<id>.webp (optional talking loop <id>-talk.mp4).
+ * Missing files fall back to a neutral monogram — see img/teachers/README.md for the photo brief.
+ */
+const TEACHERS = {
+  en: [
+    { id: 'emma', name: 'Emma', accent: 'en-US', gender: 'f', age: 24, hue: 200,
+      city: { he: 'ניו יורק', en: 'New York', ar: 'نيويورك', ru: 'Нью-Йорк' },
+      bio: { he: 'אוהבת קפה, מוזיקה ואת הסלנג של ניו יורק', en: 'Loves coffee, music and New York slang',
+        ar: 'تحب القهوة والموسيقى وعامية نيويورك', ru: 'Любит кофе, музыку и нью-йоркский сленг' } },
+    { id: 'oliver', name: 'Oliver', accent: 'en-GB', gender: 'm', age: 26, hue: 160,
+      city: { he: 'לונדון', en: 'London', ar: 'لندن', ru: 'Лондон' },
+      bio: { he: 'מדריך טיולים בלונדון, מדבר לאט וברור', en: 'London tour guide who speaks slowly and clearly',
+        ar: 'مرشد سياحي في لندن يتكلم ببطء ووضوح', ru: 'Гид по Лондону, говорит медленно и чётко' } }
+  ],
+  es: [
+    { id: 'lucia', name: 'Lucía', accent: 'es-ES', gender: 'f', age: 23, hue: 12,
+      city: { he: 'מדריד', en: 'Madrid', ar: 'مدريد', ru: 'Мадрид' },
+      bio: { he: 'סטודנטית לעיצוב ממדריד ומומחית לטאפאס', en: 'Design student from Madrid and a tapas expert',
+        ar: 'طالبة تصميم من مدريد وخبيرة في التاباس', ru: 'Студентка-дизайнер из Мадрида и знаток тапас' } },
+    { id: 'mateo', name: 'Mateo', accent: 'es-MX', gender: 'm', age: 25, hue: 35,
+      city: { he: 'מקסיקו סיטי', en: 'Mexico City', ar: 'مكسيكو سيتي', ru: 'Мехико' },
+      bio: { he: 'שף צעיר ממקסיקו סיטי שאוהב לדבר עם אנשים', en: 'Young chef from Mexico City who loves to chat',
+        ar: 'طاهٍ شاب من مكسيكو سيتي يحب الحديث مع الناس', ru: 'Молодой шеф-повар из Мехико, любит поболтать' } }
+  ]
+};
+
+function teacherFor(langId, accentCode) {
+  const list = TEACHERS[langId] || [];
+  return list.find(t => t.accent === accentCode) || list[0] || null;
+}
+
 function getPhrase(langId, stationId, idx) {
   const st = LANGS[langId] && LANGS[langId].stations[stationId];
   return st ? st.phrases[idx] : null;
 }
 
-window.LQData = { STATIONS, LANGS, LEVELS, PACES, KNOWN_LANGS, LANG_FAMILY, getPhrase };
+window.LQData = { STATIONS, LANGS, LEVELS, PACES, KNOWN_LANGS, LANG_FAMILY, TEACHERS, teacherFor, getPhrase };
