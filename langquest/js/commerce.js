@@ -25,7 +25,7 @@
     trialDays: 3
   };
 
-  const FREE_STATIONS = 2;
+  const FREE_STATIONS = 3;
 
   const PLANS = [
     { id: 'monthly', price: { ILS: 24.9, USD: 6.99 }, period: 'month' },

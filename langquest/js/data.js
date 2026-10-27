@@ -30,9 +30,14 @@ function P(text, he, emoji, words) {
 
 const STATIONS = [
   { id: 'airport', npcGender: 'm', name: 'שדה תעופה', name_en: 'Airport', name_ar: 'المطار', name_ru: 'Аэропорт', icon: '✈️', npc: '🛂' },
+  { id: 'taxi', npcGender: 'm', name: 'מוניות ותחבורה', name_en: 'Taxi & transport', name_ar: 'التاكسي والمواصلات', name_ru: 'Такси и транспорт', icon: '🚕', npc: '🧔' },
   { id: 'hotel', npcGender: 'f', name: 'מלון', name_en: 'Hotel', name_ar: 'الفندق', name_ru: 'Отель', icon: '🏨', npc: '🛎️' },
+  { id: 'cafe', npcGender: 'f', name: 'בית קפה', name_en: 'Café', name_ar: 'المقهى', name_ru: 'Кафе', icon: '☕', npc: '👩' },
   { id: 'restaurant', npcGender: 'm', name: 'מסעדה', name_en: 'Restaurant', name_ar: 'المطعم', name_ru: 'Ресторан', icon: '🍽️', npc: '🧑‍🍳' },
+  { id: 'directions', npcGender: 'f', name: 'התמצאות ברחוב', name_en: 'Getting around', name_ar: 'التنقل في الشوارع', name_ru: 'Ориентирование', icon: '🧭', npc: '🙋‍♀️' },
+  { id: 'sights', npcGender: 'm', name: 'אטרקציות ומוזיאונים', name_en: 'Sights & museums', name_ar: 'المعالم والمتاحف', name_ru: 'Достопримечательности', icon: '🏛️', npc: '👨‍💼' },
   { id: 'shopping', npcGender: 'f', name: 'קניות', name_en: 'Shopping', name_ar: 'التسوق', name_ru: 'Покупки', icon: '🛍️', npc: '🧑‍💼' },
+  { id: 'smalltalk', npcGender: 'f', name: 'היכרות ושיחת חולין', name_en: 'Meeting people', name_ar: 'التعارف والدردشة', name_ru: 'Знакомства', icon: '💬', npc: '💁‍♀️' },
   { id: 'emergency', npcGender: 'f', name: 'חירום ורפואה', name_en: 'Emergency & health', name_ar: 'الطوارئ والصحة', name_ru: 'Экстренная помощь', icon: '🚑', npc: '🧑‍⚕️' }
 ];
 
@@ -51,6 +56,118 @@ const LANGS = {
       { code: 'en-GB', label: 'בריטית', label_en: 'British', label_ar: 'بريطانية', label_ru: 'Британский', flag: '🇬🇧' }
     ],
     stations: {
+      taxi: {
+        phrases: [
+          P('Can you take me to this address?', 'אפשר לקחת אותי לכתובת הזאת?', '🚕', [
+            'Can|האם אפשר|can|קֶן', 'you|אתה|you|יוּ', 'take|לקחת|take|טֵייק', 'me|אותי|me|מִי', 'to|אל|to|טוּ',
+            'this|הזאת|this|דִיס', 'address?|כתובת|ad·dress|אֶ·דְרֶס|0'
+          ]),
+          P('How long does it take?', 'כמה זמן זה לוקח?', '⏱️', [
+            'How|איך|how|הָאוּ', 'long|ארוך (כמה זמן)|long|לוֹנְג', 'does|(פועל עזר)|does|דָאז', 'it|זה|it|אִיט', 'take?|לוקח|take|טֵייק'
+          ]),
+          P('Please stop here.', 'עצור כאן, בבקשה.', '🛑', [
+            'Please|בבקשה|please|פְּלִיז', 'stop|עצור|stop|סְטוֹפּ', 'here.|כאן|here|הִיר'
+          ])
+        ],
+        boss: {
+          title: 'נהג המונית', title_en: 'Taxi driver', title_ar: 'سائق التاكسي', title_ru: 'Таксист',
+          intro: ['Hi there! Where to?', 'היי! לאן?'],
+          turns: [
+            { expect: 0, reply: ['No problem. Buckle up!', 'אין בעיה. תחגור חגורה!'] },
+            { expect: 1, reply: ['About twenty minutes with this traffic.', 'בערך עשרים דקות עם הפקקים האלה.'] },
+            { expect: 2, reply: ["Here you go. That's fifteen dollars.", 'הגענו. זה חמישה־עשר דולר.'] }
+          ]
+        }
+      },
+      cafe: {
+        phrases: [
+          P('A coffee with milk, please.', 'קפה עם חלב, בבקשה.', '☕', [
+            'A|(אחד)|a|אָ', 'coffee|קפה|cof·fee|קוֹ·פִי|0', 'with|עם|with|וִויד׳', 'milk,|חלב|milk|מִילְק', 'please.|בבקשה|please|פְּלִיז'
+          ]),
+          P('Is there Wi-Fi here?', 'יש כאן Wi-Fi?', '📶', [
+            'Is|האם|is|אִיז', 'there|(יש)|there|דֶ׳ר', 'Wi-Fi|אינטרנט אלחוטי|wi·fi|וַאי·פַאי|0', 'here?|כאן|here|הִיר'
+          ]),
+          P('Can I have it to go?', 'אפשר לקחת את זה איתי?', '🥡', [
+            'Can|האם אפשר|can|קֶן', 'I|אני|I|אַיי', 'have|לקבל|have|הֶב', 'it|את זה|it|אִיט', 'to|ל־|to|טוּ', 'go?|ללכת (לקחת)|go|גוֹאוּ'
+          ])
+        ],
+        boss: {
+          title: 'הבריסטה', title_en: 'Barista', title_ar: 'الباريستا', title_ru: 'Бариста',
+          intro: ['Hi! What can I get you?', 'היי! מה להביא לך?'],
+          turns: [
+            { expect: 0, reply: ['Coming right up. Anything else?', 'מיד מגיע. עוד משהו?'] },
+            { expect: 1, reply: ['Yes, the password is on the board.', 'כן, הסיסמה על הלוח.'] },
+            { expect: 2, reply: ['Sure! Here you go. Have a great day!', 'בטח! בבקשה. יום נהדר!'] }
+          ]
+        }
+      },
+      directions: {
+        phrases: [
+          P("Excuse me, I'm lost.", 'סליחה, הלכתי לאיבוד.', '🗺️', [
+            'Excuse|סליחה|ex·cuse|אֶקְס·קְיוּז|1', 'me,|לי (סליחה)|me|מִי', "I'm|אני|I'm|אַיים", 'lost.|אבוד|lost|לוֹסְט'
+          ]),
+          P('How do I get to the station?', 'איך מגיעים לתחנה?', '🚉', [
+            'How|איך|how|הָאוּ', 'do|(פועל עזר)|do|דוּ', 'I|אני|I|אַיי', 'get|מגיע|get|גֶט', 'to|אל|to|טוּ', 'the|ה־|the|דָה',
+            'station?|תחנה|sta·tion|סְטֵיי·שֶׁן|0'
+          ]),
+          P('Is it far from here?', 'זה רחוק מכאן?', '📍', [
+            'Is|האם|is|אִיז', 'it|זה|it|אִיט', 'far|רחוק|far|פָאר', 'from|מ־|from|פְרוֹם', 'here?|כאן|here|הִיר'
+          ])
+        ],
+        boss: {
+          title: 'מקומית שעוזרת', title_en: 'Friendly local', title_ar: 'امرأة من السكان المحليين', title_ru: 'Местная жительница',
+          intro: ['Hi! You look a little confused.', 'היי! אתה נראה קצת מבולבל.'],
+          turns: [
+            { expect: 0, reply: ['No worries, I can help. Where do you want to go?', 'אל דאגה, אני יכולה לעזור. לאן אתה רוצה להגיע?'] },
+            { expect: 1, reply: ['Go straight and turn left at the bank.', 'לך ישר ופנה שמאלה ליד הבנק.'] },
+            { expect: 2, reply: ["No, it's only five minutes on foot.", 'לא, זה רק חמש דקות ברגל.'] }
+          ]
+        }
+      },
+      sights: {
+        phrases: [
+          P('Two tickets, please.', 'שני כרטיסים, בבקשה.', '🎟️', [
+            'Two|שניים|two|טוּ', 'tickets,|כרטיסים|tick·ets|טִי·קֶטְס|0', 'please.|בבקשה|please|פְּלִיז'
+          ]),
+          P('What time does it close?', 'באיזו שעה זה נסגר?', '🕔', [
+            'What|מה|what|ווֹט', 'time|שעה|time|טַיים', 'does|(פועל עזר)|does|דָאז', 'it|זה|it|אִיט', 'close?|נסגר|close|קְלוֹאוּז'
+          ]),
+          P('Can I take a photo?', 'אפשר לצלם?', '📸', [
+            'Can|האם אפשר|can|קֶן', 'I|אני|I|אַיי', 'take|לקחת (לצלם)|take|טֵייק', 'a|(אחת)|a|אָ', 'photo?|תמונה|pho·to|פוֹ·טוֹ|0'
+          ])
+        ],
+        boss: {
+          title: 'הקופאי במוזיאון', title_en: 'Ticket clerk', title_ar: 'موظف التذاكر', title_ru: 'Кассир музея',
+          intro: ['Welcome to the museum!', 'ברוכים הבאים למוזיאון!'],
+          turns: [
+            { expect: 0, reply: ["That's thirty dollars. Here you go.", 'זה שלושים דולר. בבקשה.'] },
+            { expect: 1, reply: ['We close at six today.', 'היום אנחנו סוגרים בשש.'] },
+            { expect: 2, reply: ['Yes, but no flash, please.', 'כן, אבל בלי פלאש, בבקשה.'] }
+          ]
+        }
+      },
+      smalltalk: {
+        phrases: [
+          P('Nice to meet you!', 'נעים מאוד להכיר!', '🤝', [
+            'Nice|נעים|nice|נַייס', 'to|ל־|to|טוּ', 'meet|לפגוש|meet|מִיט', 'you!|אותך|you|יוּ'
+          ]),
+          P('Where are you from?', 'מאיפה אתה?', '🌍', [
+            'Where|איפה|where|וֶר', 'are|(אתה)|are|אָר', 'you|אתה|you|יוּ', 'from?|מ־|from|פְרוֹם'
+          ]),
+          P('See you later!', 'נתראה אחר כך!', '👋', [
+            'See|לראות|see|סִי', 'you|אותך|you|יוּ', 'later!|אחר כך|la·ter|לֵיי·טֶר|0'
+          ])
+        ],
+        boss: {
+          title: 'חברה חדשה', title_en: 'New friend', title_ar: 'صديقة جديدة', title_ru: 'Новая знакомая',
+          intro: ["Hi! I'm Kate. Welcome to the party!", 'היי! אני קייט. ברוך הבא למסיבה!'],
+          turns: [
+            { expect: 0, reply: ['Nice to meet you too!', 'גם לי נעים!'] },
+            { expect: 1, reply: ["I'm from Chicago. Oh, my friends are calling me!", 'אני משיקגו. אוי, החברים שלי קוראים לי!'] },
+            { expect: 2, reply: ['Bye! Enjoy the party!', 'ביי! תהנה במסיבה!'] }
+          ]
+        }
+      },
       airport: {
         phrases: [
           P('Here is my passport.', 'הנה הדרכון שלי.', '🛂', [
@@ -191,6 +308,120 @@ const LANGS = {
       { code: 'es-MX', label: 'לטינית', label_en: 'Latin American', label_ar: 'لاتينية', label_ru: 'Латиноамериканский', flag: '🇲🇽' }
     ],
     stations: {
+      taxi: {
+        phrases: [
+          P('¿Me puede llevar a esta dirección?', 'אפשר לקחת אותי לכתובת הזאת?', '🚕', [
+            '¿Me|אותי|me|מֶה', 'puede|יכול|pue·de|פּוּאֶ·דֶה|0', 'llevar|לקחת|lle·var|יֶה·בַאר|1', 'a|אל|a|אָה',
+            'esta|הזאת|es·ta|אֶס·טָה|0', 'dirección?|כתובת|di·rec·ción|דִי·רֶק·סְיוֹן|2'
+          ]),
+          P('¿Cuánto tiempo tarda?', 'כמה זמן זה לוקח?', '⏱️', [
+            '¿Cuánto|כמה|cuán·to|קוּאַנְ·טוֹ|0', 'tiempo|זמן|tiem·po|טְיֶם·פּוֹ|0', 'tarda?|לוקח|tar·da|טַאר·דָה|0'
+          ]),
+          P('Pare aquí, por favor.', 'עצור כאן, בבקשה.', '🛑', [
+            'Pare|עצור|pa·re|פָּ·רֶה|0', 'aquí,|כאן|a·quí|אָ·קִי|1', 'por|(בבקשה)|por|פּוֹר', 'favor.|טובה (בבקשה)|fa·vor|פָה·בוֹר|1'
+          ])
+        ],
+        boss: {
+          title: 'נהג המונית', title_en: 'Taxi driver', title_ar: 'سائق التاكسي', title_ru: 'Таксист',
+          intro: ['¡Hola! ¿Adónde vamos?', 'שלום! לאן נוסעים?'],
+          turns: [
+            { expect: 0, reply: ['Claro. Abróchese el cinturón.', 'בטח. תחגור חגורה.'] },
+            { expect: 1, reply: ['Unos veinte minutos con este tráfico.', 'בערך עשרים דקות עם התנועה הזאת.'] },
+            { expect: 2, reply: ['Aquí tiene. Son quince euros.', 'הגענו. זה חמישה־עשר יורו.'] }
+          ]
+        }
+      },
+      cafe: {
+        phrases: [
+          P('Un café con leche, por favor.', 'קפה עם חלב, בבקשה.', '☕', [
+            'Un|(אחד)|un|אוּן', 'café|קפה|ca·fé|קָה·פֶה|1', 'con|עם|con|קוֹן', 'leche,|חלב|le·che|לֶה·צֶ׳ה|0',
+            'por|(בבקשה)|por|פּוֹר', 'favor.|טובה (בבקשה)|fa·vor|פָה·בוֹר|1'
+          ]),
+          P('¿Hay wifi aquí?', 'יש כאן Wi-Fi?', '📶', [
+            '¿Hay|יש|hay|אַיי', 'wifi|אינטרנט אלחוטי|wi·fi|וּאִי·פִי|0', 'aquí?|כאן|a·quí|אָ·קִי|1'
+          ]),
+          P('¿Me lo pone para llevar?', 'אפשר לקחת את זה איתי?', '🥡', [
+            '¿Me|לי|me|מֶה', 'lo|אותו|lo|לוֹ', 'pone|שם (מגיש)|po·ne|פּוֹ·נֶה|0', 'para|ל־|pa·ra|פָּ·רָה|0', 'llevar?|לקחת|lle·var|יֶה·בַאר|1'
+          ])
+        ],
+        boss: {
+          title: 'הבריסטה', title_en: 'Barista', title_ar: 'الباريستا', title_ru: 'Бариста',
+          intro: ['¡Hola! ¿Qué le pongo?', 'שלום! מה להגיש לך?'],
+          turns: [
+            { expect: 0, reply: ['Ahora mismo. ¿Algo más?', 'מיד. עוד משהו?'] },
+            { expect: 1, reply: ['Sí, la contraseña está en la pizarra.', 'כן, הסיסמה על הלוח.'] },
+            { expect: 2, reply: ['¡Claro! Aquí tiene. ¡Que tenga buen día!', 'בטח! בבקשה. שיהיה לך יום טוב!'] }
+          ]
+        }
+      },
+      directions: {
+        phrases: [
+          P('Perdone, estoy perdido.', 'סליחה, הלכתי לאיבוד.', '🗺️', [
+            'Perdone,|סליחה|per·do·ne|פֶּר·דוֹ·נֶה|1', 'estoy|אני (נמצא)|es·toy|אֶס·טוֹי|1', 'perdido.|אבוד|per·di·do|פֶּר·דִי·דוֹ|1'
+          ]),
+          P('¿Cómo llego a la estación?', 'איך מגיעים לתחנה?', '🚉', [
+            '¿Cómo|איך|có·mo|קוֹ·מוֹ|0', 'llego|אני מגיע|lle·go|יֶה·גוֹ|0', 'a|אל|a|אָה', 'la|ה־|la|לָה',
+            'estación?|תחנה|es·ta·ción|אֶס·טָה·סְיוֹן|2'
+          ]),
+          P('¿Está lejos de aquí?', 'זה רחוק מכאן?', '📍', [
+            '¿Está|זה (נמצא)|es·tá|אֶס·טָה|1', 'lejos|רחוק|le·jos|לֶה·חוֹס|0', 'de|מ־|de|דֶה', 'aquí?|כאן|a·quí|אָ·קִי|1'
+          ])
+        ],
+        boss: {
+          title: 'מקומית שעוזרת', title_en: 'Friendly local', title_ar: 'امرأة من السكان المحليين', title_ru: 'Местная жительница',
+          intro: ['¡Hola! Parece un poco perdido.', 'שלום! נראה שאתה קצת אבוד.'],
+          turns: [
+            { expect: 0, reply: ['Tranquilo, le ayudo. ¿Adónde quiere ir?', 'אל דאגה, אני אעזור. לאן אתה רוצה ללכת?'] },
+            { expect: 1, reply: ['Siga recto y gire a la izquierda en el banco.', 'המשך ישר ופנה שמאלה ליד הבנק.'] },
+            { expect: 2, reply: ['No, está a cinco minutos andando.', 'לא, זה חמש דקות הליכה.'] }
+          ]
+        }
+      },
+      sights: {
+        phrases: [
+          P('Dos entradas, por favor.', 'שני כרטיסים, בבקשה.', '🎟️', [
+            'Dos|שניים|dos|דּוֹס', 'entradas,|כרטיסי כניסה|en·tra·das|אֶנְ·טְרָה·דָס|1', 'por|(בבקשה)|por|פּוֹר',
+            'favor.|טובה (בבקשה)|fa·vor|פָה·בוֹר|1'
+          ]),
+          P('¿A qué hora cierra?', 'באיזו שעה זה נסגר?', '🕔', [
+            '¿A|ב־|a|אָה', 'qué|מה / איזו|qué|קֶה', 'hora|שעה|ho·ra|אוֹ·רָה|0', 'cierra?|נסגר|cie·rra|סְיֶה·רָה|0'
+          ]),
+          P('¿Puedo hacer una foto?', 'אפשר לצלם?', '📸', [
+            '¿Puedo|אני יכול|pue·do|פּוּאֶ·דוֹ|0', 'hacer|לעשות|ha·cer|אָה·סֶר|1', 'una|(אחת)|u·na|אוּ·נָה|0', 'foto?|תמונה|fo·to|פוֹ·טוֹ|0'
+          ])
+        ],
+        boss: {
+          title: 'הקופאי במוזיאון', title_en: 'Ticket clerk', title_ar: 'موظف التذاكر', title_ru: 'Кассир музея',
+          intro: ['¡Bienvenidos al museo!', 'ברוכים הבאים למוזיאון!'],
+          turns: [
+            { expect: 0, reply: ['Son treinta euros. Aquí tienen.', 'זה שלושים יורו. בבקשה.'] },
+            { expect: 1, reply: ['Hoy cerramos a las seis.', 'היום אנחנו סוגרים בשש.'] },
+            { expect: 2, reply: ['Sí, pero sin flash, por favor.', 'כן, אבל בלי פלאש, בבקשה.'] }
+          ]
+        }
+      },
+      smalltalk: {
+        phrases: [
+          P('¡Encantado de conocerte!', 'נעים מאוד להכיר!', '🤝', [
+            '¡Encantado|נעים לי (מוקסם)|en·can·ta·do|אֶנְ·קָאנְ·טָה·דוֹ|2', 'de|ל־|de|דֶה', 'conocerte!|להכיר אותך|co·no·cer·te|קוֹ·נוֹ·סֶר·טֶה|2'
+          ]),
+          P('¿De dónde eres?', 'מאיפה אתה?', '🌍', [
+            '¿De|מ־|de|דֶה', 'dónde|איפה|dón·de|דּוֹנְ·דֶה|0', 'eres?|אתה|e·res|אֶה·רֶס|0'
+          ]),
+          P('¡Hasta luego!', 'נתראה אחר כך!', '👋', [
+            '¡Hasta|עד|has·ta|אָס·טָה|0', 'luego!|אחר כך|lue·go|לוּאֶה·גוֹ|0'
+          ])
+        ],
+        boss: {
+          title: 'חברה חדשה', title_en: 'New friend', title_ar: 'صديقة جديدة', title_ru: 'Новая знакомая',
+          intro: ['¡Hola! Soy Carmen. ¡Bienvenido a la fiesta!', 'שלום! אני כרמן. ברוך הבא למסיבה!'],
+          turns: [
+            { expect: 0, reply: ['¡Igualmente!', 'גם לי!'] },
+            { expect: 1, reply: ['Soy de Sevilla. ¡Ay, mis amigos me llaman!', 'אני מסביליה. אוי, החברים שלי קוראים לי!'] },
+            { expect: 2, reply: ['¡Chao! ¡Disfruta de la fiesta!', 'ביי! תהנה במסיבה!'] }
+          ]
+        }
+      },
       airport: {
         phrases: [
           P('Aquí está mi pasaporte.', 'הנה הדרכון שלי.', '🛂', [
@@ -357,11 +588,11 @@ const PACES = [
     desc: 'מצב צב 60%, תעתיק עברי, תחנות נפתחות בהדרגה',
     name_en: 'Regular', desc_en: 'Turtle mode at 60%, stops unlock one by one',
     name_ar: 'عادية', desc_ar: 'وضع السلحفاة 60%، وتُفتح المحطات تدريجيًا', name_ru: 'Обычный', desc_ru: 'Режим черепахи 60%, остановки открываются постепенно' },
-  { id: 2, name: 'מהיר', icon: '🏃', slowRate: 0.7, translit: false, unlocked: 3, bossFree: false, skipSteps: true, pass: 65,
-    desc: '3 תחנות פתוחות מיד, אפשר לדלג על שלבי השמיעה, תעתיק כבוי (ניתן להפעיל)',
-    name_en: 'Fast', desc_en: '3 stops open right away and you can skip the listening steps',
-    name_ar: 'سريعة', desc_ar: '3 محطات مفتوحة فورًا ويمكن تخطي خطوات الاستماع', name_ru: 'Быстрый', desc_ru: '3 остановки открыты сразу, можно пропускать шаги прослушивания' },
-  { id: 3, name: 'ליטוש מבטא', icon: '🚀', slowRate: 0.7, translit: false, unlocked: 5, bossFree: true, skipSteps: true, pass: 75,
+  { id: 2, name: 'מהיר', icon: '🏃', slowRate: 0.7, translit: false, unlocked: 4, bossFree: false, skipSteps: true, pass: 65,
+    desc: '4 תחנות פתוחות מיד, אפשר לדלג על שלבי השמיעה, תעתיק כבוי (ניתן להפעיל)',
+    name_en: 'Fast', desc_en: '4 stops open right away and you can skip the listening steps',
+    name_ar: 'سريعة', desc_ar: '4 محطات مفتوحة فورًا ويمكن تخطي خطوات الاستماع', name_ru: 'Быстрый', desc_ru: '4 остановки открыты сразу, можно пропускать шаги прослушивания' },
+  { id: 3, name: 'ליטוש מבטא', icon: '🚀', slowRate: 0.7, translit: false, unlocked: 99, bossFree: true, skipSteps: true, pass: 75,
     desc: 'כל המפה פתוחה, Boss זמין מיד, רף הגייה גבוה — מתמקדים במבטא',
     name_en: 'Accent polish', desc_en: 'The whole map is open, Bosses right away and a high pronunciation bar — focus on accent',
     name_ar: 'صقل اللهجة', desc_ar: 'الخريطة كلها مفتوحة، والزعيم متاح فورًا، ومعيار نطق مرتفع — التركيز على اللهجة', name_ru: 'Шлифовка акцента', desc_ru: 'Вся карта открыта, Боссы доступны сразу, высокая планка произношения — фокус на акценте' }
@@ -687,6 +918,193 @@ const TRANSLIT = {
     }
   }
 };
+
+/* ---------- translations & transliteration: taxi · café · directions · sights · meeting people ---------- */
+const EXT = {
+  phrases: {
+    en: {
+      '¿Me puede llevar a esta dirección?': 'Can you take me to this address?', '¿Cuánto tiempo tarda?': 'How long does it take?',
+      'Pare aquí, por favor.': 'Stop here, please.', 'Un café con leche, por favor.': 'A coffee with milk, please.',
+      '¿Hay wifi aquí?': 'Is there Wi-Fi here?', '¿Me lo pone para llevar?': 'Can I have it to go?',
+      'Perdone, estoy perdido.': "Excuse me, I'm lost.", '¿Cómo llego a la estación?': 'How do I get to the station?',
+      '¿Está lejos de aquí?': 'Is it far from here?', 'Dos entradas, por favor.': 'Two tickets, please.',
+      '¿A qué hora cierra?': 'What time does it close?', '¿Puedo hacer una foto?': 'Can I take a photo?',
+      '¡Encantado de conocerte!': 'Nice to meet you!', '¿De dónde eres?': 'Where are you from?', '¡Hasta luego!': 'See you later!',
+      '¡Hola! ¿Adónde vamos?': 'Hello! Where are we going?', 'Claro. Abróchese el cinturón.': 'Sure. Fasten your seatbelt.',
+      'Unos veinte minutos con este tráfico.': 'About twenty minutes in this traffic.', 'Aquí tiene. Son quince euros.': "Here you are. That's fifteen euros.",
+      '¡Hola! ¿Qué le pongo?': 'Hi! What can I get you?', 'Ahora mismo. ¿Algo más?': 'Right away. Anything else?',
+      'Sí, la contraseña está en la pizarra.': 'Yes, the password is on the board.', '¡Claro! Aquí tiene. ¡Que tenga buen día!': 'Sure! Here you are. Have a nice day!',
+      '¡Hola! Parece un poco perdido.': 'Hi! You look a bit lost.', 'Tranquilo, le ayudo. ¿Adónde quiere ir?': "Don't worry, I'll help you. Where do you want to go?",
+      'Siga recto y gire a la izquierda en el banco.': 'Go straight on and turn left at the bank.', 'No, está a cinco minutos andando.': "No, it's a five-minute walk.",
+      '¡Bienvenidos al museo!': 'Welcome to the museum!', 'Son treinta euros. Aquí tienen.': "That's thirty euros. Here you are.",
+      'Hoy cerramos a las seis.': 'Today we close at six.', 'Sí, pero sin flash, por favor.': 'Yes, but no flash, please.',
+      '¡Hola! Soy Carmen. ¡Bienvenido a la fiesta!': "Hi! I'm Carmen. Welcome to the party!", '¡Igualmente!': 'Likewise!',
+      'Soy de Sevilla. ¡Ay, mis amigos me llaman!': "I'm from Seville. Oh, my friends are calling me!", '¡Chao! ¡Disfruta de la fiesta!': 'Bye! Enjoy the party!'
+    },
+    ar: {
+      'Can you take me to this address?': 'هل يمكنك أن تأخذني إلى هذا العنوان؟', '¿Me puede llevar a esta dirección?': 'هل يمكنك أن تأخذني إلى هذا العنوان؟',
+      'How long does it take?': 'كم من الوقت يستغرق؟', '¿Cuánto tiempo tarda?': 'كم من الوقت يستغرق؟',
+      'Please stop here.': 'توقف هنا من فضلك.', 'Pare aquí, por favor.': 'توقف هنا من فضلك.',
+      'A coffee with milk, please.': 'قهوة بالحليب، من فضلك.', 'Un café con leche, por favor.': 'قهوة بالحليب، من فضلك.',
+      'Is there Wi-Fi here?': 'هل يوجد واي فاي هنا؟', '¿Hay wifi aquí?': 'هل يوجد واي فاي هنا؟',
+      'Can I have it to go?': 'هل يمكنني أخذه معي؟', '¿Me lo pone para llevar?': 'هل يمكنني أخذه معي؟',
+      "Excuse me, I'm lost.": 'عذرًا، لقد ضعت.', 'Perdone, estoy perdido.': 'عذرًا، لقد ضعت.',
+      'How do I get to the station?': 'كيف أصل إلى المحطة؟', '¿Cómo llego a la estación?': 'كيف أصل إلى المحطة؟',
+      'Is it far from here?': 'هل هو بعيد من هنا؟', '¿Está lejos de aquí?': 'هل هو بعيد من هنا؟',
+      'Two tickets, please.': 'تذكرتان من فضلك.', 'Dos entradas, por favor.': 'تذكرتان من فضلك.',
+      'What time does it close?': 'متى يُغلق؟', '¿A qué hora cierra?': 'متى يُغلق؟',
+      'Can I take a photo?': 'هل يمكنني التقاط صورة؟', '¿Puedo hacer una foto?': 'هل يمكنني التقاط صورة؟',
+      'Nice to meet you!': 'تشرفت بمعرفتك!', '¡Encantado de conocerte!': 'تشرفت بمعرفتك!',
+      'Where are you from?': 'من أين أنت؟', '¿De dónde eres?': 'من أين أنت؟',
+      'See you later!': 'أراك لاحقًا!', '¡Hasta luego!': 'أراك لاحقًا!',
+      'Hi there! Where to?': 'مرحبًا! إلى أين؟', 'No problem. Buckle up!': 'لا مشكلة. اربط حزام الأمان!',
+      'About twenty minutes with this traffic.': 'حوالي عشرين دقيقة مع هذه الزحمة.', "Here you go. That's fifteen dollars.": 'وصلنا. المبلغ خمسة عشر دولارًا.',
+      'Hi! What can I get you?': 'مرحبًا! ماذا أحضر لك؟', 'Coming right up. Anything else?': 'حالًا. شيء آخر؟',
+      'Yes, the password is on the board.': 'نعم، كلمة المرور على اللوحة.', 'Sure! Here you go. Have a great day!': 'بالتأكيد! تفضل. يومًا سعيدًا!',
+      'Hi! You look a little confused.': 'مرحبًا! تبدو مرتبكًا قليلًا.', 'No worries, I can help. Where do you want to go?': 'لا تقلق، يمكنني المساعدة. إلى أين تريد أن تذهب؟',
+      'Go straight and turn left at the bank.': 'امشِ مباشرة ثم انعطف يسارًا عند البنك.', "No, it's only five minutes on foot.": 'لا، إنها خمس دقائق فقط سيرًا على الأقدام.',
+      'Welcome to the museum!': 'أهلًا بكم في المتحف!', "That's thirty dollars. Here you go.": 'المبلغ ثلاثون دولارًا. تفضلوا.',
+      'We close at six today.': 'نغلق اليوم في السادسة.', 'Yes, but no flash, please.': 'نعم، لكن بدون فلاش من فضلك.',
+      "Hi! I'm Kate. Welcome to the party!": 'مرحبًا! أنا كيت. أهلًا بك في الحفلة!', 'Nice to meet you too!': 'وأنا أيضًا تشرفت بمعرفتك!',
+      "I'm from Chicago. Oh, my friends are calling me!": 'أنا من شيكاغو. أوه، أصدقائي ينادونني!', 'Bye! Enjoy the party!': 'إلى اللقاء! استمتع بالحفلة!',
+      '¡Hola! ¿Adónde vamos?': 'مرحبًا! إلى أين نذهب؟', 'Claro. Abróchese el cinturón.': 'بالتأكيد. اربط حزام الأمان.',
+      'Unos veinte minutos con este tráfico.': 'حوالي عشرين دقيقة مع هذه الزحمة.', 'Aquí tiene. Son quince euros.': 'وصلنا. المبلغ خمسة عشر يورو.',
+      '¡Hola! ¿Qué le pongo?': 'مرحبًا! ماذا أقدّم لك؟', 'Ahora mismo. ¿Algo más?': 'حالًا. شيء آخر؟',
+      'Sí, la contraseña está en la pizarra.': 'نعم، كلمة المرور على اللوحة.', '¡Claro! Aquí tiene. ¡Que tenga buen día!': 'بالتأكيد! تفضل. يومًا سعيدًا!',
+      '¡Hola! Parece un poco perdido.': 'مرحبًا! تبدو تائهًا قليلًا.', 'Tranquilo, le ayudo. ¿Adónde quiere ir?': 'لا تقلق، سأساعدك. إلى أين تريد أن تذهب؟',
+      'Siga recto y gire a la izquierda en el banco.': 'امشِ مباشرة ثم انعطف يسارًا عند البنك.', 'No, está a cinco minutos andando.': 'لا، إنها على بُعد خمس دقائق سيرًا.',
+      '¡Bienvenidos al museo!': 'أهلًا بكم في المتحف!', 'Son treinta euros. Aquí tienen.': 'المبلغ ثلاثون يورو. تفضلوا.',
+      'Hoy cerramos a las seis.': 'نغلق اليوم في السادسة.', 'Sí, pero sin flash, por favor.': 'نعم، لكن بدون فلاش من فضلك.',
+      '¡Hola! Soy Carmen. ¡Bienvenido a la fiesta!': 'مرحبًا! أنا كارمن. أهلًا بك في الحفلة!', '¡Igualmente!': 'وأنا كذلك!',
+      'Soy de Sevilla. ¡Ay, mis amigos me llaman!': 'أنا من إشبيلية. أوه، أصدقائي ينادونني!', '¡Chao! ¡Disfruta de la fiesta!': 'إلى اللقاء! استمتع بالحفلة!'
+    },
+    ru: {
+      'Can you take me to this address?': 'Отвезёте меня по этому адресу?', '¿Me puede llevar a esta dirección?': 'Отвезёте меня по этому адресу?',
+      'How long does it take?': 'Сколько времени это займёт?', '¿Cuánto tiempo tarda?': 'Сколько времени это займёт?',
+      'Please stop here.': 'Остановите здесь, пожалуйста.', 'Pare aquí, por favor.': 'Остановите здесь, пожалуйста.',
+      'A coffee with milk, please.': 'Кофе с молоком, пожалуйста.', 'Un café con leche, por favor.': 'Кофе с молоком, пожалуйста.',
+      'Is there Wi-Fi here?': 'Здесь есть Wi-Fi?', '¿Hay wifi aquí?': 'Здесь есть Wi-Fi?',
+      'Can I have it to go?': 'Можно с собой?', '¿Me lo pone para llevar?': 'Можно с собой?',
+      "Excuse me, I'm lost.": 'Извините, я заблудился.', 'Perdone, estoy perdido.': 'Извините, я заблудился.',
+      'How do I get to the station?': 'Как пройти к станции?', '¿Cómo llego a la estación?': 'Как пройти к станции?',
+      'Is it far from here?': 'Это далеко отсюда?', '¿Está lejos de aquí?': 'Это далеко отсюда?',
+      'Two tickets, please.': 'Два билета, пожалуйста.', 'Dos entradas, por favor.': 'Два билета, пожалуйста.',
+      'What time does it close?': 'Во сколько закрывается?', '¿A qué hora cierra?': 'Во сколько закрывается?',
+      'Can I take a photo?': 'Можно сфотографировать?', '¿Puedo hacer una foto?': 'Можно сфотографировать?',
+      'Nice to meet you!': 'Приятно познакомиться!', '¡Encantado de conocerte!': 'Приятно познакомиться!',
+      'Where are you from?': 'Откуда вы?', '¿De dónde eres?': 'Откуда ты?',
+      'See you later!': 'До встречи!', '¡Hasta luego!': 'До встречи!',
+      'Hi there! Where to?': 'Здравствуйте! Куда едем?', 'No problem. Buckle up!': 'Без проблем. Пристегнитесь!',
+      'About twenty minutes with this traffic.': 'Минут двадцать с такими пробками.', "Here you go. That's fifteen dollars.": 'Приехали. С вас пятнадцать долларов.',
+      'Hi! What can I get you?': 'Привет! Что вам предложить?', 'Coming right up. Anything else?': 'Сейчас будет. Что-нибудь ещё?',
+      'Yes, the password is on the board.': 'Да, пароль на доске.', 'Sure! Here you go. Have a great day!': 'Конечно! Пожалуйста. Хорошего дня!',
+      'Hi! You look a little confused.': 'Привет! Вы, кажется, немного растеряны.', 'No worries, I can help. Where do you want to go?': 'Не волнуйтесь, я помогу. Куда вам нужно?',
+      'Go straight and turn left at the bank.': 'Идите прямо и поверните налево у банка.', "No, it's only five minutes on foot.": 'Нет, всего пять минут пешком.',
+      'Welcome to the museum!': 'Добро пожаловать в музей!', "That's thirty dollars. Here you go.": 'С вас тридцать долларов. Пожалуйста.',
+      'We close at six today.': 'Сегодня мы закрываемся в шесть.', 'Yes, but no flash, please.': 'Да, но без вспышки, пожалуйста.',
+      "Hi! I'm Kate. Welcome to the party!": 'Привет! Я Кейт. Добро пожаловать на вечеринку!', 'Nice to meet you too!': 'Мне тоже очень приятно!',
+      "I'm from Chicago. Oh, my friends are calling me!": 'Я из Чикаго. Ой, меня зовут друзья!', 'Bye! Enjoy the party!': 'Пока! Хорошо повеселиться!',
+      '¡Hola! ¿Adónde vamos?': 'Здравствуйте! Куда едем?', 'Claro. Abróchese el cinturón.': 'Конечно. Пристегнитесь.',
+      'Unos veinte minutos con este tráfico.': 'Минут двадцать с таким движением.', 'Aquí tiene. Son quince euros.': 'Приехали. С вас пятнадцать евро.',
+      '¡Hola! ¿Qué le pongo?': 'Здравствуйте! Что вам предложить?', 'Ahora mismo. ¿Algo más?': 'Сейчас. Что-нибудь ещё?',
+      'Sí, la contraseña está en la pizarra.': 'Да, пароль на доске.', '¡Claro! Aquí tiene. ¡Que tenga buen día!': 'Конечно! Пожалуйста. Хорошего дня!',
+      '¡Hola! Parece un poco perdido.': 'Здравствуйте! Вы, кажется, заблудились.', 'Tranquilo, le ayudo. ¿Adónde quiere ir?': 'Не волнуйтесь, я помогу. Куда вам нужно?',
+      'Siga recto y gire a la izquierda en el banco.': 'Идите прямо и поверните налево у банка.', 'No, está a cinco minutos andando.': 'Нет, это пять минут пешком.',
+      '¡Bienvenidos al museo!': 'Добро пожаловать в музей!', 'Son treinta euros. Aquí tienen.': 'С вас тридцать евро. Пожалуйста.',
+      'Hoy cerramos a las seis.': 'Сегодня мы закрываемся в шесть.', 'Sí, pero sin flash, por favor.': 'Да, но без вспышки, пожалуйста.',
+      '¡Hola! Soy Carmen. ¡Bienvenido a la fiesta!': 'Привет! Я Кармен. Добро пожаловать на вечеринку!', '¡Igualmente!': 'Взаимно!',
+      'Soy de Sevilla. ¡Ay, mis amigos me llaman!': 'Я из Севильи. Ой, меня зовут друзья!', '¡Chao! ¡Disfruta de la fiesta!': 'Пока! Хорошо повеселиться!'
+    }
+  },
+  words: {
+    en: {
+      es: {
+        'llevar': 'take / carry', 'esta': 'this', 'dirección': 'address', 'tiempo': 'time', 'tarda': 'takes (time)', 'pare': 'stop',
+        'café': 'coffee', 'leche': 'milk', 'hay': 'there is', 'wifi': 'Wi-Fi', 'pone': 'put (serve)', 'perdone': 'excuse me',
+        'estoy': 'I am', 'perdido': 'lost', 'cómo': 'how', 'llego': 'I get (arrive)', 'estación': 'station', 'lejos': 'far',
+        'entradas': 'tickets', 'cierra': 'closes', 'hacer': 'make / take', 'foto': 'photo', 'encantado': 'delighted',
+        'conocerte': 'to meet you', 'eres': 'you are', 'hasta': 'until', 'luego': 'later'
+      }
+    },
+    ar: {
+      en: {
+        'take': 'تأخذ / تلتقط', 'me': 'ـني (أنا)', 'to': 'إلى', 'address': 'عنوان', 'long': 'طويل (كم من الوقت)', 'it': 'هو / هذا',
+        'stop': 'توقف', 'coffee': 'قهوة', 'with': 'مع / بـ', 'milk': 'حليب', 'there': '(يوجد)', 'wi-fi': 'واي فاي', 'go': '(للأخذ معي)',
+        'excuse': 'اعذرني', "i'm": 'أنا', 'lost': 'ضائع', 'get': 'أصل', 'station': 'محطة', 'far': 'بعيد', 'from': 'من',
+        'tickets': 'تذاكر', 'close': 'يُغلق', 'photo': 'صورة', 'nice': 'لطيف (تشرفت)', 'meet': 'ألتقي', 'are': '(تكون)', 'later': 'لاحقًا'
+      },
+      es: {
+        'llevar': 'تأخذ / توصل', 'esta': 'هذا / هذه', 'dirección': 'عنوان', 'tiempo': 'وقت', 'tarda': 'يستغرق', 'pare': 'توقف',
+        'café': 'قهوة', 'leche': 'حليب', 'hay': 'يوجد', 'wifi': 'واي فاي', 'pone': 'تضع (تقدّم)', 'perdone': 'عذرًا', 'estoy': 'أنا',
+        'perdido': 'ضائع', 'cómo': 'كيف', 'llego': 'أصل', 'estación': 'محطة', 'lejos': 'بعيد', 'entradas': 'تذاكر', 'cierra': 'يُغلق',
+        'hacer': 'أفعل / ألتقط', 'foto': 'صورة', 'encantado': 'مسرور', 'conocerte': 'بمعرفتك', 'eres': 'أنت', 'hasta': 'حتى', 'luego': 'لاحقًا'
+      }
+    },
+    ru: {
+      en: {
+        'take': 'отвезти / сделать', 'me': 'меня', 'to': 'в / к', 'address': 'адрес', 'long': 'долго', 'it': 'это', 'stop': 'остановите',
+        'coffee': 'кофе', 'with': 'с', 'milk': 'молоко', 'there': '(есть)', 'wi-fi': 'Wi-Fi', 'go': '(с собой)', 'excuse': 'извините',
+        "i'm": 'я', 'lost': 'заблудился', 'get': 'добраться', 'station': 'станция', 'far': 'далеко', 'from': 'из / от',
+        'tickets': 'билеты', 'close': 'закрываться', 'photo': 'фото', 'nice': 'приятно', 'meet': 'встретить', 'are': '(есть)', 'later': 'позже'
+      },
+      es: {
+        'llevar': 'отвезти', 'esta': 'этот / эта', 'dirección': 'адрес', 'tiempo': 'время', 'tarda': 'занимает (время)', 'pare': 'остановите',
+        'café': 'кофе', 'leche': 'молоко', 'hay': 'есть (имеется)', 'wifi': 'Wi-Fi', 'pone': 'подайте', 'perdone': 'извините',
+        'estoy': 'я (нахожусь)', 'perdido': 'потерянный', 'cómo': 'как', 'llego': 'добираюсь', 'estación': 'станция', 'lejos': 'далеко',
+        'entradas': 'билеты', 'cierra': 'закрывается', 'hacer': 'делать', 'foto': 'фото', 'encantado': 'очарован (рад)',
+        'conocerte': 'познакомиться с тобой', 'eres': 'ты есть', 'hasta': 'до', 'luego': 'потом'
+      }
+    }
+  },
+  translit: {
+    ar: {
+      en: {
+        'take': 'تيك', 'me': 'مي', 'to': 'تو', 'address': 'أد·رِس', 'long': 'لونغ', 'it': 'إت', 'stop': 'ستوپ', 'coffee': 'كو·في',
+        'with': 'وِذ', 'milk': 'ميلك', 'there': 'ذير', 'wi-fi': 'واي·فاي', 'go': 'غو', 'excuse': 'إكس·كيوز', "i'm": 'آيم', 'lost': 'لوست',
+        'get': 'غيت', 'station': 'ستي·شِن', 'far': 'فار', 'from': 'فروم', 'tickets': 'تي·كِتس', 'close': 'كلوز', 'photo': 'فو·تو',
+        'nice': 'نايس', 'meet': 'ميت', 'are': 'آر', 'later': 'لي·تَر'
+      },
+      es: {
+        'llevar': 'يي·بار', 'esta': 'إس·تا', 'dirección': 'دي·ريك·سيون', 'tiempo': 'تييم·پو', 'tarda': 'تار·دا', 'pare': 'پا·ري',
+        'café': 'كا·في', 'leche': 'لي·تشي', 'hay': 'آي', 'wifi': 'وي·في', 'pone': 'پو·ني', 'perdone': 'پير·دو·ني', 'estoy': 'إس·توي',
+        'perdido': 'پير·دي·دو', 'cómo': 'كو·مو', 'llego': 'يي·غو', 'estación': 'إس·تا·سيون', 'lejos': 'لي·خوس',
+        'entradas': 'إن·ترا·داس', 'cierra': 'سيي·را', 'hacer': 'آ·سير', 'foto': 'فو·تو', 'encantado': 'إن·كان·تا·دو',
+        'conocerte': 'كو·نو·سير·تي', 'eres': 'إي·ريس', 'hasta': 'آس·تا', 'luego': 'لوي·غو'
+      }
+    },
+    ru: {
+      en: {
+        'take': 'тейк', 'me': 'ми', 'to': 'ту', 'address': 'эд·рэс', 'long': 'лонг', 'it': 'ит', 'stop': 'стоп', 'coffee': 'ко·фи',
+        'with': 'уиз', 'milk': 'милк', 'there': 'зэр', 'wi-fi': 'уай·фай', 'go': 'гоу', 'excuse': 'икс·кьюз', "i'm": 'айм', 'lost': 'лост',
+        'get': 'гет', 'station': 'стэй·шн', 'far': 'фар', 'from': 'фром', 'tickets': 'ти·китс', 'close': 'клоуз', 'photo': 'фоу·тоу',
+        'nice': 'найс', 'meet': 'мит', 'are': 'ар', 'later': 'лэй·тэр'
+      },
+      es: {
+        'llevar': 'йе·бар', 'esta': 'эс·та', 'dirección': 'ди·рэк·сьон', 'tiempo': 'тьем·по', 'tarda': 'тар·да', 'pare': 'па·рэ',
+        'café': 'ка·фэ', 'leche': 'лэ·чэ', 'hay': 'ай', 'wifi': 'уи·фи', 'pone': 'по·нэ', 'perdone': 'пэр·до·нэ', 'estoy': 'эс·той',
+        'perdido': 'пэр·ди·до', 'cómo': 'ко·мо', 'llego': 'йе·го', 'estación': 'эс·та·сьон', 'lejos': 'лэ·хос',
+        'entradas': 'эн·тра·дас', 'cierra': 'сье·рра', 'hacer': 'а·сэр', 'foto': 'фо·то', 'encantado': 'эн·кан·та·до',
+        'conocerte': 'ко·но·сэр·тэ', 'eres': 'э·рэс', 'hasta': 'ас·та', 'luego': 'луэ·го'
+      }
+    },
+    en: {
+      es: {
+        'llevar': 'yeh·bahr', 'esta': 'ehs·tah', 'dirección': 'dee·rehk·syohn', 'tiempo': 'tyehm·poh', 'tarda': 'tahr·dah', 'pare': 'pah·reh',
+        'café': 'kah·feh', 'leche': 'leh·cheh', 'hay': 'eye', 'wifi': 'wee·fee', 'pone': 'poh·neh', 'perdone': 'pehr·doh·neh',
+        'estoy': 'ehs·toy', 'perdido': 'pehr·dee·doh', 'cómo': 'koh·moh', 'llego': 'yeh·goh', 'estación': 'ehs·tah·syohn',
+        'lejos': 'leh·hohs', 'entradas': 'ehn·trah·dahs', 'cierra': 'syeh·rrah', 'hacer': 'ah·sehr', 'foto': 'foh·toh',
+        'encantado': 'ehn·kahn·tah·doh', 'conocerte': 'koh·noh·sehr·teh', 'eres': 'eh·rehs', 'hasta': 'ahs·tah', 'luego': 'lweh·goh'
+      }
+    }
+  }
+};
+Object.entries(EXT.phrases).forEach(([ui, map]) => Object.assign(TRANSLATIONS[ui].phrases, map));
+Object.entries(EXT.words).forEach(([ui, byLang]) => Object.entries(byLang).forEach(([lg, map]) => {
+  TRANSLATIONS[ui].words[lg] = Object.assign(TRANSLATIONS[ui].words[lg] || {}, map);
+}));
+Object.entries(EXT.translit).forEach(([ui, byLang]) => Object.entries(byLang).forEach(([lg, map]) => {
+  TRANSLIT[ui][lg] = Object.assign(TRANSLIT[ui][lg] || {}, map);
+}));
 
 // attach translations: phrase.tr / line.tr = { he, en, … }, word.meaning_<lang>
 Object.values(LANGS).forEach(L => Object.values(L.stations).forEach(st => {
