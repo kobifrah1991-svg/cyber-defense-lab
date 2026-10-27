@@ -4,7 +4,6 @@
  */
 (function () {
   const { esc, $, $$, karaoke, toast, burst, shuffle } = LQUI;
-  const PASS = 60;
   const MAX_TRIES = 3;
 
   let B = null;
@@ -15,6 +14,7 @@
       root, lang, stationId, onExit,
       meta: LQData.STATIONS.find(s => s.id === stationId),
       accent: LQUI.currentAccent(),
+      pass: LQStore.getPace(lang).pass,
       phrases: st.phrases,
       boss: st.boss,
       turn: 0, tries: 0, hinted: false,
@@ -123,7 +123,7 @@
       if (!res) return;
       B.tries++;
       const score = B.hinted ? Math.min(res.score, 80) : res.score;
-      if (res.score >= PASS) {
+      if (res.score >= B.pass) {
         return answered(phrase, score, res.matches);
       }
       if (B.tries >= MAX_TRIES) {
@@ -164,7 +164,7 @@
   function finish() {
     setDots();
     const total = Math.round(B.scores.reduce((a, b) => a + b, 0) / B.scores.length);
-    const won = total >= PASS;
+    const won = total >= B.pass;
     const prev = LQStore.stationProgress(B.lang, B.stationId);
     if (won) {
       LQStore.updateStation(B.lang, B.stationId, { boss: true, bestBoss: total });

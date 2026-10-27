@@ -1,6 +1,5 @@
 /* LangQuest — LocalStorage: settings · progress · XP · daily streak · Phrasebook Vault (SRS) */
 const LQ_KEY = 'langquest_v1';
-const DAILY_GOAL_SEC = 5 * 60;
 // Leitner boxes → days until next review
 const SRS_INTERVALS = [0, 1, 3, 7, 14, 30];
 
@@ -15,7 +14,14 @@ const LQ_DEFAULT = {
   xp: 0,
   progress: {},         // lang → station → { lesson, boss, bestVoice, bestBoss }
   streak: { count: 0, best: 0, lastGoalDay: null, today: null, todaySec: 0 },
-  vault: {}             // "lang:station:idx" → { box, due, added, reviews }
+  vault: {},            // "lang:station:idx" → { box, due, added, reviews }
+  profile: {
+    onboarded: false,
+    known: [{ lang: 'he', level: 4 }],   // languages the learner already speaks
+    levels: {},                          // target lang → proficiency level (LQData.LEVELS)
+    minutes: 5,                          // personal daily goal
+    reminder: { enabled: false, times: ['19:00'], days: [0, 1, 2, 3, 4, 5, 6], fired: {} }
+  }
 };
 
 function dayKey(d = new Date()) {
@@ -36,7 +42,12 @@ function lqLoad() {
       ...d,
       ...s,
       settings: { ...d.settings, ...s.settings, accent: { ...d.settings.accent, ...(s.settings || {}).accent } },
-      streak: { ...d.streak, ...s.streak }
+      streak: { ...d.streak, ...s.streak },
+      profile: {
+        ...d.profile,
+        ...s.profile,
+        reminder: { ...d.profile.reminder, ...(s.profile || {}).reminder }
+      }
     };
   } catch {
     return structuredClone(LQ_DEFAULT);
@@ -87,8 +98,60 @@ function updateStation(lang, station, patch) {
 }
 
 function isStationUnlocked(lang, stations, idx) {
-  return idx === 0 || stationProgress(lang, stations[idx - 1].id).lesson;
+  return idx < getPace(lang).unlocked || stationProgress(lang, stations[idx - 1].id).lesson;
 }
+
+/* ---------- learner profile & pace ---------- */
+function getProfile() { return lqState.profile; }
+
+function updateProfile(patch) {
+  lqState.profile = { ...lqState.profile, ...patch };
+  lqSave();
+}
+
+function setReminder(patch) {
+  lqState.profile.reminder = { ...lqState.profile.reminder, ...patch };
+  lqSave();
+}
+
+function getLevel(lang) {
+  const l = lqState.profile.levels[lang];
+  return l == null ? null : l;
+}
+
+/**
+ * Pace for a target language: driven by the learner's level in it, nudged up one notch for
+ * absolute beginners who already speak a related language (or any foreign language) well.
+ */
+function getPace(lang) {
+  const level = getLevel(lang) || 0;
+  let paceId = Math.min(level, LQData.PACES.length - 1);
+  const boost = paceBoost(lang);
+  if (paceId === 0 && boost) paceId = 1;
+  return { ...LQData.PACES[paceId], level, boost };
+}
+
+/** Returns a short reason when the learner's other languages justify a faster start, else null. */
+function paceBoost(lang) {
+  const fam = LQData.LANG_FAMILY[lang];
+  const strong = lqState.profile.known.filter(k => k.lang !== lang && k.lang !== 'he' && k.level >= 2);
+  const related = strong.find(k => (LQData.KNOWN_LANGS.find(x => x.id === k.lang) || {}).family === fam);
+  if (related) return { type: 'related', lang: related.lang };
+  if (strong.length) return { type: 'multilingual', lang: strong[0].lang };
+  return null;
+}
+
+/** Set the level for a target language and apply that pace's audio defaults. */
+function setLevel(lang, level) {
+  lqState.profile.levels[lang] = level;
+  const pace = getPace(lang);
+  lqState.settings.slowRate = pace.slowRate;
+  lqState.settings.translit = pace.translit;
+  lqSave();
+  return pace;
+}
+
+function goalSec() { return (lqState.profile.minutes || 5) * 60; }
 
 function addXp(n) {
   lqState.xp += n;
@@ -114,10 +177,11 @@ function rollDay() {
 function addActiveSeconds(sec) {
   rollDay();
   const s = lqState.streak;
+  const goal = goalSec();
   const before = s.todaySec;
   s.todaySec += sec;
   let reached = false;
-  if (before < DAILY_GOAL_SEC && s.todaySec >= DAILY_GOAL_SEC && s.lastGoalDay !== s.today) {
+  if (before < goal && s.todaySec >= goal && s.lastGoalDay !== s.today) {
     s.count = s.lastGoalDay && dayDiff(s.lastGoalDay, s.today) === 1 ? s.count + 1 : 1;
     s.best = Math.max(s.best, s.count);
     s.lastGoalDay = s.today;
@@ -135,7 +199,7 @@ function getStreak() {
     count: s.count,
     best: s.best,
     todaySec: s.todaySec,
-    goalSec: DAILY_GOAL_SEC,
+    goalSec: goalSec(),
     doneToday: s.lastGoalDay === s.today
   };
 }
@@ -187,6 +251,7 @@ function resetAll() {
 window.LQStore = {
   getSettings, setSetting, setAccent, setVoice,
   stationProgress, updateStation, isStationUnlocked,
+  getProfile, updateProfile, setReminder, getLevel, setLevel, getPace, dayKey,
   addXp, getXp,
   addActiveSeconds, getStreak,
   vaultId, inVault, vaultAdd, vaultRemove, vaultReview, vaultList,

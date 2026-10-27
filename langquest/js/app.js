@@ -23,6 +23,7 @@
     else if (name === 'boss') LQBoss.start(view, params.lang, params.station, back);
     else if (name === 'vault') renderVault();
     else if (name === 'review') startReview();
+    else if (name === 'onboarding') LQOnboarding.start(view, () => { go('map'); LQUI.burst(['🗺️', '✨', '⭐']); });
     else renderMap();
     refreshHeader();
   }
@@ -39,6 +40,7 @@
     $('#hdrStreak').title = st.doneToday
       ? `יעד היום הושג! רצף: ${st.count} ימים`
       : `היום: ${Math.floor(st.todaySec / 60)} / ${st.goalSec / 60} דקות · רצף: ${st.count} ימים`;
+    document.body.classList.toggle('onboarding', current === 'onboarding');
     $('#hdrXp').innerHTML = `⭐ <b>${LQStore.getXp()}</b>`;
     $('#hdrVault').innerHTML = `📒${due ? `<i class="badge">${due}</i>` : ''}`;
   }
@@ -51,8 +53,19 @@
     const due = LQStore.vaultList(lang()).filter(v => v.isDue).length;
     const doneCount = STATIONS.filter(x => LQStore.stationProgress(L.id, x.id).lesson).length;
     const mins = Math.floor(st.todaySec / 60);
+    const goalMin = st.goalSec / 60;
+    const pace = LQStore.getPace(L.id);
+    const lvl = LQData.LEVELS[pace.level];
+    const slot = LQReminders.pendingSlot();
+    const nextStation = STATIONS.find((x, i) => LQStore.isStationUnlocked(L.id, STATIONS, i) && !LQStore.stationProgress(L.id, x.id).lesson);
 
     view.innerHTML = `
+      ${slot ? `
+      <section class="card due-banner">
+        <span class="due-ico">⏰</span>
+        <div><b>הגיע זמן התרגול של ${esc(slot)}!</b><small>עוד ${Math.max(1, goalMin - mins)} דקות ליעד היומי ${st.count ? `— שמרו על רצף של ${st.count} ימים 🔥` : ''}</small></div>
+        <button class="btn primary" data-act="due">${nextStation ? `▶️ ${nextStation.icon} ${esc(nextStation.name)}` : '🧠 חזרה'}</button>
+      </section>` : ''}
       <section class="hero">
         <div>
           <h1>המסע שלך ב${esc(L.name)} <span class="flag">${L.flag}</span></h1>
@@ -61,11 +74,13 @@
             ${L.accents.map(a => `<button role="radio" aria-checked="${s.accent[L.id] === a.code}" class="pill ${s.accent[L.id] === a.code ? 'on' : ''}" data-accent="${a.code}">${a.flag} ${esc(a.label)}</button>`).join('')}
             <button class="pill ghost" data-act="test">🔊 בדיקת קול</button>
           </div>
+          <button class="pace-pill" data-act="level" title="שינוי רמה">${lvl.icon} רמה: <b>${esc(lvl.name)}</b> · קצב ${pace.icon} <b>${esc(pace.name)}</b> <span class="muted">✎</span></button>
         </div>
         <div class="goal card">
           <div class="goal-top"><span class="big-fire ${st.doneToday ? 'lit' : ''}">🔥</span><div><b>${st.count} ימי רצף</b><small>שיא: ${st.best}</small></div></div>
           <div class="bar"><i style="width:${Math.min(100, Math.round(100 * st.todaySec / st.goalSec))}%"></i></div>
-          <small>${st.doneToday ? '✅ יעד 5 הדקות של היום הושג' : `היום: ${mins} / 5 דקות למידה`}</small>
+          <small>${st.doneToday ? `✅ יעד ${goalMin} הדקות של היום הושג` : `היום: ${mins} / ${goalMin} דקות למידה`}</small>
+          <button class="rem-line" data-act="reminders">⏰ תזכורות: ${esc(LQReminders.summary())}</button>
         </div>
       </section>
 
@@ -76,6 +91,7 @@
             const p = LQStore.stationProgress(L.id, x.id);
             const open = LQStore.isStationUnlocked(L.id, STATIONS, i);
             const state = p.lesson ? 'done' : open ? 'open' : 'locked';
+            const bossOpen = p.lesson || (pace.bossFree && open);
             return `
               <li class="node ${state}" style="--i:${i}">
                 <div class="node-ico">${open ? x.icon : '🔒'}</div>
@@ -84,7 +100,7 @@
                   <div class="node-meta">${p.lesson ? `✅ הושלם · הגייה ${p.bestVoice}%` : open ? '3 ביטויים · ~4 דק׳' : 'השלימו את התחנה הקודמת'}${p.boss ? ' · 👑 בוס הובס' : ''}</div>
                   <div class="node-actions">
                     <button class="btn sm ${p.lesson ? 'ghost' : 'primary'}" data-lesson="${x.id}" ${open ? '' : 'disabled'}>${p.lesson ? '🔁 שיעור' : '▶️ התחל'}</button>
-                    <button class="btn sm boss" data-boss="${x.id}" ${p.lesson ? '' : 'disabled'} title="${p.lesson ? '' : 'נפתח אחרי השיעור'}">👑 Boss</button>
+                    <button class="btn sm boss" data-boss="${x.id}" ${bossOpen ? '' : 'disabled'} title="${bossOpen ? '' : 'נפתח אחרי השיעור'}">👑 Boss</button>
                   </div>
                 </div>
               </li>`;
@@ -106,6 +122,10 @@
       testVoice();
     });
     $('[data-act=test]', view).onclick = testVoice;
+    $('[data-act=level]', view).onclick = () => openLevelPicker(L.id);
+    $('[data-act=reminders]', view).onclick = openReminders;
+    const dueBtn = $('[data-act=due]', view);
+    if (dueBtn) dueBtn.onclick = () => (nextStation ? go('lesson', { lang: L.id, station: nextStation.id }) : go(due ? 'review' : 'map'));
     $$('[data-lesson]', view).forEach(b => b.onclick = () => go('lesson', { lang: L.id, station: b.dataset.lesson }));
     $$('[data-boss]', view).forEach(b => b.onclick = () => go('boss', { lang: L.id, station: b.dataset.boss }));
     const r = $('[data-act=review]', view);
@@ -263,7 +283,9 @@
           </button>`).join('')}
       </div>`, body => {
       $$('[data-lang]', body).forEach(b => b.onclick = () => {
-        LQStore.setSetting('lang', b.dataset.lang);
+        const id = b.dataset.lang;
+        LQStore.setSetting('lang', id);
+        if (LQStore.getLevel(id) == null) return openLevelPicker(id);
         closeModal();
         go('map');
       });
@@ -277,7 +299,19 @@
     const voices = LQAudio.voicesFor(accent);
     const chosen = LQAudio.pickVoice(accent);
     openModal(`
-      <h2>⚙️ הגדרות קול והגייה</h2>
+      <h2>⚙️ הגדרות</h2>
+      <div class="set-group">
+        <div class="plan-row"><span>רמה ב${esc(L.name)}</span><b>${LQData.LEVELS[LQStore.getPace(L.id).level].icon} ${esc(LQData.LEVELS[LQStore.getPace(L.id).level].name)} · ${LQStore.getPace(L.id).icon} ${esc(LQStore.getPace(L.id).name)}</b></div>
+        <label class="field"><span>יעד יומי</span>
+          <select data-f="minutes">${[3, 5, 10, 15].map(m => `<option value="${m}" ${LQStore.getProfile().minutes === m ? 'selected' : ''}>${m} דקות</option>`).join('')}</select>
+        </label>
+        <div class="row">
+          <button class="btn ghost sm" data-act="level">🎚️ שינוי רמה</button>
+          <button class="btn ghost sm" data-act="reminders">⏰ תזכורות (${esc(LQReminders.summary())})</button>
+          <button class="btn ghost sm" data-act="profile">👤 עריכת פרופיל השפות</button>
+        </div>
+      </div>
+      <h3 class="sub">🔊 קול והגייה</h3>
       <label class="field"><span>מבטא (${esc(L.name)})</span>
         <select data-f="accent">${L.accents.map(a => `<option value="${a.code}" ${a.code === accent ? 'selected' : ''}>${a.flag} ${esc(a.label)} · ${a.code}</option>`).join('')}</select>
       </label>
@@ -305,12 +339,36 @@
       rate.oninput = () => { $('[data-out]', body).textContent = Math.round(rate.value * 100) + '%'; };
       rate.onchange = () => LQStore.setSetting('slowRate', +rate.value);
       $('[data-f=translit]', body).onchange = e => { LQStore.setSetting('translit', e.target.checked); };
+      $('[data-f=minutes]', body).onchange = e => { LQStore.updateProfile({ minutes: +e.target.value }); refreshHeader(); };
+      $('[data-act=level]', body).onclick = () => openLevelPicker(L.id);
+      $('[data-act=reminders]', body).onclick = openReminders;
+      $('[data-act=profile]', body).onclick = () => { closeModal(); go('onboarding'); };
       const sample = LANGS[lang()].stations.restaurant.phrases[0];
       $('[data-act=test]', body).onclick = () => LQAudio.speak(sample.text, { accent, rate: 1 });
       $('[data-act=test-slow]', body).onclick = () => LQAudio.speak(sample.text, { accent, rate: +rate.value });
       $('[data-act=reset]', body).onclick = () => {
         if (confirm('לאפס את כל ההתקדמות, הרצף והאוסף?')) { LQStore.resetAll(); closeModal(); go('map'); }
       };
+      $('[data-act=close]', body).onclick = () => { closeModal(); if (current === 'map') renderMap(); };
+    });
+  }
+
+  function openLevelPicker(langId) {
+    openModal('', body => LQOnboarding.levelPicker(body, langId, level => {
+      const pace = LQStore.setLevel(langId, level);
+      closeModal();
+      toast(`${pace.icon} קצב ${pace.name} — ${LQData.LEVELS[level].name}`);
+      go('map');
+    }));
+  }
+
+  function openReminders() {
+    openModal(`
+      <h2>⏰ תזכורות ללמידה</h2>
+      <p class="muted">בחרו שעה קבועה ביום שבה אתם פנויים לכמה דקות תרגול.</p>
+      <div class="rem-slot"></div>
+      <div class="row spread"><span></span><button class="btn primary" data-act="close">שמירה</button></div>`, body => {
+      LQReminders.editor($('.rem-slot', body));
       $('[data-act=close]', body).onclick = () => { closeModal(); if (current === 'map') renderMap(); };
     });
   }
@@ -324,7 +382,7 @@
     if (document.hidden || !LEARNING_VIEWS.includes(current)) return;
     if (Date.now() - lastInteraction > 90000) return;
     if (LQStore.addActiveSeconds(5)) {
-      toast('🔥 יעד 5 הדקות היומי הושג! הרצף ממשיך (+20 XP)', 3500);
+      toast(`🔥 יעד ${LQStore.getProfile().minutes} הדקות היומי הושג! הרצף ממשיך (+20 XP)`, 3500);
       burst(['🔥', '⭐', '🔥']);
     }
     refreshHeader();
@@ -337,6 +395,11 @@
   $('#logoBtn').onclick = e => { e.preventDefault(); go('map'); };
   LQAudio.onVoices(() => { if ($('#modal[open] [data-f=voice]')) openSettings(); });
 
+  LQReminders.onDue(t => {
+    toast(`⏰ ${t} — הגיע זמן התרגול היומי!`, 5000);
+    if (current === 'map') renderMap();
+  });
+
   window.LQApp = { go, refreshHeader, view };
-  go('map');
+  go(LQStore.getProfile().onboarded ? 'map' : 'onboarding');
 })();

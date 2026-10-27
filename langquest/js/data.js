@@ -321,9 +321,48 @@ const LANGS = {
   de: { id: 'de', name: 'גרמנית', native: 'Deutsch', flag: '🇩🇪', status: 'soon', accents: [{ code: 'de-DE', label: 'גרמניה', flag: '🇩🇪' }], stations: {} }
 };
 
+/* ---------- proficiency levels & learning paces ---------- */
+const LEVELS = [
+  { id: 0, name: 'מתחיל מאפס', cefr: 'Pre-A1', icon: '🌱', desc: 'לא מכיר את השפה, או רק כמה מילים בודדות' },
+  { id: 1, name: 'בסיסי', cefr: 'A1–A2', icon: '🌿', desc: 'מבין ביטויים פשוטים, מסתדר בקושי בהזמנה או בשאלת כיוונים' },
+  { id: 2, name: 'בינוני', cefr: 'B1–B2', icon: '🌳', desc: 'מנהל שיחה יומיומית, אבל ההגייה והביטחון עוד לא שם' },
+  { id: 3, name: 'מתקדם', cefr: 'C1–C2', icon: '🏔️', desc: 'שוטף — רוצה ללטש מבטא והגייה' },
+  { id: 4, name: 'שפת אם', cefr: 'Native', icon: '🏠', desc: 'שפת אם / דובר ילידי', knownOnly: true }
+];
+
+// pace per target-language level: slow-mode speed, transliteration default, stations open at start,
+// whether the Boss is open without the lesson, whether steps 1–2 can be skipped, and the voice pass mark
+const PACES = [
+  { id: 0, name: 'עדין', icon: '🐢', slowRate: 0.5, translit: true, unlocked: 1, bossFree: false, skipSteps: false, pass: 50,
+    desc: 'הקראה איטית במיוחד (50%), תעתיק עברי מלא, תחנה אחת בכל פעם ורף הגייה מקל' },
+  { id: 1, name: 'רגיל', icon: '🚶', slowRate: 0.6, translit: true, unlocked: 1, bossFree: false, skipSteps: false, pass: 60,
+    desc: 'מצב צב 60%, תעתיק עברי, תחנות נפתחות בהדרגה' },
+  { id: 2, name: 'מהיר', icon: '🏃', slowRate: 0.7, translit: false, unlocked: 3, bossFree: false, skipSteps: true, pass: 65,
+    desc: '3 תחנות פתוחות מיד, אפשר לדלג על שלבי השמיעה, תעתיק כבוי (ניתן להפעיל)' },
+  { id: 3, name: 'ליטוש מבטא', icon: '🚀', slowRate: 0.7, translit: false, unlocked: 5, bossFree: true, skipSteps: true, pass: 75,
+    desc: 'כל המפה פתוחה, Boss זמין מיד, רף הגייה גבוה — מתמקדים במבטא' }
+];
+
+// languages a learner may already know (for the profile); `family` drives the "related language" boost
+const KNOWN_LANGS = [
+  { id: 'he', name: 'עברית', flag: '🇮🇱', family: 'semitic' },
+  { id: 'en', name: 'אנגלית', flag: '🇬🇧', family: 'germanic' },
+  { id: 'ar', name: 'ערבית', flag: '🇸🇦', family: 'semitic' },
+  { id: 'ru', name: 'רוסית', flag: '🇷🇺', family: 'slavic' },
+  { id: 'es', name: 'ספרדית', flag: '🇪🇸', family: 'romance' },
+  { id: 'fr', name: 'צרפתית', flag: '🇫🇷', family: 'romance' },
+  { id: 'it', name: 'איטלקית', flag: '🇮🇹', family: 'romance' },
+  { id: 'pt', name: 'פורטוגזית', flag: '🇵🇹', family: 'romance' },
+  { id: 'de', name: 'גרמנית', flag: '🇩🇪', family: 'germanic' },
+  { id: 'am', name: 'אמהרית', flag: '🇪🇹', family: 'semitic' },
+  { id: 'yi', name: 'יידיש', flag: '🕍', family: 'germanic' }
+];
+
+const LANG_FAMILY = { en: 'germanic', es: 'romance', fr: 'romance', it: 'romance', de: 'germanic' };
+
 function getPhrase(langId, stationId, idx) {
   const st = LANGS[langId] && LANGS[langId].stations[stationId];
   return st ? st.phrases[idx] : null;
 }
 
-window.LQData = { STATIONS, LANGS, getPhrase };
+window.LQData = { STATIONS, LANGS, LEVELS, PACES, KNOWN_LANGS, LANG_FAMILY, getPhrase };

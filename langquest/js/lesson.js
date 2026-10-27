@@ -26,6 +26,7 @@
     S = {
       root, lang, stationId, meta, onExit,
       accent: LQUI.currentAccent(),
+      pace: LQStore.getPace(lang),
       phrases: LQData.LANGS[lang].stations[stationId].phrases,
       step: 0, pi: 0,
       canNext: true,
@@ -70,12 +71,15 @@
         <div class="lesson-nav">
           <button class="btn primary" data-act="next">${isLast() ? 'סיום 🏁' : 'הבא ←'}</button>
           ${step.id === 'voice' ? '<button class="btn ghost sm" data-act="skip">דלג</button>' : ''}
+          ${S.pace.skipSteps && (step.id === 'listen' || step.id === 'slow') ? '<button class="btn ghost sm" data-act="skip-step">⏭️ דלג לשלב המשחק</button>' : ''}
         </div>
       </section>`;
     $('[data-act=exit]', S.root).onclick = () => { const cb = S.onExit; stop(); cb(); };
     $('[data-act=next]', S.root).onclick = next;
     const skip = $('[data-act=skip]', S.root);
     if (skip) skip.onclick = () => { if (S.voice[S.pi] == null) { S.voice[S.pi] = 0; markMissed(S.pi); } advance(); };
+    const skipStep = $('[data-act=skip-step]', S.root);
+    if (skipStep) skipStep.onclick = () => { S.step = 2; S.pi = 0; S.canNext = false; render(); };
 
     const body = $('.step-body', S.root);
     ({ listen: renderListen, slow: renderSlow, game: renderGame, voice: renderVoice })[step.id](body, S.phrases[S.pi]);
@@ -305,7 +309,7 @@
       accent: S.accent,
       onResult: (score) => {
         S.voice[S.pi] = Math.max(S.voice[S.pi] || 0, score);
-        if (score < 70) markMissed(S.pi);
+        if (score < S.pace.pass + 10) markMissed(S.pi);
         setNext(true);
       }
     });
