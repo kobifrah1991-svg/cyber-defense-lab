@@ -216,13 +216,13 @@
   const FAMILY = [
     { name: 'CyberLab 3D', img: 'cl3d-hero', page: '/cyberlab-3d/',
       desc: { he: 'סימולטור תלת־ממדי ללימוד IT וסייבר: 60 שלבים מ-Help Desk ועד SOC.', en: 'A 3D simulator for learning IT and cyber: 60 lessons from Help Desk to SOC.', ar: 'محاكي ثلاثي الأبعاد لتعلّم تقنية المعلومات والأمن السيبراني: 60 مرحلة من الدعم الفني حتى SOC.', ru: '3D-симулятор для изучения IT и кибербезопасности: 60 уровней от Help Desk до SOC.' } },
-    { name: 'CyberLab Kids', img: 'kids-hero', url: 'https://cyberlab-3d-kids.web.app/',
+    { name: 'CyberLab Kids', img: 'kids-hero', page: '/cyberlab-kids/',
       desc: { he: 'משחק חינמי לילדים על מחשבים, רשתות ובטיחות ברשת.', en: 'A free game for kids about computers, networks and online safety.', ar: 'لعبة مجانية للأطفال عن الحواسيب والشبكات والأمان على الإنترنت.', ru: 'Бесплатная игра для детей о компьютерах, сетях и безопасности в интернете.' } },
     { name: { he: 'הרפתקת הרשת של ביטי', en: "Bitty's Net Adventure" }, img: 'bna-title2', en: true, page: '/net-adventure/',
       desc: { he: 'משחק פלטפורמה לילדים על סכנות ברשת: רצים, קופצים ולומדים להיזהר.', en: 'A kids platformer about online dangers: run, jump and learn to stay safe.', ar: 'لعبة منصات للأطفال عن مخاطر الإنترنت: اركض واقفز وتعلّم الحذر.', ru: 'Платформер для детей об опасностях в интернете: беги, прыгай и учись осторожности.' } },
     { name: 'Tedralink Files', img: 'tlf-hero', en: true, page: '/tedralink-files/',
       desc: { he: 'ניהול ועריכת קבצים מרחוק: שרתים, NAS וענן — במחשב ובטלפון.', en: 'Remote file management: servers, NAS and cloud — on desktop and phone.', ar: 'إدارة الملفات عن بُعد: الخوادم وNAS والسحابة — على الحاسوب والهاتف.', ru: 'Удалённое управление файлами: серверы, NAS и облако — на компьютере и телефоне.' } },
-    { name: 'EduPsych CRM', img: 'eps-hero', url: 'https://edupsych-crm.web.app/',
+    { name: 'EduPsych CRM', img: 'eps-hero', page: '/edupsych-crm/',
       desc: { he: 'מערכת עבודה לפסיכולוגים חינוכיים: יומן, מטופלים, סיכומים ודוחות.', en: 'A workspace for educational psychologists: calendar, clients, notes and reports.', ar: 'منظومة عمل للأخصائيين النفسيين التربويين: تقويم وملفات ومحاضر وتقارير.', ru: 'Рабочая система для школьных психологов: календарь, клиенты, заметки и отчёты.' } }
   ];
 

@@ -8,6 +8,7 @@
 
 | | |
 |---|---|
+| 🔗 עמוד המוצר ב-Scitedra Labs | https://scitedra-labs.web.app/tedralingo/ — קישורים קבועים: `/tedralingo/app` (הלומדה) · `/tedralingo/landing` (דף הנחיתה) · `/tedralingo/apk` (הורדה) · `/tedralingo/issues` (דיווח על באג) |
 | 🌐 דף הנחיתה והלומדה | https://tedralingo.web.app (אתר Hosting בשם `tedralingo` בפרויקט Firebase `cyberlab-3d`) — `/site/` דף הנחיתה, `/index.html` הלומדה |
 | 📱 הורדה לאנדרואיד | https://github.com/Scitedra-Labs/TedraLingo-releases/releases/latest |
 | 💾 קוד המקור (פרטי) | https://github.com/Scitedra-Labs/TedraLingo |
