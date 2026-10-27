@@ -55,3 +55,9 @@ cyber-defense-lab/
 ---
 
 🛡️ HackerBot Defense Lab — ללמוד להגן, לא לתקוף.
+
+---
+
+## LangQuest
+
+בתיקייה [`langquest/`](langquest/) נמצאת לומדה נפרדת לשפה מדוברת (אנגלית / ספרדית) — קריוקי, מצב צב, פירוק הברות, בדיקת הגייה במיקרופון ו־Audio Boss. ראו [`langquest/README.md`](langquest/README.md).
