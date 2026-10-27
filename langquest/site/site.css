@@ -130,3 +130,12 @@ h2 { font-size: clamp(1.6rem, 1.1rem + 2vw, 2.4rem); text-align: center; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
 
 .slogan { display: inline-block; margin-bottom: 12px; padding: 6px 14px; border-radius: 999px; background: var(--grad); color: #fff; font-weight: 800; letter-spacing: .01em; }
+
+/* the other Scitedra Labs products */
+.family { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 18px; margin: 28px auto; }
+.fam { display: flex; flex-direction: column; gap: 6px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; color: var(--text); text-decoration: none; box-shadow: var(--shadow); transition: transform .2s, border-color .2s; }
+.fam:hover { transform: translateY(-3px); border-color: var(--sea); }
+.fam img { width: 100%; height: auto; aspect-ratio: 800 / 375; object-fit: cover; background: var(--grad); }
+.fam b { padding: 6px 16px 0; font-size: 1.1rem; }
+.fam small { padding: 0 16px; color: var(--muted); }
+.fam .more { margin-top: auto; padding: 8px 16px 14px; color: var(--sea); font-weight: 800; }

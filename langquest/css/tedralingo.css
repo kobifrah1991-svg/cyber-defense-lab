@@ -668,3 +668,5 @@ img, svg, video { max-width: 100%; }
 .cloud-user b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cloud-user small.ok { color: var(--ok); font-weight: 700; }
 .cloud-cta h3 { margin: 0 0 6px; }
+.family-line { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--sea); font-weight: 700; text-decoration: none; font-size: .9rem; }
+.family-line img { border-radius: 6px; }

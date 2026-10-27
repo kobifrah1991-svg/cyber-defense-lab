@@ -13,6 +13,7 @@
     he: {
       title: 'TedraLingo · מדברים שפה חדשה כבר מהשיעור הראשון',
       nav_features: 'יכולות', nav_how: 'איך זה עובד', nav_teachers: 'המורים', nav_pricing: 'מחירים', nav_faq: 'שאלות',
+      nav_family: "מוצרים נוספים", family_title: "עוד מ-Scitedra Labs", family_sub: "TedraLingo היא חלק ממשפחת המוצרים של סקיטדרה מעבדות — לומדים טכנולוגיה ושפות דרך עשייה.", family_all: "לכל המוצרים של Scitedra Labs", family_more: "לפרטים",
       open_app: 'פתחו את הלומדה',
       hero_title: 'מדברים שפה חדשה — כבר מהשיעור הראשון',
       hero_sub: 'שיעורים של 3–5 דקות לשפה מדוברת לחו״ל: שומעים מורה אמיתי, מאטים, משחקים ומדברים — והלומדה בודקת לכם את ההגייה, מילה אחר מילה.',
@@ -55,6 +56,7 @@
     en: {
       title: 'TedraLingo · Speak a new language from your first lesson',
       nav_features: 'Features', nav_how: 'How it works', nav_teachers: 'Teachers', nav_pricing: 'Pricing', nav_faq: 'FAQ',
+      nav_family: "More products", family_title: "More from Scitedra Labs", family_sub: "TedraLingo is part of the Scitedra Labs family — learn technology and languages by doing.", family_all: "All Scitedra Labs products", family_more: "Learn more",
       open_app: 'Open the app',
       hero_title: 'Speak a new language — from your very first lesson',
       hero_sub: '3–5 minute lessons in the language you need abroad: hear a real teacher, slow it down, play, and speak — and get your pronunciation checked word by word.',
@@ -97,6 +99,7 @@
     ar: {
       title: 'TedraLingo · تحدثوا لغة جديدة من الدرس الأول',
       nav_features: 'المزايا', nav_how: 'كيف يعمل', nav_teachers: 'المعلمون', nav_pricing: 'الأسعار', nav_faq: 'الأسئلة',
+      nav_family: "منتجات أخرى", family_title: "المزيد من Scitedra Labs", family_sub: "TedraLingo جزء من عائلة منتجات Scitedra Labs — تعلّم التقنية واللغات بالممارسة.", family_all: "كل منتجات Scitedra Labs", family_more: "التفاصيل",
       open_app: 'افتحوا التطبيق',
       hero_title: 'تحدثوا لغة جديدة — من الدرس الأول',
       hero_sub: 'دروس من 3 إلى 5 دقائق للغة التي تحتاجونها في السفر: استمعوا إلى معلم حقيقي، أبطئوا، العبوا وتكلموا — والتطبيق يفحص نطقكم كلمة بكلمة.',
@@ -139,6 +142,7 @@
     ru: {
       title: 'TedraLingo · Говорите на новом языке с первого урока',
       nav_features: 'Возможности', nav_how: 'Как это работает', nav_teachers: 'Преподаватели', nav_pricing: 'Цены', nav_faq: 'Вопросы',
+      nav_family: "Другие продукты", family_title: "Ещё от Scitedra Labs", family_sub: "TedraLingo входит в семью продуктов Scitedra Labs — изучайте технологии и языки на практике.", family_all: "Все продукты Scitedra Labs", family_more: "Подробнее",
       open_app: 'Открыть приложение',
       hero_title: 'Говорите на новом языке — с первого урока',
       hero_sub: 'Уроки по 3–5 минут для языка, который нужен в поездке: слушайте настоящего преподавателя, замедляйте, играйте и говорите — приложение проверит произношение слово за словом.',
@@ -207,6 +211,21 @@
   ];
   const LEARN = [['🇬🇧', 'English', true], ['🇪🇸', 'Español', true], ['🇫🇷', 'Français', false], ['🇮🇹', 'Italiano', true], ['🇩🇪', 'Deutsch', false]];
 
+  // the other Scitedra Labs products (pages on scitedra-labs.web.app)
+  const SCT = 'https://scitedra-labs.web.app';
+  const FAMILY = [
+    { name: 'CyberLab 3D', img: 'cl3d-hero', page: '/cyberlab-3d/',
+      desc: { he: 'סימולטור תלת־ממדי ללימוד IT וסייבר: 60 שלבים מ-Help Desk ועד SOC.', en: 'A 3D simulator for learning IT and cyber: 60 lessons from Help Desk to SOC.', ar: 'محاكي ثلاثي الأبعاد لتعلّم تقنية المعلومات والأمن السيبراني: 60 مرحلة من الدعم الفني حتى SOC.', ru: '3D-симулятор для изучения IT и кибербезопасности: 60 уровней от Help Desk до SOC.' } },
+    { name: 'CyberLab Kids', img: 'kids-hero', url: 'https://cyberlab-3d-kids.web.app/',
+      desc: { he: 'משחק חינמי לילדים על מחשבים, רשתות ובטיחות ברשת.', en: 'A free game for kids about computers, networks and online safety.', ar: 'لعبة مجانية للأطفال عن الحواسيب والشبكات والأمان على الإنترنت.', ru: 'Бесплатная игра для детей о компьютерах, сетях и безопасности в интернете.' } },
+    { name: { he: 'הרפתקת הרשת של ביטי', en: "Bitty's Net Adventure" }, img: 'bna-title2', en: true, page: '/net-adventure/',
+      desc: { he: 'משחק פלטפורמה לילדים על סכנות ברשת: רצים, קופצים ולומדים להיזהר.', en: 'A kids platformer about online dangers: run, jump and learn to stay safe.', ar: 'لعبة منصات للأطفال عن مخاطر الإنترنت: اركض واقفز وتعلّم الحذر.', ru: 'Платформер для детей об опасностях в интернете: беги, прыгай и учись осторожности.' } },
+    { name: 'Tedralink Files', img: 'tlf-hero', en: true, page: '/tedralink-files/',
+      desc: { he: 'ניהול ועריכת קבצים מרחוק: שרתים, NAS וענן — במחשב ובטלפון.', en: 'Remote file management: servers, NAS and cloud — on desktop and phone.', ar: 'إدارة الملفات عن بُعد: الخوادم وNAS والسحابة — على الحاسوب والهاتف.', ru: 'Удалённое управление файлами: серверы, NAS и облако — на компьютере и телефоне.' } },
+    { name: 'EduPsych CRM', img: 'eps-hero', url: 'https://edupsych-crm.web.app/',
+      desc: { he: 'מערכת עבודה לפסיכולוגים חינוכיים: יומן, מטופלים, סיכומים ודוחות.', en: 'A workspace for educational psychologists: calendar, clients, notes and reports.', ar: 'منظومة عمل للأخصائيين النفسيين التربويين: تقويم وملفات ومحاضر وتقارير.', ru: 'Рабочая система для школьных психологов: календарь, клиенты, заметки и отчёты.' } }
+  ];
+
   function render() {
     const t = T[lang];
     const C = window.LQCommerce;
@@ -254,6 +273,16 @@
         <p>${esc(t.prem_includes)}</p>
         <a class="btn ${p.best ? 'primary' : 'ghost'}" href="../index.html?upgrade=${p.id}">${esc(t.choose)}</a>
       </article>`).join('');
+    const pre = lang === 'he' ? '' : '/en';
+    $('[data-family-home]').href = `${SCT}${pre}/`;
+    $('#family').innerHTML = FAMILY.map(f => {
+      const href = f.url || `${SCT}${pre}${f.page}`;
+      const name = typeof f.name === 'string' ? f.name : (f.name[lang] || f.name.en);
+      const img = `img/family/${f.img}${f.en && lang !== 'he' ? '-en' : ''}.webp`;
+      return `<a class="fam" href="${href}" target="_blank" rel="noopener">
+        <img src="${img}" alt="" loading="lazy" width="800" height="375">
+        <b dir="auto">${esc(name)}</b><small>${esc(f.desc[lang])}</small><span class="more">${esc(t.family_more)} ${LANGS[lang].dir === 'rtl' ? '←' : '→'}</span></a>`;
+    }).join('');
     $('#faq').innerHTML = t.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
   }
 

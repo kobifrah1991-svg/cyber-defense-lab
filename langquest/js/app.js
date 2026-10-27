@@ -423,6 +423,7 @@
       </div>
       <p class="muted small">${LQAudio.canListen ? t('set.micYes') : t('set.micNo')}</p>
       <hr>
+      <a class="family-line" href="https://scitedra-labs.web.app/${LQI18n.ui() === 'he' ? '' : 'en/'}" data-act="family"><img src="icons/scitedra-labs.svg" alt="" width="22" height="22"> TedraLingo · ${esc(t('set.family'))}</a>
       <div class="row spread"><button class="btn bad sm" data-act="reset">${t('set.reset')}</button><button class="btn primary" data-act="close">${t('common.close')}</button></div>`, body => {
       $('[data-f=ui]', body).onchange = e => { switchUi(e.target.value); openSettings(); };
       bindPremiumSection(body);
@@ -442,6 +443,7 @@
       const sample = LANGS[lang()].stations.restaurant.phrases[0];
       $('[data-act=test]', body).onclick = () => LQAudio.speak(sample.text, { accent, rate: 1 });
       $('[data-act=test-slow]', body).onclick = () => LQAudio.speak(sample.text, { accent, rate: +rate.value });
+      $('[data-act=family]', body).onclick = e => { e.preventDefault(); LQNative.openExternal(e.currentTarget.href); };
       $('[data-act=reset]', body).onclick = () => {
         if (confirm(t('set.resetConfirm'))) { LQStore.resetAll(); closeModal(); go('map'); }
       };
