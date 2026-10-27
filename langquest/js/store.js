@@ -134,7 +134,8 @@ function getPace(lang) {
 /** Returns a short reason when the learner's other languages justify a faster start, else null. */
 function paceBoost(lang) {
   const fam = LQData.LANG_FAMILY[lang];
-  const strong = lqState.profile.known.filter(k => k.lang !== lang && k.lang !== 'he' && k.level >= 2);
+  const base = window.LQI18n ? LQI18n.ui() : 'he';   // the learner's own language isn't a "foreign" one
+  const strong = lqState.profile.known.filter(k => k.lang !== lang && k.lang !== base && k.level >= 2);
   const related = strong.find(k => (LQData.KNOWN_LANGS.find(x => x.id === k.lang) || {}).family === fam);
   if (related) return { type: 'related', lang: related.lang };
   if (strong.length) return { type: 'multilingual', lang: strong[0].lang };

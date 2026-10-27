@@ -29,11 +29,11 @@ function P(text, he, emoji, words) {
 }
 
 const STATIONS = [
-  { id: 'airport', name: 'שדה תעופה', name_en: 'Airport', icon: '✈️', npc: '🛂' },
-  { id: 'hotel', name: 'מלון', name_en: 'Hotel', icon: '🏨', npc: '🛎️' },
-  { id: 'restaurant', name: 'מסעדה', name_en: 'Restaurant', icon: '🍽️', npc: '🧑‍🍳' },
-  { id: 'shopping', name: 'קניות', name_en: 'Shopping', icon: '🛍️', npc: '🧑‍💼' },
-  { id: 'emergency', name: 'חירום ורפואה', name_en: 'Emergency & health', icon: '🚑', npc: '🧑‍⚕️' }
+  { id: 'airport', name: 'שדה תעופה', name_en: 'Airport', name_ar: 'المطار', name_ru: 'Аэропорт', icon: '✈️', npc: '🛂' },
+  { id: 'hotel', name: 'מלון', name_en: 'Hotel', name_ar: 'الفندق', name_ru: 'Отель', icon: '🏨', npc: '🛎️' },
+  { id: 'restaurant', name: 'מסעדה', name_en: 'Restaurant', name_ar: 'المطعم', name_ru: 'Ресторан', icon: '🍽️', npc: '🧑‍🍳' },
+  { id: 'shopping', name: 'קניות', name_en: 'Shopping', name_ar: 'التسوق', name_ru: 'Покупки', icon: '🛍️', npc: '🧑‍💼' },
+  { id: 'emergency', name: 'חירום ורפואה', name_en: 'Emergency & health', name_ar: 'الطوارئ والصحة', name_ru: 'Экстренная помощь', icon: '🚑', npc: '🧑‍⚕️' }
 ];
 
 const LANGS = {
@@ -41,12 +41,14 @@ const LANGS = {
     id: 'en',
     name: 'אנגלית',
     name_en: 'English',
+    name_ar: 'الإنجليزية',
+    name_ru: 'Английский',
     native: 'English',
     flag: '🇬🇧',
     status: 'ready',
     accents: [
-      { code: 'en-US', label: 'אמריקאית', label_en: 'American', flag: '🇺🇸' },
-      { code: 'en-GB', label: 'בריטית', label_en: 'British', flag: '🇬🇧' }
+      { code: 'en-US', label: 'אמריקאית', label_en: 'American', label_ar: 'أمريكية', label_ru: 'Американский', flag: '🇺🇸' },
+      { code: 'en-GB', label: 'בריטית', label_en: 'British', label_ar: 'بريطانية', label_ru: 'Британский', flag: '🇬🇧' }
     ],
     stations: {
       airport: {
@@ -64,7 +66,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'פקיד הגבולות', title_en: 'Border officer',
+          title: 'פקיד הגבולות', title_en: 'Border officer', title_ar: 'ضابط الحدود', title_ru: 'Пограничник',
           intro: ['Good morning! Passport, please.', 'בוקר טוב! דרכון, בבקשה.'],
           turns: [
             { expect: 0, reply: ['Thank you. What is your final destination?', 'תודה. מה היעד הסופי שלך?'] },
@@ -89,7 +91,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'פקידת הקבלה', title_en: 'Receptionist',
+          title: 'פקידת הקבלה', title_en: 'Receptionist', title_ar: 'موظفة الاستقبال', title_ru: 'Администратор',
           intro: ['Welcome! How can I help you?', 'ברוכים הבאים! איך אפשר לעזור?'],
           turns: [
             { expect: 0, reply: ['Perfect, here is your key. Anything else?', 'מצוין, הנה המפתח שלך. עוד משהו?'] },
@@ -113,7 +115,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'המלצר', title_en: 'Waiter',
+          title: 'המלצר', title_en: 'Waiter', title_ar: 'النادل', title_ru: 'Официант',
           intro: ['Good evening! How many people?', 'ערב טוב! כמה אנשים?'],
           turns: [
             { expect: 0, reply: ['Right this way. Would you like to order?', 'בבקשה, מכאן. תרצו להזמין?'] },
@@ -139,7 +141,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'המוכרת', title_en: 'Shop assistant',
+          title: 'המוכרת', title_en: 'Shop assistant', title_ar: 'البائعة', title_ru: 'Продавец',
           intro: ['Hi! Are you looking for something?', 'היי! מחפשים משהו?'],
           turns: [
             { expect: 0, reply: ['Yes, here it is.', 'כן, הנה.'] },
@@ -163,7 +165,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'הפרמדיקית', title_en: 'Paramedic',
+          title: 'הפרמדיקית', title_en: 'Paramedic', title_ar: 'المسعفة', title_ru: 'Фельдшер',
           intro: ['Hello, what is wrong?', 'שלום, מה קרה?'],
           turns: [
             { expect: 0, reply: ['Is it serious? Can you breathe?', 'זה רציני? אתה יכול לנשום?'] },
@@ -179,12 +181,14 @@ const LANGS = {
     id: 'es',
     name: 'ספרדית',
     name_en: 'Spanish',
+    name_ar: 'الإسبانية',
+    name_ru: 'Испанский',
     native: 'Español',
     flag: '🇪🇸',
     status: 'ready',
     accents: [
-      { code: 'es-ES', label: 'אירופאית', label_en: 'European', flag: '🇪🇸' },
-      { code: 'es-MX', label: 'לטינית', label_en: 'Latin American', flag: '🇲🇽' }
+      { code: 'es-ES', label: 'אירופאית', label_en: 'European', label_ar: 'أوروبية', label_ru: 'Европейский', flag: '🇪🇸' },
+      { code: 'es-MX', label: 'לטינית', label_en: 'Latin American', label_ar: 'لاتينية', label_ru: 'Латиноамериканский', flag: '🇲🇽' }
     ],
     stations: {
       airport: {
@@ -204,7 +208,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'פקיד הגבולות', title_en: 'Border officer',
+          title: 'פקיד הגבולות', title_en: 'Border officer', title_ar: 'ضابط الحدود', title_ru: 'Пограничник',
           intro: ['¡Buenos días! Su pasaporte, por favor.', 'בוקר טוב! הדרכון שלך, בבקשה.'],
           turns: [
             { expect: 0, reply: ['Gracias. ¿Cuál es su destino final?', 'תודה. מה היעד הסופי שלך?'] },
@@ -229,7 +233,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'פקידת הקבלה', title_en: 'Receptionist',
+          title: 'פקידת הקבלה', title_en: 'Receptionist', title_ar: 'موظفة الاستقبال', title_ru: 'Администратор',
           intro: ['¡Bienvenido! ¿En qué puedo ayudarle?', 'ברוך הבא! במה אפשר לעזור?'],
           turns: [
             { expect: 0, reply: ['Perfecto, aquí tiene su llave. ¿Algo más?', 'מצוין, הנה המפתח שלך. עוד משהו?'] },
@@ -254,7 +258,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'המלצר', title_en: 'Waiter',
+          title: 'המלצר', title_en: 'Waiter', title_ar: 'النادل', title_ru: 'Официант',
           intro: ['¡Buenas noches! ¿Cuántas personas?', 'ערב טוב! כמה אנשים?'],
           turns: [
             { expect: 0, reply: ['Por aquí, por favor. ¿Desean pedir?', 'מכאן, בבקשה. תרצו להזמין?'] },
@@ -279,7 +283,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'המוכרת', title_en: 'Shop assistant',
+          title: 'המוכרת', title_en: 'Shop assistant', title_ar: 'البائعة', title_ru: 'Продавец',
           intro: ['¡Hola! ¿Busca algo?', 'שלום! מחפשים משהו?'],
           turns: [
             { expect: 0, reply: ['Sí, aquí está.', 'כן, הנה.'] },
@@ -305,7 +309,7 @@ const LANGS = {
           ])
         ],
         boss: {
-          title: 'הפרמדיקית', title_en: 'Paramedic',
+          title: 'הפרמדיקית', title_en: 'Paramedic', title_ar: 'المسعفة', title_ru: 'Фельдшер',
           intro: ['Hola, ¿qué le pasa?', 'שלום, מה קרה לך?'],
           turns: [
             { expect: 0, reply: ['¿Es grave? ¿Puede respirar?', 'זה חמור? אתה יכול לנשום?'] },
@@ -318,23 +322,28 @@ const LANGS = {
   },
 
   // Planned languages — shown on the picker as "בקרוב"; fill `stations` to activate.
-  fr: { id: 'fr', name: 'צרפתית', name_en: 'French', native: 'Français', flag: '🇫🇷', status: 'soon', accents: [{ code: 'fr-FR', label: 'צרפת', label_en: 'France', flag: '🇫🇷' }, { code: 'fr-CA', label: 'קנדה', label_en: 'Canada', flag: '🇨🇦' }], stations: {} },
-  it: { id: 'it', name: 'איטלקית', name_en: 'Italian', native: 'Italiano', flag: '🇮🇹', status: 'soon', accents: [{ code: 'it-IT', label: 'איטליה', label_en: 'Italy', flag: '🇮🇹' }], stations: {} },
-  de: { id: 'de', name: 'גרמנית', name_en: 'German', native: 'Deutsch', flag: '🇩🇪', status: 'soon', accents: [{ code: 'de-DE', label: 'גרמניה', label_en: 'Germany', flag: '🇩🇪' }], stations: {} }
+  fr: { id: 'fr', name: 'צרפתית', name_en: 'French', name_ar: 'الفرنسية', name_ru: 'Французский', native: 'Français', flag: '🇫🇷', status: 'soon', accents: [{ code: 'fr-FR', label: 'צרפת', label_en: 'France', label_ar: 'فرنسا', label_ru: 'Франция', flag: '🇫🇷' }, { code: 'fr-CA', label: 'קנדה', label_en: 'Canada', label_ar: 'كندا', label_ru: 'Канада', flag: '🇨🇦' }], stations: {} },
+  it: { id: 'it', name: 'איטלקית', name_en: 'Italian', name_ar: 'الإيطالية', name_ru: 'Итальянский', native: 'Italiano', flag: '🇮🇹', status: 'soon', accents: [{ code: 'it-IT', label: 'איטליה', label_en: 'Italy', label_ar: 'إيطاليا', label_ru: 'Италия', flag: '🇮🇹' }], stations: {} },
+  de: { id: 'de', name: 'גרמנית', name_en: 'German', name_ar: 'الألمانية', name_ru: 'Немецкий', native: 'Deutsch', flag: '🇩🇪', status: 'soon', accents: [{ code: 'de-DE', label: 'גרמניה', label_en: 'Germany', label_ar: 'ألمانيا', label_ru: 'Германия', flag: '🇩🇪' }], stations: {} }
 };
 
 /* ---------- proficiency levels & learning paces ---------- */
 const LEVELS = [
   { id: 0, name: 'מתחיל מאפס', cefr: 'Pre-A1', icon: '🌱', desc: 'לא מכיר את השפה, או רק כמה מילים בודדות',
-    name_en: 'Absolute beginner', desc_en: "I don't know the language, or only a few words" },
+    name_en: 'Absolute beginner', desc_en: "I don't know the language, or only a few words",
+    name_ar: 'مبتدئ تمامًا', desc_ar: 'لا أعرف اللغة، أو أعرف بضع كلمات فقط', name_ru: 'Абсолютный новичок', desc_ru: 'Не знаю язык или знаю лишь несколько слов' },
   { id: 1, name: 'בסיסי', cefr: 'A1–A2', icon: '🌿', desc: 'מבין ביטויים פשוטים, מסתדר בקושי בהזמנה או בשאלת כיוונים',
-    name_en: 'Basic', desc_en: 'I understand simple phrases and can just about order food or ask the way' },
+    name_en: 'Basic', desc_en: 'I understand simple phrases and can just about order food or ask the way',
+    name_ar: 'أساسي', desc_ar: 'أفهم عبارات بسيطة وبالكاد أطلب طعامًا أو أسأل عن الطريق', name_ru: 'Базовый', desc_ru: 'Понимаю простые фразы, с трудом могу заказать еду или спросить дорогу' },
   { id: 2, name: 'בינוני', cefr: 'B1–B2', icon: '🌳', desc: 'מנהל שיחה יומיומית, אבל ההגייה והביטחון עוד לא שם',
-    name_en: 'Intermediate', desc_en: 'I can hold an everyday conversation, but my pronunciation and confidence lag behind' },
+    name_en: 'Intermediate', desc_en: 'I can hold an everyday conversation, but my pronunciation and confidence lag behind',
+    name_ar: 'متوسط', desc_ar: 'أدير محادثة يومية، لكن النطق والثقة لم يكتملا بعد', name_ru: 'Средний', desc_ru: 'Могу поддержать бытовой разговор, но не хватает произношения и уверенности' },
   { id: 3, name: 'מתקדם', cefr: 'C1–C2', icon: '🏔️', desc: 'שוטף — רוצה ללטש מבטא והגייה',
-    name_en: 'Advanced', desc_en: 'Fluent — I want to polish my accent and pronunciation' },
+    name_en: 'Advanced', desc_en: 'Fluent — I want to polish my accent and pronunciation',
+    name_ar: 'متقدم', desc_ar: 'أتحدث بطلاقة — أريد تحسين اللهجة والنطق', name_ru: 'Продвинутый', desc_ru: 'Говорю свободно — хочу отточить акцент и произношение' },
   { id: 4, name: 'שפת אם', cefr: 'Native', icon: '🏠', desc: 'שפת אם / דובר ילידי', knownOnly: true,
-    name_en: 'Native', desc_en: 'Mother tongue / native speaker' }
+    name_en: 'Native', desc_en: 'Mother tongue / native speaker',
+    name_ar: 'لغة أم', desc_ar: 'اللغة الأم / متحدث أصلي', name_ru: 'Родной', desc_ru: 'Родной язык / носитель' }
 ];
 
 // pace per target-language level: slow-mode speed, transliteration default, stations open at start,
@@ -342,31 +351,35 @@ const LEVELS = [
 const PACES = [
   { id: 0, name: 'עדין', icon: '🐢', slowRate: 0.5, translit: true, unlocked: 1, bossFree: false, skipSteps: false, pass: 50,
     desc: 'הקראה איטית במיוחד (50%), תעתיק עברי מלא, תחנה אחת בכל פעם ורף הגייה מקל',
-    name_en: 'Gentle', desc_en: 'Extra-slow narration (50%), one stop at a time and a forgiving pronunciation bar' },
+    name_en: 'Gentle', desc_en: 'Extra-slow narration (50%), one stop at a time and a forgiving pronunciation bar',
+    name_ar: 'لطيفة', desc_ar: 'قراءة بطيئة جدًا (50%)، محطة واحدة في كل مرة ومعيار نطق متساهل', name_ru: 'Мягкий', desc_ru: 'Очень медленная озвучка (50%), по одной остановке и мягкая планка произношения' },
   { id: 1, name: 'רגיל', icon: '🚶', slowRate: 0.6, translit: true, unlocked: 1, bossFree: false, skipSteps: false, pass: 60,
     desc: 'מצב צב 60%, תעתיק עברי, תחנות נפתחות בהדרגה',
-    name_en: 'Regular', desc_en: 'Turtle mode at 60%, stops unlock one by one' },
+    name_en: 'Regular', desc_en: 'Turtle mode at 60%, stops unlock one by one',
+    name_ar: 'عادية', desc_ar: 'وضع السلحفاة 60%، وتُفتح المحطات تدريجيًا', name_ru: 'Обычный', desc_ru: 'Режим черепахи 60%, остановки открываются постепенно' },
   { id: 2, name: 'מהיר', icon: '🏃', slowRate: 0.7, translit: false, unlocked: 3, bossFree: false, skipSteps: true, pass: 65,
     desc: '3 תחנות פתוחות מיד, אפשר לדלג על שלבי השמיעה, תעתיק כבוי (ניתן להפעיל)',
-    name_en: 'Fast', desc_en: '3 stops open right away and you can skip the listening steps' },
+    name_en: 'Fast', desc_en: '3 stops open right away and you can skip the listening steps',
+    name_ar: 'سريعة', desc_ar: '3 محطات مفتوحة فورًا ويمكن تخطي خطوات الاستماع', name_ru: 'Быстрый', desc_ru: '3 остановки открыты сразу, можно пропускать шаги прослушивания' },
   { id: 3, name: 'ליטוש מבטא', icon: '🚀', slowRate: 0.7, translit: false, unlocked: 5, bossFree: true, skipSteps: true, pass: 75,
     desc: 'כל המפה פתוחה, Boss זמין מיד, רף הגייה גבוה — מתמקדים במבטא',
-    name_en: 'Accent polish', desc_en: 'The whole map is open, Bosses right away and a high pronunciation bar — focus on accent' }
+    name_en: 'Accent polish', desc_en: 'The whole map is open, Bosses right away and a high pronunciation bar — focus on accent',
+    name_ar: 'صقل اللهجة', desc_ar: 'الخريطة كلها مفتوحة، والزعيم متاح فورًا، ومعيار نطق مرتفع — التركيز على اللهجة', name_ru: 'Шлифовка акцента', desc_ru: 'Вся карта открыта, Боссы доступны сразу, высокая планка произношения — фокус на акценте' }
 ];
 
 // languages a learner may already know (for the profile); `family` drives the "related language" boost
 const KNOWN_LANGS = [
-  { id: 'he', name: 'עברית', name_en: 'Hebrew', flag: '🇮🇱', family: 'semitic' },
-  { id: 'en', name: 'אנגלית', name_en: 'English', flag: '🇬🇧', family: 'germanic' },
-  { id: 'ar', name: 'ערבית', name_en: 'Arabic', flag: '🇸🇦', family: 'semitic' },
-  { id: 'ru', name: 'רוסית', name_en: 'Russian', flag: '🇷🇺', family: 'slavic' },
-  { id: 'es', name: 'ספרדית', name_en: 'Spanish', flag: '🇪🇸', family: 'romance' },
-  { id: 'fr', name: 'צרפתית', name_en: 'French', flag: '🇫🇷', family: 'romance' },
-  { id: 'it', name: 'איטלקית', name_en: 'Italian', flag: '🇮🇹', family: 'romance' },
-  { id: 'pt', name: 'פורטוגזית', name_en: 'Portuguese', flag: '🇵🇹', family: 'romance' },
-  { id: 'de', name: 'גרמנית', name_en: 'German', flag: '🇩🇪', family: 'germanic' },
-  { id: 'am', name: 'אמהרית', name_en: 'Amharic', flag: '🇪🇹', family: 'semitic' },
-  { id: 'yi', name: 'יידיש', name_en: 'Yiddish', flag: '🕍', family: 'germanic' }
+  { id: 'he', name: 'עברית', name_en: 'Hebrew', name_ar: 'العبرية', name_ru: 'Иврит', flag: '🇮🇱', family: 'semitic' },
+  { id: 'en', name: 'אנגלית', name_en: 'English', name_ar: 'الإنجليزية', name_ru: 'Английский', flag: '🇬🇧', family: 'germanic' },
+  { id: 'ar', name: 'ערבית', name_en: 'Arabic', name_ar: 'العربية', name_ru: 'Арабский', flag: '🇸🇦', family: 'semitic' },
+  { id: 'ru', name: 'רוסית', name_en: 'Russian', name_ar: 'الروسية', name_ru: 'Русский', flag: '🇷🇺', family: 'slavic' },
+  { id: 'es', name: 'ספרדית', name_en: 'Spanish', name_ar: 'الإسبانية', name_ru: 'Испанский', flag: '🇪🇸', family: 'romance' },
+  { id: 'fr', name: 'צרפתית', name_en: 'French', name_ar: 'الفرنسية', name_ru: 'Французский', flag: '🇫🇷', family: 'romance' },
+  { id: 'it', name: 'איטלקית', name_en: 'Italian', name_ar: 'الإيطالية', name_ru: 'Итальянский', flag: '🇮🇹', family: 'romance' },
+  { id: 'pt', name: 'פורטוגזית', name_en: 'Portuguese', name_ar: 'البرتغالية', name_ru: 'Португальский', flag: '🇵🇹', family: 'romance' },
+  { id: 'de', name: 'גרמנית', name_en: 'German', name_ar: 'الألمانية', name_ru: 'Немецкий', flag: '🇩🇪', family: 'germanic' },
+  { id: 'am', name: 'אמהרית', name_en: 'Amharic', name_ar: 'الأمهرية', name_ru: 'Амхарский', flag: '🇪🇹', family: 'semitic' },
+  { id: 'yi', name: 'יידיש', name_en: 'Yiddish', name_ar: 'اليديشية', name_ru: 'Идиш', flag: '🕍', family: 'germanic' }
 ];
 
 const LANG_FAMILY = { en: 'germanic', es: 'romance', fr: 'romance', it: 'romance', de: 'germanic' };
@@ -428,6 +441,177 @@ const TRANSLATIONS = {
         'puedo': 'can I', 'pagar': 'to pay', 'con': 'with', 'tarjeta': 'card', 'necesito': 'I need',
         'médico': 'doctor', 'llame': 'call', 'ambulancia': 'ambulance', 'farmacia': 'pharmacy',
         'más': 'most / more', 'cercana': 'nearest / close'
+      }
+    }
+  },
+  ar: {
+    phrases: {
+      'Here is my passport.': 'تفضّل، هذا جواز سفري.', 'Aquí está mi pasaporte.': 'تفضّل، هذا جواز سفري.',
+      'I have a connecting flight.': 'لدي رحلة ترانزيت.', 'Tengo un vuelo de conexión.': 'لدي رحلة ترانزيت.',
+      'Where is the gate?': 'أين البوابة؟', '¿Dónde está la puerta de embarque?': 'أين بوابة الصعود إلى الطائرة؟',
+      'I have a reservation.': 'لدي حجز.', 'Tengo una reserva.': 'لدي حجز.',
+      'What time is breakfast?': 'في أي ساعة الفطور؟', '¿A qué hora es el desayuno?': 'في أي ساعة الفطور؟',
+      'Could I have another towel?': 'هل يمكنني الحصول على منشفة أخرى؟', '¿Me puede dar otra toalla?': 'هل يمكنكم إعطائي منشفة أخرى؟',
+      'A table for two, please.': 'طاولة لشخصين، من فضلك.', 'Una mesa para dos, por favor.': 'طاولة لشخصين، من فضلك.',
+      'Can I see the menu?': 'هل يمكنني رؤية قائمة الطعام؟', '¿Me trae la carta, por favor?': 'هل يمكنكم إحضار قائمة الطعام، من فضلك؟',
+      'The check, please.': 'الحساب، من فضلك.', 'La cuenta, por favor.': 'الحساب، من فضلك.',
+      'Do you have this in a medium?': 'هل لديكم هذا بمقاس متوسط؟', '¿Lo tiene en talla mediana?': 'هل لديكم هذا بمقاس متوسط؟',
+      'How much does this cost?': 'كم سعر هذا؟', '¿Cuánto cuesta esto?': 'كم سعر هذا؟',
+      'Can I pay by card?': 'هل يمكنني الدفع بالبطاقة؟', '¿Puedo pagar con tarjeta?': 'هل يمكنني الدفع بالبطاقة؟',
+      'I need a doctor.': 'أحتاج إلى طبيب.', 'Necesito un médico.': 'أحتاج إلى طبيب.',
+      'Call an ambulance!': 'اطلبوا سيارة إسعاف!', '¡Llame a una ambulancia!': 'اطلبوا سيارة إسعاف!',
+      'Where is the nearest pharmacy?': 'أين أقرب صيدلية؟', '¿Dónde está la farmacia más cercana?': 'أين أقرب صيدلية؟',
+
+      'Good morning! Passport, please.': 'صباح الخير! جواز السفر، من فضلك.',
+      'Thank you. What is your final destination?': 'شكرًا. ما وجهتك النهائية؟',
+      'Okay. Do you have any questions?': 'حسنًا. هل لديك أي أسئلة؟',
+      'Gate twelve, on your left. Have a good flight!': 'البوابة رقم 12، على يسارك. رحلة سعيدة!',
+      'Welcome! How can I help you?': 'أهلًا وسهلًا! كيف يمكنني مساعدتك؟',
+      'Perfect, here is your key. Anything else?': 'ممتاز، هذا مفتاحك. هل تحتاج شيئًا آخر؟',
+      'From seven to ten. Anything else?': 'من السابعة حتى العاشرة. شيء آخر؟',
+      'Of course, I will send one up. Enjoy your stay!': 'بالتأكيد، سأرسل واحدة إلى غرفتك. إقامة سعيدة!',
+      'Good evening! How many people?': 'مساء الخير! كم شخصًا؟',
+      'Right this way. Would you like to order?': 'من هنا، من فضلكم. هل تودون الطلب؟',
+      'Here you go. How was everything?': 'تفضلوا. كيف كان كل شيء؟',
+      'Here you are. Have a nice evening!': 'تفضلوا. أمسية سعيدة!',
+      'Hi! Are you looking for something?': 'مرحبًا! هل تبحث عن شيء؟',
+      'Yes, here it is.': 'نعم، ها هو.',
+      'It is twenty dollars.': 'السعر عشرون دولارًا.',
+      'Sure! Here is your bag. Thank you!': 'بالتأكيد! هذه حقيبتك. شكرًا!',
+      'Hello, what is wrong?': 'مرحبًا، ما المشكلة؟',
+      'Is it serious? Can you breathe?': 'هل الأمر خطير؟ هل تستطيع التنفس؟',
+      'They are on the way. Anything else?': 'إنهم في الطريق. شيء آخر؟',
+      'Two blocks away, on the right. Take care!': 'على بُعد شارعين، على اليمين. اعتنِ بنفسك!',
+
+      '¡Buenos días! Su pasaporte, por favor.': 'صباح الخير! جواز سفرك، من فضلك.',
+      'Gracias. ¿Cuál es su destino final?': 'شكرًا. ما وجهتك النهائية؟',
+      'Muy bien. ¿Alguna pregunta?': 'جيد جدًا. هل لديك أي سؤال؟',
+      'Puerta doce, a la izquierda. ¡Buen viaje!': 'البوابة رقم 12، على اليسار. رحلة سعيدة!',
+      '¡Bienvenido! ¿En qué puedo ayudarle?': 'أهلًا وسهلًا! كيف يمكنني مساعدتك؟',
+      'Perfecto, aquí tiene su llave. ¿Algo más?': 'ممتاز، هذا مفتاحك. هل تحتاج شيئًا آخر؟',
+      'De siete a diez. ¿Algo más?': 'من السابعة حتى العاشرة. شيء آخر؟',
+      'Claro, se la subimos. ¡Disfrute su estancia!': 'بالتأكيد، سنرسلها إلى غرفتك. إقامة سعيدة!',
+      '¡Buenas noches! ¿Cuántas personas?': 'مساء الخير! كم شخصًا؟',
+      'Por aquí, por favor. ¿Desean pedir?': 'من هنا، من فضلكم. هل تودون الطلب؟',
+      'Aquí tiene. ¿Qué tal todo?': 'تفضلوا. كيف كان كل شيء؟',
+      'Aquí tiene. ¡Buenas noches!': 'تفضلوا. تصبحون على خير!',
+      '¡Hola! ¿Busca algo?': 'مرحبًا! هل تبحث عن شيء؟',
+      'Sí, aquí está.': 'نعم، ها هو.',
+      'Veinte euros.': 'عشرون يورو.',
+      '¡Claro! Aquí tiene su bolsa. ¡Gracias!': 'بالتأكيد! هذه حقيبتك. شكرًا!',
+      'Hola, ¿qué le pasa?': 'مرحبًا، ما الذي حدث لك؟',
+      '¿Es grave? ¿Puede respirar?': 'هل الأمر خطير؟ هل تستطيع التنفس؟',
+      'Ya vienen. ¿Algo más?': 'إنهم في الطريق. شيء آخر؟',
+      'A dos calles, a la derecha. ¡Cuídese!': 'على بُعد شارعين، على اليمين. اعتنِ بنفسك!'
+    },
+    words: {
+      en: {
+        'here': 'هنا / تفضّل', 'is': 'يكون', 'my': 'ـي (لي)', 'passport': 'جواز سفر', 'i': 'أنا', 'have': 'لدي / أحصل',
+        'a': '(أداة نكرة)', 'an': '(أداة نكرة)', 'connecting': 'ترانزيت / متصلة', 'flight': 'رحلة جوية', 'where': 'أين',
+        'the': 'الـ', 'gate': 'بوابة', 'reservation': 'حجز', 'what': 'ما / أي', 'time': 'وقت / ساعة', 'breakfast': 'فطور',
+        'could': 'هل يمكن', 'another': 'أخرى / آخر', 'towel': 'منشفة', 'table': 'طاولة', 'for': 'لـ', 'two': 'اثنان',
+        'please': 'من فضلك', 'can': 'هل يمكن', 'see': 'أرى', 'menu': 'قائمة الطعام', 'check': 'الحساب', 'do': '(فعل مساعد للسؤال)',
+        'you': 'أنتم', 'this': 'هذا', 'in': 'في / بـ', 'medium': 'متوسط (M)', 'how': 'كيف', 'much': 'كثير (كم)',
+        'does': '(فعل مساعد)', 'cost': 'يكلّف', 'pay': 'أدفع', 'by': 'بواسطة', 'card': 'بطاقة', 'need': 'أحتاج',
+        'doctor': 'طبيب', 'call': 'اطلبوا / اتصلوا', 'ambulance': 'سيارة إسعاف', 'nearest': 'الأقرب', 'pharmacy': 'صيدلية'
+      },
+      es: {
+        'aquí': 'هنا', 'está': 'يوجد', 'mi': 'ـي (لي)', 'pasaporte': 'جواز سفر', 'tengo': 'لدي', 'un': 'واحد (نكرة)',
+        'una': 'واحدة (نكرة)', 'vuelo': 'رحلة جوية', 'de': 'من / لـ', 'conexión': 'ترانزيت', 'dónde': 'أين', 'la': 'الـ',
+        'el': 'الـ', 'puerta': 'باب / بوابة', 'embarque': 'الصعود إلى الطائرة', 'reserva': 'حجز', 'a': 'في / إلى',
+        'qué': 'ما / أي', 'hora': 'ساعة', 'es': 'يكون', 'desayuno': 'فطور', 'me': 'لي', 'puede': 'هل يمكنكم', 'dar': 'إعطاء',
+        'otra': 'أخرى', 'toalla': 'منشفة', 'mesa': 'طاولة', 'para': 'لـ', 'dos': 'اثنان', 'por': '(من فضلك)',
+        'favor': 'معروف (من فضلك)', 'trae': 'تُحضر', 'carta': 'قائمة الطعام', 'cuenta': 'الحساب', 'lo': 'إياه',
+        'tiene': 'لديكم', 'en': 'في / بـ', 'talla': 'مقاس', 'mediana': 'متوسط', 'cuánto': 'كم', 'cuesta': 'يكلّف',
+        'esto': 'هذا', 'puedo': 'هل يمكنني', 'pagar': 'أن أدفع', 'con': 'بـ / مع', 'tarjeta': 'بطاقة',
+        'necesito': 'أحتاج', 'médico': 'طبيب', 'llame': 'اطلبوا / اتصلوا', 'ambulancia': 'سيارة إسعاف',
+        'farmacia': 'صيدلية', 'más': 'الأكثر', 'cercana': 'قريبة'
+      }
+    }
+  },
+  ru: {
+    phrases: {
+      'Here is my passport.': 'Вот мой паспорт.', 'Aquí está mi pasaporte.': 'Вот мой паспорт.',
+      'I have a connecting flight.': 'У меня стыковочный рейс.', 'Tengo un vuelo de conexión.': 'У меня стыковочный рейс.',
+      'Where is the gate?': 'Где выход на посадку?', '¿Dónde está la puerta de embarque?': 'Где выход на посадку?',
+      'I have a reservation.': 'У меня есть бронь.', 'Tengo una reserva.': 'У меня есть бронь.',
+      'What time is breakfast?': 'Во сколько завтрак?', '¿A qué hora es el desayuno?': 'Во сколько завтрак?',
+      'Could I have another towel?': 'Можно мне ещё одно полотенце?', '¿Me puede dar otra toalla?': 'Можно мне ещё одно полотенце?',
+      'A table for two, please.': 'Столик на двоих, пожалуйста.', 'Una mesa para dos, por favor.': 'Столик на двоих, пожалуйста.',
+      'Can I see the menu?': 'Можно посмотреть меню?', '¿Me trae la carta, por favor?': 'Принесите, пожалуйста, меню.',
+      'The check, please.': 'Счёт, пожалуйста.', 'La cuenta, por favor.': 'Счёт, пожалуйста.',
+      'Do you have this in a medium?': 'У вас есть это в размере M?', '¿Lo tiene en talla mediana?': 'У вас есть это в размере M?',
+      'How much does this cost?': 'Сколько это стоит?', '¿Cuánto cuesta esto?': 'Сколько это стоит?',
+      'Can I pay by card?': 'Можно оплатить картой?', '¿Puedo pagar con tarjeta?': 'Можно оплатить картой?',
+      'I need a doctor.': 'Мне нужен врач.', 'Necesito un médico.': 'Мне нужен врач.',
+      'Call an ambulance!': 'Вызовите скорую!', '¡Llame a una ambulancia!': 'Вызовите скорую!',
+      'Where is the nearest pharmacy?': 'Где ближайшая аптека?', '¿Dónde está la farmacia más cercana?': 'Где ближайшая аптека?',
+
+      'Good morning! Passport, please.': 'Доброе утро! Паспорт, пожалуйста.',
+      'Thank you. What is your final destination?': 'Спасибо. Какой ваш конечный пункт?',
+      'Okay. Do you have any questions?': 'Хорошо. У вас есть вопросы?',
+      'Gate twelve, on your left. Have a good flight!': 'Выход двенадцать, слева от вас. Хорошего полёта!',
+      'Welcome! How can I help you?': 'Добро пожаловать! Чем могу помочь?',
+      'Perfect, here is your key. Anything else?': 'Отлично, вот ваш ключ. Что-нибудь ещё?',
+      'From seven to ten. Anything else?': 'С семи до десяти. Что-нибудь ещё?',
+      'Of course, I will send one up. Enjoy your stay!': 'Конечно, я пришлю его в номер. Приятного отдыха!',
+      'Good evening! How many people?': 'Добрый вечер! Сколько человек?',
+      'Right this way. Would you like to order?': 'Сюда, пожалуйста. Будете заказывать?',
+      'Here you go. How was everything?': 'Пожалуйста. Как вам всё?',
+      'Here you are. Have a nice evening!': 'Пожалуйста. Приятного вечера!',
+      'Hi! Are you looking for something?': 'Здравствуйте! Что-то ищете?',
+      'Yes, here it is.': 'Да, вот он.',
+      'It is twenty dollars.': 'Двадцать долларов.',
+      'Sure! Here is your bag. Thank you!': 'Конечно! Вот ваш пакет. Спасибо!',
+      'Hello, what is wrong?': 'Здравствуйте, что случилось?',
+      'Is it serious? Can you breathe?': 'Это серьёзно? Вы можете дышать?',
+      'They are on the way. Anything else?': 'Они уже едут. Что-нибудь ещё?',
+      'Two blocks away, on the right. Take care!': 'В двух кварталах, справа. Берегите себя!',
+
+      '¡Buenos días! Su pasaporte, por favor.': 'Доброе утро! Ваш паспорт, пожалуйста.',
+      'Gracias. ¿Cuál es su destino final?': 'Спасибо. Какой ваш конечный пункт?',
+      'Muy bien. ¿Alguna pregunta?': 'Очень хорошо. Есть вопросы?',
+      'Puerta doce, a la izquierda. ¡Buen viaje!': 'Выход двенадцать, налево. Счастливого пути!',
+      '¡Bienvenido! ¿En qué puedo ayudarle?': 'Добро пожаловать! Чем могу помочь?',
+      'Perfecto, aquí tiene su llave. ¿Algo más?': 'Отлично, вот ваш ключ. Что-нибудь ещё?',
+      'De siete a diez. ¿Algo más?': 'С семи до десяти. Что-нибудь ещё?',
+      'Claro, se la subimos. ¡Disfrute su estancia!': 'Конечно, мы принесём его в номер. Приятного отдыха!',
+      '¡Buenas noches! ¿Cuántas personas?': 'Добрый вечер! Сколько человек?',
+      'Por aquí, por favor. ¿Desean pedir?': 'Сюда, пожалуйста. Готовы сделать заказ?',
+      'Aquí tiene. ¿Qué tal todo?': 'Пожалуйста. Как вам всё?',
+      'Aquí tiene. ¡Buenas noches!': 'Пожалуйста. Доброй ночи!',
+      '¡Hola! ¿Busca algo?': 'Здравствуйте! Что-то ищете?',
+      'Sí, aquí está.': 'Да, вот он.',
+      'Veinte euros.': 'Двадцать евро.',
+      '¡Claro! Aquí tiene su bolsa. ¡Gracias!': 'Конечно! Вот ваш пакет. Спасибо!',
+      'Hola, ¿qué le pasa?': 'Здравствуйте, что с вами?',
+      '¿Es grave? ¿Puede respirar?': 'Это серьёзно? Вы можете дышать?',
+      'Ya vienen. ¿Algo más?': 'Они уже едут. Что-нибудь ещё?',
+      'A dos calles, a la derecha. ¡Cuídese!': 'В двух кварталах, справа. Берегите себя!'
+    },
+    words: {
+      en: {
+        'here': 'вот / здесь', 'is': 'есть (является)', 'my': 'мой', 'passport': 'паспорт', 'i': 'я', 'have': 'иметь / получить',
+        'a': '(неопр. артикль)', 'an': '(неопр. артикль)', 'connecting': 'стыковочный', 'flight': 'рейс', 'where': 'где',
+        'the': '(опр. артикль)', 'gate': 'выход на посадку', 'reservation': 'бронь', 'what': 'что / какой', 'time': 'время',
+        'breakfast': 'завтрак', 'could': 'можно ли', 'another': 'ещё один', 'towel': 'полотенце', 'table': 'столик',
+        'for': 'для / на', 'two': 'два', 'please': 'пожалуйста', 'can': 'можно / могу', 'see': 'видеть', 'menu': 'меню',
+        'check': 'счёт', 'do': '(вспом. глагол)', 'you': 'вы', 'this': 'это', 'in': 'в', 'medium': 'средний (M)',
+        'how': 'как', 'much': 'много (сколько)', 'does': '(вспом. глагол)', 'cost': 'стоить', 'pay': 'платить',
+        'by': '(способ: чем)', 'card': 'карта', 'need': 'нужен', 'doctor': 'врач', 'call': 'вызовите',
+        'ambulance': 'скорая помощь', 'nearest': 'ближайший', 'pharmacy': 'аптека'
+      },
+      es: {
+        'aquí': 'здесь / вот', 'está': 'находится', 'mi': 'мой', 'pasaporte': 'паспорт', 'tengo': 'у меня есть',
+        'un': 'один (неопр. артикль)', 'una': 'одна (неопр. артикль)', 'vuelo': 'рейс', 'de': 'из / о', 'conexión': 'пересадка',
+        'dónde': 'где', 'la': '(артикль ж. р.)', 'el': '(артикль м. р.)', 'puerta': 'дверь / выход', 'embarque': 'посадка',
+        'reserva': 'бронь', 'a': 'в / к', 'qué': 'что / какой', 'hora': 'час', 'es': 'есть (является)', 'desayuno': 'завтрак',
+        'me': 'мне', 'puede': 'можете', 'dar': 'дать', 'otra': 'ещё одну', 'toalla': 'полотенце', 'mesa': 'столик',
+        'para': 'для / на', 'dos': 'два', 'por': '(пожалуйста)', 'favor': 'одолжение (пожалуйста)', 'trae': 'принесите',
+        'carta': 'меню', 'cuenta': 'счёт', 'lo': 'его', 'tiene': 'у вас есть', 'en': 'в', 'talla': 'размер',
+        'mediana': 'средний', 'cuánto': 'сколько', 'cuesta': 'стоит', 'esto': 'это', 'puedo': 'могу', 'pagar': 'заплатить',
+        'con': 'с / (чем)', 'tarjeta': 'карта', 'necesito': 'мне нужен', 'médico': 'врач', 'llame': 'вызовите',
+        'ambulancia': 'скорая', 'farmacia': 'аптека', 'más': 'самый / более', 'cercana': 'близкая'
       }
     }
   }

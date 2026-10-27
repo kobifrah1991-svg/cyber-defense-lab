@@ -1,5 +1,5 @@
 /* LangQuest — light, travel-postcard look (Hebrew RTL) with dark mode */
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=Nunito:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=Nunito:wght@600;700;800&family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
 
 :root {
   --bg: #fdf8f1;
@@ -22,7 +22,7 @@
   --boss: #7c3aed;
   --radius: 18px;
   --shadow: 0 6px 24px rgba(31, 42, 55, 0.08);
-  --font: 'Heebo', system-ui, 'Segoe UI', Arial, sans-serif;
+  --font: 'Heebo', 'Noto Sans Arabic', system-ui, 'Segoe UI', Arial, sans-serif;
   --font-lat: 'Nunito', 'Heebo', system-ui, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
