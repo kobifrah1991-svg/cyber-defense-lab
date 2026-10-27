@@ -1,4 +1,4 @@
-/* LangQuest — sales model (freemium) and entitlements
+/* TedraLingo — sales model (freemium) and entitlements
  *
  *  Free:    the first FREE_STATIONS stations of every language (lesson + Boss), phrasebook, reminders
  *  Premium: every station and Boss in every language (monthly / yearly / lifetime)
@@ -16,7 +16,7 @@
   const CONFIG = {
     // Stripe Payment Links (https://dashboard.stripe.com/payment-links) — one per plan
     checkout: { monthly: '', yearly: '', lifetime: '' },
-    // Deployed server/license-worker.js, e.g. 'https://langquest-license.<you>.workers.dev'
+    // Deployed server/license-worker.js, e.g. 'https://tedralingo-license.<you>.workers.dev'
     licenseApi: '',
     // AI tutor endpoint; defaults to licenseApi + '/tutor'
     tutorApi: '',

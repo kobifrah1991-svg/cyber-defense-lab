@@ -1,4 +1,4 @@
-/* LangQuest website — language, prices and links
+/* TedraLingo website — language, prices and links
  * Text per interface language; prices and checkout come from ../js/commerce.js (single source of truth).
  */
 (function () {
@@ -11,7 +11,7 @@
 
   const T = {
     he: {
-      title: 'LangQuest · מדברים שפה חדשה כבר מהשיעור הראשון',
+      title: 'TedraLingo · מדברים שפה חדשה כבר מהשיעור הראשון',
       nav_features: 'יכולות', nav_how: 'איך זה עובד', nav_teachers: 'המורים', nav_pricing: 'מחירים', nav_faq: 'שאלות',
       open_app: 'פתחו את הלומדה',
       hero_title: 'מדברים שפה חדשה — כבר מהשיעור הראשון',
@@ -53,7 +53,7 @@
       footer_privacy: 'פרטיות', footer_terms: 'תנאי שימוש', footer_contact: 'צור קשר'
     },
     en: {
-      title: 'LangQuest · Speak a new language from your first lesson',
+      title: 'TedraLingo · Speak a new language from your first lesson',
       nav_features: 'Features', nav_how: 'How it works', nav_teachers: 'Teachers', nav_pricing: 'Pricing', nav_faq: 'FAQ',
       open_app: 'Open the app',
       hero_title: 'Speak a new language — from your very first lesson',
@@ -95,7 +95,7 @@
       footer_privacy: 'Privacy', footer_terms: 'Terms', footer_contact: 'Contact'
     },
     ar: {
-      title: 'LangQuest · تحدثوا لغة جديدة من الدرس الأول',
+      title: 'TedraLingo · تحدثوا لغة جديدة من الدرس الأول',
       nav_features: 'المزايا', nav_how: 'كيف يعمل', nav_teachers: 'المعلمون', nav_pricing: 'الأسعار', nav_faq: 'الأسئلة',
       open_app: 'افتحوا التطبيق',
       hero_title: 'تحدثوا لغة جديدة — من الدرس الأول',
@@ -137,7 +137,7 @@
       footer_privacy: 'الخصوصية', footer_terms: 'الشروط', footer_contact: 'تواصل'
     },
     ru: {
-      title: 'LangQuest · Говорите на новом языке с первого урока',
+      title: 'TedraLingo · Говорите на новом языке с первого урока',
       nav_features: 'Возможности', nav_how: 'Как это работает', nav_teachers: 'Преподаватели', nav_pricing: 'Цены', nav_faq: 'Вопросы',
       open_app: 'Открыть приложение',
       hero_title: 'Говорите на новом языке — с первого урока',

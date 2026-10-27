@@ -1,6 +1,6 @@
 {
-  "appId": "app.langquest.learn",
-  "appName": "LangQuest",
+  "appId": "app.scitedra.tedralingo",
+  "appName": "TedraLingo",
   "webDir": "www",
   "android": {
     "allowMixedContent": false,
@@ -13,7 +13,7 @@
       "showSpinner": false
     },
     "LocalNotifications": {
-      "smallIcon": "ic_stat_langquest",
+      "smallIcon": "ic_stat_tedralingo",
       "iconColor": "#0e7490"
     }
   }

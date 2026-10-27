@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // A learner owns one opaque progress document. Scores are not authoritative.
+    match /players/{uid} {
+      function owner() { return request.auth != null && request.auth.uid == uid; }
+      function store(value) { return value is string && value.size() <= 30000; }
+      function valid() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['schema', 'saves', 'updatedAt'])
+          && d.keys().hasOnly(['schema', 'saves', 'updatedAt'])
+          && d.schema is int && d.schema == 2
+          && d.saves is map
+          && d.saves.keys().hasAll(['cl3d', 'cl_ac', 'cyberlab-career-v2'])
+          && d.saves.keys().hasOnly(['cl3d', 'cl_ac', 'cyberlab-career-v2'])
+          && store(d.saves.cl3d) && store(d.saves.cl_ac)
+          && store(d.saves['cyberlab-career-v2'])
+          && d.updatedAt is timestamp && d.updatedAt == request.time;
+      }
+      allow get: if owner();
+      allow list: if false;
+      allow create, update: if owner() && valid();
+      allow delete: if owner();
+    }
+    // Bitty's Net Adventure platformer (formerly Cloud Kingdom) (Kids web app): one owner-only progress document per signed-in user.
+    match /platformer/{uid} {
+      function pfOwner() { return request.auth != null && request.auth.uid == uid; }
+      function pfValid() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['schema', 'save', 'updatedAt'])
+          && d.keys().hasOnly(['schema', 'save', 'updatedAt'])
+          && d.schema is int && d.schema == 1
+          && d.save is string && d.save.size() <= 20000
+          && d.updatedAt is timestamp && d.updatedAt == request.time;
+      }
+      allow get: if pfOwner();
+      allow list: if false;
+      allow create, update: if pfOwner() && pfValid();
+      allow delete: if pfOwner();
+    }
+    // TedraLingo (Scitedra Labs language course): one owner-only progress document per signed-in learner (js/cloud.js).
+    match /tedralingo/{uid} {
+      function tlOwner() { return request.auth != null && request.auth.uid == uid; }
+      function tlValid() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['schema', 'save', 'updatedAt'])
+          && d.keys().hasOnly(['schema', 'save', 'updatedAt'])
+          && d.schema is int && d.schema == 1
+          && d.save is string && d.save.size() <= 200000
+          && d.updatedAt is timestamp && d.updatedAt == request.time;
+      }
+      allow get: if tlOwner();
+      allow list: if false;
+      allow create, update: if tlOwner() && tlValid();
+      allow delete: if tlOwner();
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

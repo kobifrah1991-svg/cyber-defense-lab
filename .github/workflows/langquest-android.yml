@@ -1,4 +1,4 @@
-name: LangQuest Android
+name: TedraLingo Android
 
 on:
   push:
@@ -45,8 +45,8 @@ jobs:
         working-directory: langquest/server
         run: npm ci
 
-      - name: License server tests
-        run: npm run test:server
+      - name: Tests (cloud merge + license server)
+        run: npm test
 
       - name: Copy web app into the Android project
         run: npm run sync
@@ -74,7 +74,7 @@ jobs:
 
       - uses: actions/upload-artifact@v5
         with:
-          name: langquest-android
+          name: tedralingo-android
           path: |
             langquest/android/app/build/outputs/apk/**/*.apk
             langquest/android/app/build/outputs/bundle/**/*.aab

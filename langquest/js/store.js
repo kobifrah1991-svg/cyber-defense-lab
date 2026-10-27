@@ -1,4 +1,4 @@
-/* LangQuest — LocalStorage: settings · progress · XP · daily streak · Phrasebook Vault (SRS) */
+/* TedraLingo — LocalStorage: settings · progress · XP · daily streak · Phrasebook Vault (SRS) */
 const LQ_KEY = 'langquest_v1';
 // Leitner boxes → days until next review
 const SRS_INTERVALS = [0, 1, 3, 7, 14, 30];
@@ -39,7 +39,16 @@ function lqLoad() {
   try {
     const raw = localStorage.getItem(LQ_KEY);
     if (!raw) return structuredClone(LQ_DEFAULT);
-    const s = JSON.parse(raw);
+    return lqNormalize(JSON.parse(raw));
+  } catch {
+    return structuredClone(LQ_DEFAULT);
+  }
+}
+
+/** Fill in defaults for missing fields (old saves, cloud copies). */
+function lqNormalize(s) {
+  {
+    if (!s || typeof s !== 'object' || Array.isArray(s)) return structuredClone(LQ_DEFAULT);
     const d = structuredClone(LQ_DEFAULT);
     return {
       ...d,
@@ -53,15 +62,28 @@ function lqLoad() {
         reminder: { ...d.profile.reminder, ...(s.profile || {}).reminder }
       }
     };
-  } catch {
-    return structuredClone(LQ_DEFAULT);
   }
 }
 
 let lqState = lqLoad();
 
 function lqSave() {
+  lqState.updated = Date.now();
+  lqWrite();
+  if (window.LQStore && typeof window.LQStore.onSave === 'function') window.LQStore.onSave();
+}
+
+function lqWrite() {
   try { localStorage.setItem(LQ_KEY, JSON.stringify(lqState)); } catch { /* private mode */ }
+}
+
+/* ---------- cloud save (js/cloud.js) ---------- */
+function exportState() { return structuredClone(lqState); }
+
+/** Replace the local state with a merged cloud copy — written locally, not pushed back again. */
+function applyCloud(s) {
+  lqState = lqNormalize(s);
+  lqWrite();
 }
 
 /* ---------- settings ---------- */
@@ -294,5 +316,7 @@ window.LQStore = {
   addActiveSeconds, getStreak,
   vaultId, inVault, vaultAdd, vaultRemove, vaultReview, vaultList,
   getEngage, saveEngage,
-  resetAll, SRS_INTERVALS
+  resetAll, SRS_INTERVALS,
+  exportState, applyCloud, normalize: lqNormalize,
+  onSave: null
 };

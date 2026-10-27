@@ -1,4 +1,4 @@
-/* LangQuest — light, travel-postcard look (Hebrew RTL) with dark mode */
+/* TedraLingo — light, travel-postcard look (Hebrew RTL) with dark mode */
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=Nunito:wght@600;700;800&family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
 
 :root {
@@ -646,3 +646,16 @@ img, svg, video { max-width: 100%; }
   .gr-drill { font-size: 1.2rem; }
   .gr-ex { flex-direction: column; align-items: stretch; }
 }
+
+/* ---------- cloud save ---------- */
+.cloud-box { display: grid; gap: 8px; justify-items: start; }
+.cloud-box p { margin: 0; }
+.btn.google { background: #fff; color: #1f1f1f; border: 2px solid #dadce0; font-weight: 700; }
+.btn.google:hover { background: #f8fafc; }
+.g-logo { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #fff; color: #4285f4; font-weight: 900; font-family: Arial, sans-serif; border: 1px solid #dadce0; }
+.cloud-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cloud-user img { border-radius: 50%; flex: none; }
+.cloud-user > div { display: flex; flex-direction: column; min-width: 0; }
+.cloud-user b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cloud-user small.ok { color: var(--ok); font-weight: 700; }
+.cloud-cta h3 { margin: 0 0 6px; }

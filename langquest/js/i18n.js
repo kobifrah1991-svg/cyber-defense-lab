@@ -1,4 +1,4 @@
-/* LangQuest — interface language (base language)
+/* TedraLingo — interface language (base language)
  *  - UI strings per base language, `{name}` placeholders
  *  - Hebrew is the default; the browser language picks another supported base language
  *  - Content fields localise via `field_<lang>` (e.g. name_en) with Hebrew as the fallback
@@ -14,7 +14,7 @@
 
   const STR = {
     he: {
-      'doc.title': 'LangQuest · שפה מדוברת',
+      'doc.title': 'TedraLingo — Speak up!',
       'common.exit': '✕ יציאה', 'common.next': 'הבא ←', 'common.finish': 'סיום 🏁', 'common.skip': 'דלג',
       'common.back': '→ חזרה', 'common.continue': 'המשך ←', 'common.toMap': '🗺️ למפה', 'common.backToMap': '→ למפה',
       'common.toVault': '📒 לאוסף', 'common.again': '🔁 שוב', 'common.close': 'סגירה', 'common.save': 'שמירה',
@@ -37,7 +37,7 @@
       'aw.title': '🏅 ההישגים שלי', 'aw.share': '📤 שיתוף כרטיס התקדמות', 'aw.new': '🏅 הישג חדש: {name}',
       'aw.stats': '{lessons} שיעורים · {bosses} ניצחונות Boss · {reviews} חזרות', 'aw.open': 'כל ההישגים', 'card.title': 'המסע שלי ב{lang}',
       'card.streak': 'ימי רצף', 'card.level': 'רמה', 'card.stations': 'תחנות',
-      'card.cta': 'לומדים לדבר עם LangQuest 🗺️', 'b.first_lesson': 'צעד ראשון', 'bd.first_lesson': 'סיימו שיעור ראשון',
+      'card.cta': 'לומדים לדבר עם TedraLingo 🗺️', 'b.first_lesson': 'צעד ראשון', 'bd.first_lesson': 'סיימו שיעור ראשון',
       'b.first_boss': 'מנצחי Boss', 'bd.first_boss': 'ניצחו Boss ראשון', 'b.streak3': 'שלושה ברצף',
       'bd.streak3': 'רצף של 3 ימים', 'b.streak7': 'שבוע מלא', 'bd.streak7': 'רצף של 7 ימים',
       'b.streak30': 'חודש של התמדה', 'bd.streak30': 'רצף של 30 ימים', 'b.perfect': 'הגייה מושלמת',
@@ -61,7 +61,7 @@
       'story.emergency': 'לפעמים צריך עזרה מהר 🚑 בואו נלמד לבקש רופא, אמבולנס ובית מרקחת.',
       'pay.trial': '{n} ימי ניסיון חינם',
       'pay.startTrial': 'התחילו ניסיון חינם',
-      'pay.badge': '⭐ Premium', 'pay.locked': 'תחנת Premium', 'pay.title': '⭐ LangQuest Premium',
+      'pay.badge': '⭐ Premium', 'pay.locked': 'תחנת Premium', 'pay.title': '⭐ TedraLingo Premium',
       'pay.sub': 'פתחו את כל התחנות, כל אתגרי ה-Boss וכל השפות.', 'pay.f1': 'כל התחנות בכל שפה', 'pay.f2': 'כל אתגרי ה-Audio Boss',
       'pay.f3': 'שפות חדשות ברגע שהן יוצאות', 'pay.f4': 'שיחה חופשית עם המורה (AI) 💬', 'pay.free': 'בחינם: {n} התחנות הראשונות בכל שפה, כולל ה-Boss שלהן',
       'pay.monthly': 'חודשי', 'pay.yearly': 'שנתי', 'pay.lifetime': 'לכל החיים',
@@ -72,7 +72,7 @@
       'pay.status': 'מנוי', 'pay.statusFree': 'חינם', 'pay.until': '{plan} · פעיל עד {date}',
       'pay.key': 'מפתח רישיון (להפעלה במכשיר נוסף)', 'pay.copy': 'העתקה', 'pay.copied': 'הועתק ✓',
       'pay.upgrade': '⭐ שדרוג ל-Premium', 'pay.signOut': 'הסרת הרישיון מהמכשיר',
-      'pwa.install': 'התקנת האפליקציה', 'pwa.installed': 'LangQuest הותקנה 🎉',
+      'pwa.install': 'התקנת האפליקציה', 'pwa.installed': 'TedraLingo הותקנה 🎉',
 
       'hdr.lang': 'החלפת שפה', 'hdr.xp': 'נקודות ניסיון', 'hdr.vault': 'אוסף הביטויים', 'hdr.settings': 'הגדרות',
       'hdr.home': 'חזרה למפה', 'hdr.streakDone': 'יעד היום הושג! רצף: {n} ימים',
@@ -134,6 +134,7 @@
       'game.pic': 'צליל ← תמונה', 'game.pic.hint': 'הקשיבו ובחרו את התמונה שמתאימה למשפט.',
       'game.gap': 'השלימו את החסר', 'game.gap.hint': 'הקשיבו ובחרו את המילה החסרה.',
       'game.build': 'הרכיבו את המשפט', 'game.build.hint': 'הקשיבו ולחצו על המילים לפי הסדר.',
+      "cloud.title": "☁️ שמירה בענן", "cloud.sub": "התחברו עם Google והשלב שלכם נשמר בענן — ממשיכים מאותה נקודה בכל מכשיר: בטלפון, במחשב ובאפליקציה.", "cloud.signIn": "התחברות עם Google", "cloud.saved": "נשמר בענן ✓", "cloud.saving": "שומר בענן…", "cloud.pending": "אין אינטרנט כרגע — נשמור בענן כשהחיבור יחזור.", "cloud.error": "השמירה בענן לא הצליחה. ההתקדמות שמורה במכשיר.", "cloud.denied": "אין הרשאה לשמירה בענן כרגע. ההתקדמות שמורה במכשיר.", "cloud.domain": "הכתובת הזו לא מאושרת להתחברות.", "cloud.off": "השמירה בענן לא זמינה כרגע. ההתקדמות נשמרת במכשיר.", "cloud.switch": "החלפת משתמש", "cloud.signOut": "התנתקות", "cloud.browser": "ההתחברות נפתחת בדפדפן וחוזרת לאפליקציה.", "cloud.restored": "☁️ ההתקדמות שלכם שוחזרה מהענן", "cloud.mapTitle": "שמרו את ההתקדמות", "cloud.mapSub": "התחברו עם Google והשלב שלכם יחכה לכם בכל מכשיר.",
       "gr.chapter1": "שלב 1", "gr.chapter2": "שלב 2", "gr.title": "שפה מורחבת ודקדוק 📘", "gr.sub": "אחרי שמדברים — מבינים איך השפה בנויה: קורס יסודי ברמת A1–A2 עם הסברים ברורים, טבלאות, דוגמאות קוליות ותרגול.", "gr.premiumNote": "השלב המורחב הוא חלק מ-Premium.", "gr.lockedStage": "נפתח אחרי שמסיימים את {n} התחנות של שלב 1, או מיד ברמה בינונית ומעלה.", "gr.units": "{d}/{n} יחידות", "gr.explain": "הסבר", "gr.examples": "דוגמאות", "gr.practice": "תרגול", "gr.speak": "דיבור", "gr.explainHint": "קראו את הכלל. לחצו על תא בטבלה כדי לשמוע אותו.", "gr.examplesHint": "הקשיבו לכל דוגמה — רגיל ואז בקצב צב.", "gr.practiceHint": "בחרו את הצורה הנכונה.", "gr.speakHint": "עכשיו אתם: אמרו את המשפט בקול.", "gr.table": "טבלת צורות", "gr.drillCount": "תרגיל {i} מתוך {n}", "gr.correct": "✅ נכון!", "gr.gotIt": "✅ עכשיו נכון", "gr.tryAgain": "לא בדיוק — נסו שוב.", "gr.finTitle": "סיימתם את היחידה: {name}", "gr.allDone": "🎓 סיימתם את כל יחידות הדקדוק בשפה הזו!", "pay.f5": "שלב 2: קורס שפה מורחבת ודקדוק בכל שפה 📘",
       'lesson.skipStep': '⏭️ דלג לשלב המשחק', 'lesson.star': 'שמירה לאוסף הביטויים',
       'lesson.starOn': 'נשמר לאוסף הביטויים ⭐', 'lesson.starOff': 'הוסר מאוסף הביטויים',
@@ -154,7 +155,7 @@
       'boss.won': 'ניצחתם את הבוס!', 'boss.lost': 'כמעט! עוד ניסיון אחד', 'boss.score': 'ציון שיחה:',
 
       'onb.s1': 'השפות שלי', 'onb.s2': 'מה לומדים', 'onb.s3': 'זמן ותזכורות', 'onb.s4': 'התוכנית שלי',
-      'onb.go': '🚀 יוצאים למסע', 'onb.welcome': 'ברוכים הבאים ל-LangQuest!',
+      'onb.go': '🚀 יוצאים למסע', 'onb.welcome': 'ברוכים הבאים ל-TedraLingo!',
       'onb.uiQ': 'באיזו שפה להציג את הלומדה?',
       'onb.knownQ': 'כדי להתאים את הקצב בשבילכם — אילו שפות אתם כבר יודעים, ובאיזו רמה?',
       'onb.levelsHelp': 'מה אומרת כל רמה?', 'onb.targetQ': 'איזו שפה נלמד? 🧭', 'onb.levelQ': 'מה הרמה שלכם ב{lang} היום?',
@@ -172,7 +173,7 @@
       'rem.dueToast': '⏰ {t} — הגיע זמן התרגול היומי!',
       'rem.dayNames': ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'],
       'rem.title': '⏰ הגיע זמן ה{lang} שלך!', 'rem.bodyStreak': '{m} דקות תרגול שומרות על רצף של {n} ימים 🔥',
-      'rem.body': '{m} דקות של שמיעה ודיבור — בואו נתחיל 🗺️', 'rem.summary': '🗺️ LangQuest — {m} דקות {lang}',
+      'rem.body': '{m} דקות של שמיעה ודיבור — בואו נתחיל 🗺️', 'rem.summary': '🗺️ TedraLingo — {m} דקות {lang}',
       'rem.details': 'זמן התרגול היומי שלך: {m} דקות של שמיעה, הגייה ודיבור ב{lang}.',
       'rem.perm.granted': '✅ התראות מערכת מאושרות',
       'rem.perm.denied': '🚫 התראות חסומות בדפדפן — אפשר לאשר מחדש בהגדרות האתר, או להשתמש ביומן',
@@ -185,7 +186,7 @@
     },
 
     en: {
-      'doc.title': 'LangQuest · Spoken language',
+      'doc.title': 'TedraLingo — Speak up!',
       'common.exit': '✕ Exit', 'common.next': 'Next →', 'common.finish': 'Finish 🏁', 'common.skip': 'Skip',
       'common.back': '← Back', 'common.continue': 'Continue →', 'common.toMap': '🗺️ Map', 'common.backToMap': '← Map',
       'common.toVault': '📒 Phrasebook', 'common.again': '🔁 Again', 'common.close': 'Close', 'common.save': 'Save',
@@ -208,7 +209,7 @@
       'aw.title': '🏅 My achievements', 'aw.share': '📤 Share my progress card', 'aw.new': '🏅 New achievement: {name}',
       'aw.stats': '{lessons} lessons · {bosses} Boss wins · {reviews} reviews', 'aw.open': 'All achievements', 'card.title': 'My {lang} journey',
       'card.streak': 'day streak', 'card.level': 'level', 'card.stations': 'stops',
-      'card.cta': 'Learning to speak with LangQuest 🗺️', 'b.first_lesson': 'First step', 'bd.first_lesson': 'Finish your first lesson',
+      'card.cta': 'Learning to speak with TedraLingo 🗺️', 'b.first_lesson': 'First step', 'bd.first_lesson': 'Finish your first lesson',
       'b.first_boss': 'Boss beater', 'bd.first_boss': 'Beat your first Boss', 'b.streak3': 'Three in a row',
       'bd.streak3': 'A 3-day streak', 'b.streak7': 'Full week', 'bd.streak7': 'A 7-day streak',
       'b.streak30': 'A month strong', 'bd.streak30': 'A 30-day streak', 'b.perfect': 'Perfect pronunciation',
@@ -232,7 +233,7 @@
       'story.emergency': 'Sometimes you need help fast 🚑 Let\'s learn to ask for a doctor, an ambulance and a pharmacy.',
       'pay.trial': '{n}-day free trial',
       'pay.startTrial': 'Start free trial',
-      'pay.badge': '⭐ Premium', 'pay.locked': 'Premium stop', 'pay.title': '⭐ LangQuest Premium',
+      'pay.badge': '⭐ Premium', 'pay.locked': 'Premium stop', 'pay.title': '⭐ TedraLingo Premium',
       'pay.sub': 'Unlock every stop, every Boss challenge and every language.', 'pay.f1': 'Every stop in every language', 'pay.f2': 'Every Audio Boss challenge',
       'pay.f3': 'New languages as soon as they launch', 'pay.f4': 'Free conversation with your AI teacher 💬', 'pay.free': 'Free: the first {n} stops of every language, Bosses included',
       'pay.monthly': 'Monthly', 'pay.yearly': 'Yearly', 'pay.lifetime': 'Lifetime',
@@ -243,7 +244,7 @@
       'pay.status': 'Subscription', 'pay.statusFree': 'Free', 'pay.until': '{plan} · active until {date}',
       'pay.key': 'License key (to activate another device)', 'pay.copy': 'Copy', 'pay.copied': 'Copied ✓',
       'pay.upgrade': '⭐ Upgrade to Premium', 'pay.signOut': 'Remove the license from this device',
-      'pwa.install': 'Install the app', 'pwa.installed': 'LangQuest installed 🎉',
+      'pwa.install': 'Install the app', 'pwa.installed': 'TedraLingo installed 🎉',
 
       'hdr.lang': 'Switch language', 'hdr.xp': 'Experience points', 'hdr.vault': 'Phrasebook', 'hdr.settings': 'Settings',
       'hdr.home': 'Back to map', 'hdr.streakDone': "Today's goal reached! Streak: {n} days",
@@ -306,6 +307,7 @@
       'game.pic': 'Sound → picture', 'game.pic.hint': 'Listen and pick the picture that matches the sentence.',
       'game.gap': 'Fill the gap', 'game.gap.hint': 'Listen and pick the missing word.',
       'game.build': 'Build the sentence', 'game.build.hint': 'Listen and tap the words in order.',
+      "cloud.title": "☁️ Cloud save", "cloud.sub": "Sign in with Google and your place is saved in the cloud — pick up where you left off on any device: phone, computer or the app.", "cloud.signIn": "Sign in with Google", "cloud.saved": "Saved to the cloud ✓", "cloud.saving": "Saving to the cloud…", "cloud.pending": "No internet right now — we will save when you are back online.", "cloud.error": "Cloud save failed. Your progress is saved on this device.", "cloud.denied": "Cloud save is not permitted right now. Your progress is saved on this device.", "cloud.domain": "This address is not approved for sign-in.", "cloud.off": "Cloud save is not available right now. Your progress is saved on this device.", "cloud.switch": "Switch account", "cloud.signOut": "Sign out", "cloud.browser": "Sign-in opens in your browser and returns to the app.", "cloud.restored": "☁️ Your progress was restored from the cloud", "cloud.mapTitle": "Save your progress", "cloud.mapSub": "Sign in with Google and your place will wait for you on every device.",
       "gr.chapter1": "Stage 1", "gr.chapter2": "Stage 2", "gr.title": "Expanded language & grammar 📘", "gr.sub": "Once you can speak, learn how the language works: a thorough A1–A2 course with clear explanations, tables, audio examples and practice.", "gr.premiumNote": "The expanded stage is part of Premium.", "gr.lockedStage": "Opens once you finish the {n} stops of Stage 1, or right away at intermediate level and up.", "gr.units": "{d}/{n} units", "gr.explain": "Explain", "gr.examples": "Examples", "gr.practice": "Practice", "gr.speak": "Speak", "gr.explainHint": "Read the rule. Tap a table cell to hear it.", "gr.examplesHint": "Listen to each example — normal, then turtle speed.", "gr.practiceHint": "Pick the right form.", "gr.speakHint": "Your turn: say the sentence out loud.", "gr.table": "Table of forms", "gr.drillCount": "Exercise {i} of {n}", "gr.correct": "✅ Correct!", "gr.gotIt": "✅ Now it is right", "gr.tryAgain": "Not quite — try again.", "gr.finTitle": "Unit complete: {name}", "gr.allDone": "🎓 You have finished every grammar unit in this language!", "pay.f5": "Stage 2: the expanded language & grammar course in every language 📘",
       'lesson.skipStep': '⏭️ Skip to the game', 'lesson.star': 'Save to phrasebook',
       'lesson.starOn': 'Saved to phrasebook ⭐', 'lesson.starOff': 'Removed from phrasebook',
@@ -326,7 +328,7 @@
       'boss.won': 'You beat the Boss!', 'boss.lost': 'So close! One more try', 'boss.score': 'Conversation score:',
 
       'onb.s1': 'My languages', 'onb.s2': 'What to learn', 'onb.s3': 'Time & reminders', 'onb.s4': 'My plan',
-      'onb.go': "🚀 Let's go", 'onb.welcome': 'Welcome to LangQuest!',
+      'onb.go': "🚀 Let's go", 'onb.welcome': 'Welcome to TedraLingo!',
       'onb.uiQ': 'Which language should the app use?',
       'onb.knownQ': 'To set the right pace for you — which languages do you already know, and how well?',
       'onb.levelsHelp': 'What does each level mean?', 'onb.targetQ': 'Which language will we learn? 🧭',
@@ -345,7 +347,7 @@
       'rem.dueToast': '⏰ {t} — time for your daily practice!',
       'rem.dayNames': ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       'rem.title': '⏰ Time for your {lang}!', 'rem.bodyStreak': '{m} minutes of practice keep your {n}-day streak 🔥',
-      'rem.body': "{m} minutes of listening and speaking — let's go 🗺️", 'rem.summary': '🗺️ LangQuest — {m} min of {lang}',
+      'rem.body': "{m} minutes of listening and speaking — let's go 🗺️", 'rem.summary': '🗺️ TedraLingo — {m} min of {lang}',
       'rem.details': 'Your daily practice: {m} minutes of listening, pronunciation and speaking in {lang}.',
       'rem.perm.granted': '✅ System notifications allowed',
       'rem.perm.denied': '🚫 Notifications are blocked — re-allow them in site settings, or use your calendar',
@@ -358,7 +360,7 @@
     },
 
     ar: {
-      'doc.title': 'LangQuest · اللغة المحكية',
+      'doc.title': 'TedraLingo — Speak up!',
       'common.exit': '✕ خروج', 'common.next': 'التالي ←', 'common.finish': 'إنهاء 🏁', 'common.skip': 'تخطٍّ',
       'common.back': '→ رجوع', 'common.continue': 'متابعة ←', 'common.toMap': '🗺️ الخريطة', 'common.backToMap': '→ الخريطة',
       'common.toVault': '📒 دفتر العبارات', 'common.again': '🔁 مرة أخرى', 'common.close': 'إغلاق', 'common.save': 'حفظ',
@@ -381,7 +383,7 @@
       'aw.title': '🏅 إنجازاتي', 'aw.share': '📤 مشاركة بطاقة التقدم', 'aw.new': '🏅 إنجاز جديد: {name}',
       'aw.stats': '{lessons} دروس · {bosses} انتصارات على الزعيم · {reviews} مراجعات', 'aw.open': 'كل الإنجازات', 'card.title': 'رحلتي مع {lang}',
       'card.streak': 'أيام متتالية', 'card.level': 'المستوى', 'card.stations': 'محطات',
-      'card.cta': 'أتعلم التحدث مع LangQuest 🗺️', 'b.first_lesson': 'الخطوة الأولى', 'bd.first_lesson': 'أكملوا الدرس الأول',
+      'card.cta': 'أتعلم التحدث مع TedraLingo 🗺️', 'b.first_lesson': 'الخطوة الأولى', 'bd.first_lesson': 'أكملوا الدرس الأول',
       'b.first_boss': 'قاهر الزعماء', 'bd.first_boss': 'اهزموا أول زعيم', 'b.streak3': 'ثلاثة متتالية',
       'bd.streak3': 'سلسلة 3 أيام', 'b.streak7': 'أسبوع كامل', 'bd.streak7': 'سلسلة 7 أيام',
       'b.streak30': 'شهر من المثابرة', 'bd.streak30': 'سلسلة 30 يومًا', 'b.perfect': 'نطق مثالي',
@@ -405,7 +407,7 @@
       'story.emergency': 'أحيانًا نحتاج إلى المساعدة بسرعة 🚑 لنتعلم كيف نطلب طبيبًا وسيارة إسعاف وصيدلية.',
       'pay.trial': 'تجربة مجانية لمدة {n} أيام',
       'pay.startTrial': 'ابدأوا التجربة المجانية',
-      'pay.badge': '⭐ Premium', 'pay.locked': 'محطة Premium', 'pay.title': '⭐ LangQuest Premium',
+      'pay.badge': '⭐ Premium', 'pay.locked': 'محطة Premium', 'pay.title': '⭐ TedraLingo Premium',
       'pay.sub': 'افتحوا كل المحطات وكل تحديات الزعيم وكل اللغات.', 'pay.f1': 'كل المحطات في كل لغة', 'pay.f2': 'كل تحديات Audio Boss',
       'pay.f3': 'لغات جديدة فور صدورها', 'pay.f4': 'محادثة حرة مع معلمكم (ذكاء اصطناعي) 💬', 'pay.free': 'مجانًا: أول {n} محطات في كل لغة، مع تحديات الزعيم الخاصة بها',
       'pay.monthly': 'شهري', 'pay.yearly': 'سنوي', 'pay.lifetime': 'مدى الحياة',
@@ -416,7 +418,7 @@
       'pay.status': 'الاشتراك', 'pay.statusFree': 'مجاني', 'pay.until': '{plan} · فعّال حتى {date}',
       'pay.key': 'مفتاح الترخيص (لتفعيل جهاز آخر)', 'pay.copy': 'نسخ', 'pay.copied': 'تم النسخ ✓',
       'pay.upgrade': '⭐ الترقية إلى Premium', 'pay.signOut': 'إزالة الترخيص من هذا الجهاز',
-      'pwa.install': 'تثبيت التطبيق', 'pwa.installed': 'تم تثبيت LangQuest 🎉',
+      'pwa.install': 'تثبيت التطبيق', 'pwa.installed': 'تم تثبيت TedraLingo 🎉',
 
       'hdr.lang': 'تغيير اللغة', 'hdr.xp': 'نقاط الخبرة', 'hdr.vault': 'دفتر العبارات', 'hdr.settings': 'الإعدادات',
       'hdr.home': 'العودة إلى الخريطة', 'hdr.streakDone': 'تم تحقيق هدف اليوم! السلسلة: {n} أيام',
@@ -478,6 +480,7 @@
       'game.pic': 'صوت ← صورة', 'game.pic.hint': 'استمعوا واختاروا الصورة المناسبة للجملة.',
       'game.gap': 'أكملوا الفراغ', 'game.gap.hint': 'استمعوا واختاروا الكلمة الناقصة.',
       'game.build': 'رتّبوا الجملة', 'game.build.hint': 'استمعوا واضغطوا على الكلمات بالترتيب.',
+      "cloud.title": "☁️ الحفظ في السحابة", "cloud.sub": "سجّلوا الدخول بحساب Google ويُحفظ تقدمكم في السحابة — تتابعون من النقطة نفسها على أي جهاز: الهاتف أو الحاسوب أو التطبيق.", "cloud.signIn": "تسجيل الدخول عبر Google", "cloud.saved": "تم الحفظ في السحابة ✓", "cloud.saving": "جارٍ الحفظ في السحابة…", "cloud.pending": "لا يوجد اتصال بالإنترنت الآن — سنحفظ عند عودة الاتصال.", "cloud.error": "فشل الحفظ في السحابة. تقدمكم محفوظ على الجهاز.", "cloud.denied": "الحفظ في السحابة غير مسموح حاليًا. تقدمكم محفوظ على الجهاز.", "cloud.domain": "هذا العنوان غير معتمد لتسجيل الدخول.", "cloud.off": "الحفظ في السحابة غير متاح حاليًا. تقدمكم محفوظ على الجهاز.", "cloud.switch": "تبديل الحساب", "cloud.signOut": "تسجيل الخروج", "cloud.browser": "يُفتح تسجيل الدخول في المتصفح ثم يعود إلى التطبيق.", "cloud.restored": "☁️ تمت استعادة تقدمكم من السحابة", "cloud.mapTitle": "احفظوا تقدمكم", "cloud.mapSub": "سجّلوا الدخول بحساب Google وسيبقى تقدمكم بانتظاركم على كل جهاز.",
       "gr.chapter1": "المرحلة 1", "gr.chapter2": "المرحلة 2", "gr.title": "لغة موسّعة وقواعد 📘", "gr.sub": "بعد أن تتكلموا — افهموا كيف تُبنى اللغة: دورة أساسية بمستوى A1–A2 مع شرح واضح وجداول وأمثلة صوتية وتمارين.", "gr.premiumNote": "المرحلة الموسّعة جزء من Premium.", "gr.lockedStage": "تُفتح بعد إنهاء {n} محطات المرحلة 1، أو فورًا للمستوى المتوسط فما فوق.", "gr.units": "{d}/{n} وحدات", "gr.explain": "شرح", "gr.examples": "أمثلة", "gr.practice": "تمرين", "gr.speak": "كلام", "gr.explainHint": "اقرأوا القاعدة. اضغطوا على خانة في الجدول لسماعها.", "gr.examplesHint": "استمعوا إلى كل مثال — بالسرعة العادية ثم بسرعة السلحفاة.", "gr.practiceHint": "اختاروا الصيغة الصحيحة.", "gr.speakHint": "دوركم الآن: قولوا الجملة بصوت عالٍ.", "gr.table": "جدول الصيغ", "gr.drillCount": "تمرين {i} من {n}", "gr.correct": "✅ صحيح!", "gr.gotIt": "✅ الآن صحيح", "gr.tryAgain": "ليس تمامًا — حاولوا مرة أخرى.", "gr.finTitle": "أنهيتم الوحدة: {name}", "gr.allDone": "🎓 أنهيتم كل وحدات القواعد في هذه اللغة!", "pay.f5": "المرحلة 2: دورة اللغة الموسّعة والقواعد في كل لغة 📘",
       'lesson.skipStep': '⏭️ الانتقال إلى اللعبة', 'lesson.star': 'حفظ في دفتر العبارات',
       'lesson.starOn': 'حُفظت في دفتر العبارات ⭐', 'lesson.starOff': 'أُزيلت من دفتر العبارات',
@@ -498,7 +501,7 @@
       'boss.won': 'هزمتم الزعيم!', 'boss.lost': 'اقتربتم! محاولة أخرى', 'boss.score': 'نتيجة المحادثة:',
 
       'onb.s1': 'لغاتي', 'onb.s2': 'ماذا نتعلم', 'onb.s3': 'الوقت والتذكيرات', 'onb.s4': 'خطتي',
-      'onb.go': '🚀 لننطلق', 'onb.welcome': 'أهلًا بكم في LangQuest!',
+      'onb.go': '🚀 لننطلق', 'onb.welcome': 'أهلًا بكم في TedraLingo!',
       'onb.uiQ': 'بأي لغة نعرض التطبيق؟',
       'onb.knownQ': 'لنضبط الوتيرة المناسبة لكم — ما اللغات التي تعرفونها، وبأي مستوى؟',
       'onb.levelsHelp': 'ماذا يعني كل مستوى؟', 'onb.targetQ': 'أي لغة سنتعلم؟ 🧭', 'onb.levelQ': 'ما مستواكم في {lang} اليوم؟',
@@ -516,7 +519,7 @@
       'rem.dueToast': '⏰ {t} — حان وقت التدريب اليومي!',
       'rem.dayNames': ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
       'rem.title': '⏰ حان وقت تعلّم {lang}!', 'rem.bodyStreak': '{m} دقائق من التدريب تحافظ على سلسلة {n} أيام 🔥',
-      'rem.body': '{m} دقائق من الاستماع والتحدث — لنبدأ 🗺️', 'rem.summary': '🗺️ LangQuest — {m} دقائق · {lang}',
+      'rem.body': '{m} دقائق من الاستماع والتحدث — لنبدأ 🗺️', 'rem.summary': '🗺️ TedraLingo — {m} دقائق · {lang}',
       'rem.details': 'تدريبكم اليومي على {lang}: {m} دقائق من الاستماع والنطق والتحدث.',
       'rem.perm.granted': '✅ إشعارات النظام مسموحة',
       'rem.perm.denied': '🚫 الإشعارات محظورة في المتصفح — يمكن السماح بها من إعدادات الموقع أو استخدام التقويم',
@@ -529,7 +532,7 @@
     },
 
     ru: {
-      'doc.title': 'LangQuest · Разговорный язык',
+      'doc.title': 'TedraLingo — Speak up!',
       'common.exit': '✕ Выход', 'common.next': 'Далее →', 'common.finish': 'Готово 🏁', 'common.skip': 'Пропустить',
       'common.back': '← Назад', 'common.continue': 'Продолжить →', 'common.toMap': '🗺️ Карта', 'common.backToMap': '← Карта',
       'common.toVault': '📒 Разговорник', 'common.again': '🔁 Ещё раз', 'common.close': 'Закрыть', 'common.save': 'Сохранить',
@@ -552,7 +555,7 @@
       'aw.title': '🏅 Мои достижения', 'aw.share': '📤 Поделиться карточкой прогресса', 'aw.new': '🏅 Новое достижение: {name}',
       'aw.stats': 'Уроков: {lessons} · побед над Боссом: {bosses} · повторений: {reviews}', 'aw.open': 'Все достижения', 'card.title': 'Моё путешествие: {lang}',
       'card.streak': 'дней подряд', 'card.level': 'уровень', 'card.stations': 'остановок',
-      'card.cta': 'Учусь говорить с LangQuest 🗺️', 'b.first_lesson': 'Первый шаг', 'bd.first_lesson': 'Пройдите первый урок',
+      'card.cta': 'Учусь говорить с TedraLingo 🗺️', 'b.first_lesson': 'Первый шаг', 'bd.first_lesson': 'Пройдите первый урок',
       'b.first_boss': 'Победитель Босса', 'bd.first_boss': 'Победите первого Босса', 'b.streak3': 'Три подряд',
       'bd.streak3': 'Серия 3 дня', 'b.streak7': 'Целая неделя', 'bd.streak7': 'Серия 7 дней',
       'b.streak30': 'Месяц упорства', 'bd.streak30': 'Серия 30 дней', 'b.perfect': 'Идеальное произношение',
@@ -576,7 +579,7 @@
       'story.emergency': 'Иногда помощь нужна срочно 🚑 Учимся звать врача, скорую и искать аптеку.',
       'pay.trial': '{n} дня бесплатно',
       'pay.startTrial': 'Начать бесплатный период',
-      'pay.badge': '⭐ Premium', 'pay.locked': 'Остановка Premium', 'pay.title': '⭐ LangQuest Premium',
+      'pay.badge': '⭐ Premium', 'pay.locked': 'Остановка Premium', 'pay.title': '⭐ TedraLingo Premium',
       'pay.sub': 'Откройте все остановки, все битвы с Боссом и все языки.', 'pay.f1': 'Все остановки в каждом языке', 'pay.f2': 'Все битвы Audio Boss',
       'pay.f3': 'Новые языки сразу после выхода', 'pay.f4': 'Свободный разговор с ИИ-преподавателем 💬', 'pay.free': 'Бесплатно: первые {n} остановки каждого языка, включая Боссов',
       'pay.monthly': 'Месяц', 'pay.yearly': 'Год', 'pay.lifetime': 'Навсегда',
@@ -587,7 +590,7 @@
       'pay.status': 'Подписка', 'pay.statusFree': 'Бесплатно', 'pay.until': '{plan} · активна до {date}',
       'pay.key': 'Лицензионный ключ (для другого устройства)', 'pay.copy': 'Копировать', 'pay.copied': 'Скопировано ✓',
       'pay.upgrade': '⭐ Перейти на Premium', 'pay.signOut': 'Удалить лицензию с этого устройства',
-      'pwa.install': 'Установить приложение', 'pwa.installed': 'LangQuest установлено 🎉',
+      'pwa.install': 'Установить приложение', 'pwa.installed': 'TedraLingo установлено 🎉',
 
       'hdr.lang': 'Сменить язык', 'hdr.xp': 'Очки опыта', 'hdr.vault': 'Разговорник', 'hdr.settings': 'Настройки',
       'hdr.home': 'На карту', 'hdr.streakDone': 'Цель на сегодня выполнена! Серия: {n} дн.',
@@ -649,6 +652,7 @@
       'game.pic': 'Звук → картинка', 'game.pic.hint': 'Послушайте и выберите подходящую картинку.',
       'game.gap': 'Заполните пропуск', 'game.gap.hint': 'Послушайте и выберите пропущенное слово.',
       'game.build': 'Соберите фразу', 'game.build.hint': 'Послушайте и нажимайте на слова по порядку.',
+      "cloud.title": "☁️ Сохранение в облаке", "cloud.sub": "Войдите через Google — и ваш прогресс сохранится в облаке: продолжайте с того же места на любом устройстве — телефоне, компьютере или в приложении.", "cloud.signIn": "Войти через Google", "cloud.saved": "Сохранено в облаке ✓", "cloud.saving": "Сохраняем в облако…", "cloud.pending": "Сейчас нет интернета — сохраним, когда связь вернётся.", "cloud.error": "Не удалось сохранить в облаке. Прогресс сохранён на устройстве.", "cloud.denied": "Сохранение в облаке сейчас недоступно. Прогресс сохранён на устройстве.", "cloud.domain": "Этот адрес не разрешён для входа.", "cloud.off": "Сохранение в облаке сейчас недоступно. Прогресс сохраняется на устройстве.", "cloud.switch": "Сменить аккаунт", "cloud.signOut": "Выйти", "cloud.browser": "Вход откроется в браузере и вернётся в приложение.", "cloud.restored": "☁️ Ваш прогресс восстановлен из облака", "cloud.mapTitle": "Сохраните прогресс", "cloud.mapSub": "Войдите через Google — и ваш прогресс будет ждать вас на любом устройстве.",
       "gr.chapter1": "Этап 1", "gr.chapter2": "Этап 2", "gr.title": "Расширенный язык и грамматика 📘", "gr.sub": "Заговорили — теперь разберитесь, как устроен язык: основательный курс уровня A1–A2 с понятными объяснениями, таблицами, аудиопримерами и упражнениями.", "gr.premiumNote": "Расширенный этап входит в Premium.", "gr.lockedStage": "Откроется после {n} остановок этапа 1 или сразу — для среднего уровня и выше.", "gr.units": "{d}/{n} уроков", "gr.explain": "Правило", "gr.examples": "Примеры", "gr.practice": "Практика", "gr.speak": "Речь", "gr.explainHint": "Прочитайте правило. Нажмите на ячейку таблицы, чтобы услышать её.", "gr.examplesHint": "Послушайте каждый пример — в обычном темпе, затем в режиме черепахи.", "gr.practiceHint": "Выберите правильную форму.", "gr.speakHint": "Ваша очередь: произнесите фразу вслух.", "gr.table": "Таблица форм", "gr.drillCount": "Упражнение {i} из {n}", "gr.correct": "✅ Верно!", "gr.gotIt": "✅ Теперь верно", "gr.tryAgain": "Не совсем — попробуйте ещё раз.", "gr.finTitle": "Урок пройден: {name}", "gr.allDone": "🎓 Вы прошли все уроки грамматики этого языка!", "pay.f5": "Этап 2: курс расширенного языка и грамматики для каждого языка 📘",
       'lesson.skipStep': '⏭️ Перейти к игре', 'lesson.star': 'Сохранить в разговорник',
       'lesson.starOn': 'Сохранено в разговорник ⭐', 'lesson.starOff': 'Удалено из разговорника',
@@ -669,7 +673,7 @@
       'boss.won': 'Вы победили Босса!', 'boss.lost': 'Почти! Ещё одна попытка', 'boss.score': 'Оценка диалога:',
 
       'onb.s1': 'Мои языки', 'onb.s2': 'Что учим', 'onb.s3': 'Время и напоминания', 'onb.s4': 'Мой план',
-      'onb.go': '🚀 В путь', 'onb.welcome': 'Добро пожаловать в LangQuest!',
+      'onb.go': '🚀 В путь', 'onb.welcome': 'Добро пожаловать в TedraLingo!',
       'onb.uiQ': 'На каком языке показывать приложение?',
       'onb.knownQ': 'Чтобы подобрать темп — какие языки вы уже знаете и насколько хорошо?',
       'onb.levelsHelp': 'Что означает каждый уровень?', 'onb.targetQ': 'Какой язык будем учить? 🧭',
@@ -688,7 +692,7 @@
       'rem.dueToast': '⏰ {t} — время ежедневной практики!',
       'rem.dayNames': ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
       'rem.title': '⏰ Время для языка: {lang}!', 'rem.bodyStreak': '{m} мин практики сохранят серию в {n} дн. 🔥',
-      'rem.body': '{m} мин слушания и разговора — начнём 🗺️', 'rem.summary': '🗺️ LangQuest — {m} мин · {lang}',
+      'rem.body': '{m} мин слушания и разговора — начнём 🗺️', 'rem.summary': '🗺️ TedraLingo — {m} мин · {lang}',
       'rem.details': 'Ваша ежедневная практика ({lang}): {m} мин слушания, произношения и разговора.',
       'rem.perm.granted': '✅ Системные уведомления разрешены',
       'rem.perm.denied': '🚫 Уведомления заблокированы — разрешите их в настройках сайта или используйте календарь',

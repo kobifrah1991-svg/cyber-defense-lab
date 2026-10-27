@@ -1,4 +1,35 @@
-# LangQuest · לומדת שפה מדוברת
+# TedraLingo — Speak up!
+
+לומדת שפות: מתחילים בשפה מדוברת וממשיכים לשפה מורחבת ודקדוק.
+
+מוצר של [Scitedra Labs](https://scitedra-labs.web.app/).
+
+## קישורים
+
+| | |
+|---|---|
+| 🌐 דף הנחיתה והלומדה | https://tedralingo.web.app (אתר Hosting בשם `tedralingo` בפרויקט Firebase `cyberlab-3d`) — `/site/` דף הנחיתה, `/index.html` הלומדה |
+| 📱 הורדה לאנדרואיד | https://github.com/Scitedra-Labs/TedraLingo-releases/releases/latest |
+| 💾 קוד המקור (פרטי) | https://github.com/Scitedra-Labs/TedraLingo |
+| ⬇️ ריפו ההורדות (ציבורי) | https://github.com/Scitedra-Labs/TedraLingo-releases |
+
+## התחברות עם Google ושמירה בענן
+
+- **התחברות עם Google** (כפתור במפה ובהגדרות): השלב שהלומד נמצא בו — תחנות, Boss, יחידות דקדוק, XP, רצף, אוסף ביטויים והגדרות — נשמר במסמך פרטי `tedralingo/{uid}` ב-Firestore (פרויקט `cyberlab-3d`) ומסונכרן בין טלפון, מחשב ואפליקציה.
+- **מיזוג בלי לאבד התקדמות** (`js/cloud-merge.js`): שיעור שהושלם נשאר מושלם, ציונים ו-XP לפי המקסימום, האוסף שומר כל ביטוי; הגדרות לפי העותק החדש יותר. בלי אינטרנט נשמר במכשיר ונשלח כשהחיבור חוזר.
+- **באפליקציית האנדרואיד** Google לא מאפשרת התחברות בתוך WebView, לכן ההתחברות נפתחת בדפדפן (`auth.html` באתר) וחוזרת לאפליקציה דרך `app.scitedra.tedralingo://auth`.
+- הגדרה חד-פעמית ב-Firebase: [`firebase/README.md`](firebase/README.md) (דומיין מאושר + כללי Firestore).
+- בדיקות: `npm test` (מיזוג + שרת).
+
+## פרסום — מסונכרן עם GitHub
+
+- **אתר + לומדה** (`.github/workflows/hosting.yml`): כל push ל-`main` עולה ל-Firebase Hosting (`npm run build:hosting` ← `dist/`), וכל Pull Request מקבל קישור תצוגה מקדימה.
+  הגדרה חד-פעמית:
+  1. יוצרים את אתר ה-Hosting: `firebase hosting:sites:create tedralingo --project cyberlab-3d`
+  2. מוסיפים ב-GitHub Secrets את `FIREBASE_SERVICE_ACCOUNT` (מפתח JSON של service account עם "Firebase Hosting Admin" על `cyberlab-3d`). בלי הסוד — הבנייה רצה והפריסה מדולגת.
+- **APK** (`.github/workflows/android.yml`): בכל push נבנה APK. כשיש סודות חתימה (`ANDROID_KEYSTORE_*`) ו-`RELEASES_TOKEN` (טוקן עם הרשאת Contents על `TedraLingo-releases`), ה-APK החתום מתפרסם כ-Release בריפו ההורדות.
+  אחרי הגרסה הראשונה ממלאים `CONFIG.apkUrl` ב-`js/commerce.js` ל-`https://github.com/Scitedra-Labs/TedraLingo-releases/releases/latest/download/TedraLingo.apk` — וכפתור ההורדה באתר נדלק.
+- ידנית: `npm run build:hosting && firebase deploy --only hosting`.
 
 לומדה אינטראקטיבית בעברית לשפה מדוברת ומעשית לחו״ל — דגש על שמיעה, הגייה, זיהוי צלילים ופירוק פונטי.
 HTML/CSS/JS בלבד, בלי build ובלי שרת backend. ההתקדמות נשמרת ב־LocalStorage.
@@ -6,7 +37,6 @@ HTML/CSS/JS בלבד, בלי build ובלי שרת backend. ההתקדמות נ�
 ## איך לפתוח
 
 ```bash
-cd langquest
 python3 -m http.server 8080
 # http://localhost:8080
 ```
@@ -35,7 +65,7 @@ python3 -m http.server 8080
 ## מבנה
 
 ```
-langquest/
+TedraLingo/
 ├── index.html
 ├── sw.js           # service worker: אופליין + לחיצה על התראה
 ├── manifest.webmanifest, icons/   # PWA
@@ -43,7 +73,7 @@ langquest/
 ├── server/         # Cloudflare Worker: רישיונות + מורה AI, עם בדיקות
 ├── android/        # פרויקט האנדרואיד (Capacitor)
 ├── img/teachers, img/npc  # תמונות המורים והדמויות
-├── css/langquest.css
+├── css/tedralingo.css
 └── js/
     ├── i18n.js     # שפת בסיס: טקסטי ממשק, כיוון, זיהוי שפת דפדפן
     ├── data.js     # שפות · מבטאים · תחנות · ביטויים · תסריטי Boss
@@ -90,9 +120,9 @@ langquest/
 - **כל גודל מסך**: טלפון קטן (320px), טלפון לרוחב, טאבלט, מחשב (מפה + פאנל צד), מסכים גדולים; תמיכה ב-notch ובאזורים בטוחים.
 - **PWA**: ניתן להתקנה מהדפדפן (כפתור 📲), עובד אופליין אחרי הפתיחה הראשונה.
 - **APK לאנדרואיד** (Capacitor 8, `android/`): הקראה וזיהוי דיבור נייטיב, תזכורות כהתראות מערכת גם כשהאפליקציה סגורה, כפתור חזרה, אייקונים ומסכי פתיחה בכל הרזולוציות.
-  - **בנייה אוטומטית**: GitHub Actions (`.github/workflows/langquest-android.yml`) בונה APK בכל שינוי — מורידים מ-Actions ← הריצה ← Artifacts.
+  - **בנייה אוטומטית**: GitHub Actions (`.github/workflows/android.yml`) בונה APK בכל שינוי — מורידים מ-Actions ← הריצה ← Artifacts.
   - **בנייה מקומית**: `npm install && npm run apk:debug` (דורש Android SDK + JDK 21).
-  - **חתימה לשחרור**: יוצרים keystore (`keytool -genkey -v -keystore release.jks -alias langquest -keyalg RSA -keysize 2048 -validity 10000`) ומוסיפים ב-GitHub Secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` — ה-workflow יבנה APK חתום ו-AAB לחנות.
+  - **חתימה לשחרור**: יוצרים keystore (`keytool -genkey -v -keystore release.jks -alias tedralingo -keyalg RSA -keysize 2048 -validity 10000`) ומוסיפים ב-GitHub Secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` — ה-workflow יבנה APK חתום ו-AAB לחנות.
 
 ## שני שלבים: שפה מדוברת ← שפה מורחבת ודקדוק
 
@@ -129,7 +159,7 @@ langquest/
 ## אתר המכירה
 
 `site/index.html` — דף נחיתה בארבע שפות (עברית · English · العربية · Русский) עם צילומי מסך אמיתיים מהלומדה, יכולות, מורים, טבלת מחירים (מחוברת ל-`commerce.js` — כפתור תוכנית פותח את מסך הרכישה בלומדה), שאלות נפוצות, `privacy.html` ו-`terms.html` (טיוטות שדורשות השלמת פרטי מפעיל ובדיקה משפטית).
-אחרי מיזוג ל-`main` אפשר לפרסם ב-GitHub Pages: `/langquest/site/` (האתר) ו-`/langquest/` (הלומדה).
+מתפרסם אוטומטית ב-Firebase Hosting: https://tedralingo.web.app/site/ (האתר) ו-https://tedralingo.web.app/index.html (הלומדה).
 
 ## הוספת שפת בסיס (ממשק)
 

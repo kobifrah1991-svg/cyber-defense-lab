@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">LangQuest</string>
-    <string name="title_activity_main">LangQuest</string>
-    <string name="package_name">app.langquest.learn</string>
-    <string name="custom_url_scheme">app.langquest.learn</string>
+    <string name="app_name">TedraLingo</string>
+    <string name="title_activity_main">TedraLingo</string>
+    <string name="package_name">app.scitedra.tedralingo</string>
+    <string name="custom_url_scheme">app.scitedra.tedralingo</string>
 </resources>

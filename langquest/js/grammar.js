@@ -1,4 +1,4 @@
-/* LangQuest — Chapter 2: expanded language & grammar (A1–A2 foundations)
+/* TedraLingo — Chapter 2: expanded language & grammar (A1–A2 foundations)
  *
  * Unit: { id, icon, level, title: {he,en,ar,ru}, explain: {he,en,ar,ru: [bullets]}, table: [[target-language cells]],
  *         ex: [[sentence, he, en, ar, ru]], drills: [[sentence with ___, answer, [options]]] }

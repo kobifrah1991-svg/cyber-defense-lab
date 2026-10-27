@@ -1,6 +1,6 @@
 # Deploy:  npx wrangler deploy
 # Secrets: npx wrangler secret put STRIPE_SECRET_KEY / LICENSE_SECRET
-name = "langquest-license"
+name = "tedralingo-license"
 main = "license-worker.js"
 compatibility_date = "2026-01-01"
 

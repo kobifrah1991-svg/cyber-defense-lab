@@ -1,6 +1,6 @@
 {
-  "name": "LangQuest — Spoken language for travel",
-  "short_name": "LangQuest",
+  "name": "TedraLingo — Speak up!",
+  "short_name": "TedraLingo",
   "description": "Listen, slow down, play and speak: spoken-language micro-lessons with karaoke, syllable breakdown and live pronunciation check.",
   "id": "./",
   "start_url": "./index.html",

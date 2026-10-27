@@ -1,4 +1,4 @@
-/* LangQuest — content registry (languages · accents · stations · phrases · boss dialogues)
+/* TedraLingo — content registry (languages · accents · stations · phrases · boss dialogues)
  *
  * Word format: "token|meaning-he|syl·la·bles|תַּעְ·תּוּק|stressIndex"
  *   - token        : the word as it appears in the phrase (punctuation is stripped for matching)

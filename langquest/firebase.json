@@ -1,0 +1,29 @@
+{
+  "hosting": {
+    "site": "tedralingo",
+    "public": "dist",
+    "ignore": ["**/.*", "**/README.md"],
+    "redirects": [
+      { "source": "/", "destination": "/site/", "type": 302 }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+          { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+          { "key": "Permissions-Policy", "value": "camera=(), geolocation=(), payment=(), usb=()" }
+        ]
+      },
+      {
+        "source": "**/*.@(html|js|css|json|webmanifest)",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "**/*.@(png|jpg|webp|svg)",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=86400" }]
+      }
+    ]
+  }
+}

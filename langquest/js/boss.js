@@ -1,4 +1,4 @@
-/* LangQuest — Audio Boss: a short spoken role-play at the end of each station.
+/* TedraLingo — Audio Boss: a short spoken role-play at the end of each station.
  * The character speaks (TTS + karaoke), the learner answers by voice. Without a mic
  * the learner answers by choosing the right reply instead.
  */

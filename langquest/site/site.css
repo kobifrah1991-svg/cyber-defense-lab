@@ -1,4 +1,4 @@
-/* LangQuest website — same palette as the app */
+/* TedraLingo website — same palette as the app */
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Nunito:wght@700;800;900&family=Noto+Sans+Arabic:wght@400;600;800&display=swap');
 
 :root {
@@ -127,3 +127,5 @@ h2 { font-size: clamp(1.6rem, 1.1rem + 2vw, 2.4rem); text-align: center; }
   .nav-end .btn { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
+
+.slogan { display: inline-block; margin-bottom: 12px; padding: 6px 14px; border-radius: 999px; background: var(--sun-soft, #ffedd5); color: var(--sun, #ea580c); font-weight: 800; letter-spacing: .01em; }

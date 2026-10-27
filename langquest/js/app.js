@@ -1,4 +1,4 @@
-/* LangQuest — app shell: header · world map · phrasebook vault · settings · daily streak timer */
+/* TedraLingo — app shell: header · world map · phrasebook vault · settings · daily streak timer */
 (function () {
   const { esc, $, $$, karaoke, translitLine, toast, burst, shuffle } = LQUI;
   const { STATIONS, LANGS } = LQData;
@@ -133,6 +133,7 @@
       </section>
       ${LQCourse.mapCard(L.id)}
       </div><aside class="map-side">
+      ${cloudCard()}
       ${chatCard()}
       ${LQEngage.questsCard()}
       ${LQEngage.leagueCard()}
@@ -165,6 +166,7 @@
     $$('[data-boss]', view).forEach(b => b.onclick = () => go('boss', { lang: L.id, station: b.dataset.boss }));
     $$('[data-unit]', view).forEach(b => b.onclick = () => go('grammar', { lang: L.id, unit: b.dataset.unit }));
     $$('[data-act=paywall]', view).forEach(b => b.onclick = openPaywall);
+    renderCloudBoxes(view);
     const chatBtn = $('[data-act=chat]', view);
     if (chatBtn) chatBtn.onclick = () => go('chat', { scenario: 'free' });
     $$('.quests, .league', view).forEach(c => { c.onclick = () => go('awards'); c.classList.add('clickable'); });
@@ -172,6 +174,32 @@
     if (r) r.onclick = () => go('review');
     $('[data-act=vault]', view).onclick = () => go('vault');
   }
+
+  /* ---------- cloud save (js/cloud.js loads as a module, after this file) ---------- */
+  function cloudCard() {
+    const C = window.LQCloud;
+    if (!C || C.user || C.state === 'off') return '';
+    return `
+      <section class="card cloud-cta">
+        <h3>☁️ ${esc(t('cloud.mapTitle'))}</h3>
+        <div class="cloud-box"></div>
+      </section>`;
+  }
+
+  function renderCloudBoxes(root = document) {
+    if (window.LQCloud) $$('.cloud-box', root).forEach(h => LQCloud.render(h));
+  }
+
+  document.addEventListener('lq:cloud', () => {
+    // the map's sign-in card appears / disappears with the session (and once the module has loaded)
+    if (current === 'map' && !!cloudCard() !== !!$('.cloud-cta', view)) return renderMap();
+    renderCloudBoxes();
+  });
+  // a merged cloud copy replaced the local state
+  document.addEventListener('lq:state', () => {
+    refreshHeader();
+    if (current === 'map') renderMap();
+  });
 
   function chatCard() {
     const tc = LQUI.currentTeacher();
@@ -373,6 +401,7 @@
           <button class="btn ghost sm" data-act="profile">${t('set.profile')}</button>
         </div>
       </div>
+      <div class="set-group cloud-set"><h3 class="sub">${t('cloud.title')}</h3><div class="cloud-box"></div></div>
       ${premiumSection()}
       <h3 class="sub">${t('set.voiceTitle')}</h3>
       <label class="field"><span>${esc(t('set.accent', { lang: f(L, 'name') }))}</span>
@@ -397,6 +426,7 @@
       <div class="row spread"><button class="btn bad sm" data-act="reset">${t('set.reset')}</button><button class="btn primary" data-act="close">${t('common.close')}</button></div>`, body => {
       $('[data-f=ui]', body).onchange = e => { switchUi(e.target.value); openSettings(); };
       bindPremiumSection(body);
+      renderCloudBoxes(body);
       $('[data-f=accent]', body).onchange = e => { LQStore.setAccent(L.id, e.target.value); openSettings(); if (current === 'map') renderMap(); };
       const vs = $('[data-f=voice]', body);
       vs.onchange = () => LQStore.setVoice(accent, vs.value);

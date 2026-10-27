@@ -1,4 +1,4 @@
-/* LangQuest — platform layer: web browser vs. Android app (Capacitor)
+/* TedraLingo — platform layer: web browser vs. Android app (Capacitor)
  * In the APK the Capacitor runtime injects window.Capacitor; native plugins are reached through
  * Capacitor.Plugins (no bundler needed). On the web every call falls back to browser APIs.
  */

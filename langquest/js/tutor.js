@@ -1,4 +1,4 @@
-/* LangQuest — AI conversation partner (Premium)
+/* TedraLingo — AI conversation partner (Premium)
  * Free spoken conversation with the learner's teacher: the teacher answers in the target language
  * (read aloud with karaoke), with a translation, a gentle correction and two suggested replies.
  * Talks to server/tutor.js; until it is configured, a demo mode on localhost replays the station's Boss lines.

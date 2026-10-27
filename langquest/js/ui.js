@@ -1,4 +1,4 @@
-/* LangQuest — shared UI components */
+/* TedraLingo — shared UI components */
 (function () {
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const $ = (sel, root = document) => root.querySelector(sel);

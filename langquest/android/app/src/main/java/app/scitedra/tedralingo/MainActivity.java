@@ -1,4 +1,4 @@
-package app.langquest.learn;
+package app.scitedra.tedralingo;
 
 import com.getcapacitor.BridgeActivity;
 

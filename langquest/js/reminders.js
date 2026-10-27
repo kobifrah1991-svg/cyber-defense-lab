@@ -1,4 +1,4 @@
-/* LangQuest — study reminders
+/* TedraLingo — study reminders
  *  - In-app scheduler: while the app is open (even in a background tab) it fires a system
  *    notification + in-app banner at the learner's chosen times on chosen weekdays
  *  - Calendar export (.ics with a recurring event + alarm, or a Google Calendar link) so the
@@ -64,7 +64,7 @@
       r.days.forEach(d => r.times.forEach((time, i) => {
         const [hour, minute] = time.split(':').map(Number);
         notifications.push({
-          id: NATIVE_BASE_ID + d * 10 + i, title, body, smallIcon: 'ic_stat_langquest',
+          id: NATIVE_BASE_ID + d * 10 + i, title, body, smallIcon: 'ic_stat_tedralingo',
           schedule: { on: { weekday: d + 1, hour, minute }, allowWhileIdle: true }   // Capacitor: 1 = Sunday
         });
       }));
@@ -79,12 +79,12 @@
   async function notify(title, body) {
     if (permission() !== 'granted') return false;
     if (LN) {
-      await LN.schedule({ notifications: [{ id: NATIVE_BASE_ID + 99, title, body, smallIcon: 'ic_stat_langquest', schedule: { at: new Date(Date.now() + 1500) } }] });
+      await LN.schedule({ notifications: [{ id: NATIVE_BASE_ID + 99, title, body, smallIcon: 'ic_stat_tedralingo', schedule: { at: new Date(Date.now() + 1500) } }] });
       return true;
     }
     const opts = {
       body,
-      tag: 'langquest-reminder',
+      tag: 'tedralingo-reminder',
       renotify: true,
       icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>",
       data: { url: location.href.split('#')[0] }
@@ -172,11 +172,11 @@
     const byday = r.days.map(d => ICS_DAYS[d]).join(',');
     const now = new Date();
     const dtstamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}00Z`;
-    const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//LangQuest//Study Reminder//HE', 'CALSCALE:GREGORIAN'];
+    const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//TedraLingo//Study Reminder//HE', 'CALSCALE:GREGORIAN'];
     r.times.forEach((t, i) => {
       lines.push(
         'BEGIN:VEVENT',
-        `UID:langquest-${i}-${t.replace(':', '')}-${now.getTime()}@langquest`,
+        `UID:tedralingo-${i}-${t.replace(':', '')}-${now.getTime()}@tedralingo`,
         `DTSTAMP:${dtstamp}`,
         `DTSTART:${stamp(nextDate(r.days, t), t)}`,
         `DURATION:PT${p.minutes}M`,
@@ -195,7 +195,7 @@
     const blob = new Blob([buildIcs()], { type: 'text/calendar;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'langquest-reminder.ics';
+    a.download = 'tedralingo-reminder.ics';
     document.body.appendChild(a);
     a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);

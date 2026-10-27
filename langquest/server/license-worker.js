@@ -1,4 +1,4 @@
-/* LangQuest license server — Cloudflare Worker (no dependencies)
+/* TedraLingo license server — Cloudflare Worker (no dependencies)
  *
  *  GET /verify?session_id=cs_…   after Stripe Checkout: confirms payment, returns a signed license key
  *  GET /verify?token=…           re-validates a license key (subscription still active?) and refreshes it
@@ -8,7 +8,7 @@
  *    STRIPE_SECRET_KEY   sk_live_… (or sk_test_…)
  *    LICENSE_SECRET      long random string used to sign license keys (HMAC-SHA256)
  *    PRICE_PLANS         JSON: {"price_123":"monthly","price_456":"yearly","price_789":"lifetime"}
- *    ALLOWED_ORIGINS     comma-separated, e.g. "https://langquest.app,https://localhost"
+ *    ALLOWED_ORIGINS     comma-separated, e.g. "https://tedralingo.web.app,https://localhost"
  *    ANTHROPIC_API_KEY   for the AI tutor (wrangler secret put ANTHROPIC_API_KEY)
  *    TUTOR_KV            optional KV namespace binding → daily message cap (TUTOR_DAILY_LIMIT, default 60)
  *

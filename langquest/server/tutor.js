@@ -1,4 +1,4 @@
-/* LangQuest AI tutor — free spoken conversation with the learner's teacher (Premium)
+/* TedraLingo AI tutor — free spoken conversation with the learner's teacher (Premium)
  *
  *  POST /tutor  { token, target, base, level, teacher: { name, city, age }, scenario, messages: [{ role, content }] }
  *   → { ok, reply, translation, correction: { note, better } | null, suggestions: [..] }

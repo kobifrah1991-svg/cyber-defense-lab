@@ -1,4 +1,4 @@
-/* LangQuest — Audio & Pronunciation Engine
+/* TedraLingo — Audio & Pronunciation Engine
  *  - Natural TTS via Web Speech API, ranked to prefer neural / natural voices per accent
  *  - Speed control: speechSynthesis `rate` slows speech without changing pitch
  *  - Karaoke: word-boundary events drive the highlight; a syllable-weighted timer is the

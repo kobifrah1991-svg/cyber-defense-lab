@@ -1,4 +1,4 @@
-/* LangQuest — Chapter 2 lesson: Explain → Examples → Practice → Speak (grammar units, Premium) */
+/* TedraLingo — Chapter 2 lesson: Explain → Examples → Practice → Speak (grammar units, Premium) */
 (function () {
   const { esc, $, $$, karaoke, voiceCheck, toast, burst, shuffle } = LQUI;
   const { t } = LQI18n;

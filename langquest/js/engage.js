@@ -1,4 +1,4 @@
-/* LangQuest — motivation layer
+/* TedraLingo — motivation layer
  *  - Daily quests: 3 per day (same 3 all day, picked by date); +15 XP each, all three earn a streak freeze
  *  - Streak freezes: protect the streak on a missed day (applied automatically in store.rollDay)
  *  - Personal weekly league: Bronze → Silver → Gold → Diamond by this week's XP (no fake competitors)
@@ -251,7 +251,7 @@
 
     const L = LQData.LANGS[LQStore.getSettings().lang];
     const font = (w, px) => `${w} ${px}px Heebo, "Noto Sans Arabic", Nunito, system-ui, sans-serif`;
-    g.font = font(900, 64); g.fillText('LangQuest', W / 2, 140);
+    g.font = font(900, 64); g.fillText('TedraLingo', W / 2, 140);
     g.font = font(800, 58); g.fillText(`${L.flag} ${t('card.title', { lang: LQI18n.f(L, 'name') })}`, W / 2, 260);
 
     const st = LQStore.getStreak();
@@ -281,7 +281,7 @@
   async function share(preview) {
     const cv = drawCard();
     const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
-    const file = new File([blob], 'langquest-progress.png', { type: 'image/png' });
+    const file = new File([blob], 'tedralingo-progress.png', { type: 'image/png' });
     const text = t('card.cta');
     preview.innerHTML = `<img src="${cv.toDataURL('image/png')}" alt="">`;
     try {
@@ -289,12 +289,12 @@
       const Fs = LQNative.plugin('Filesystem');
       if (Share && Fs) {
         const data = cv.toDataURL('image/png').split(',')[1];
-        const { uri } = await Fs.writeFile({ path: 'langquest-progress.png', data, directory: 'CACHE' });
-        await Share.share({ title: 'LangQuest', text, files: [uri] });
+        const { uri } = await Fs.writeFile({ path: 'tedralingo-progress.png', data, directory: 'CACHE' });
+        await Share.share({ title: 'TedraLingo', text, files: [uri] });
         return;
       }
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'LangQuest', text });
+        await navigator.share({ files: [file], title: 'TedraLingo', text });
         return;
       }
     } catch (err) {
@@ -302,7 +302,7 @@
     }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'langquest-progress.png';
+    a.download = 'tedralingo-progress.png';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }

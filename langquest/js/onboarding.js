@@ -1,4 +1,4 @@
-/* LangQuest — first-run onboarding
+/* TedraLingo — first-run onboarding
  *  1. Languages I already know + level in each
  *  2. Language I want to learn + my current level in it
  *  3. Daily practice minutes + reminder time(s) / days

@@ -1,4 +1,4 @@
-/* LangQuest — The 4-Step Micro-Learning Cycle
+/* TedraLingo — The 4-Step Micro-Learning Cycle
  *  1. Listen & Feel   — natural speed + karaoke, breakdown of complex sounds
  *  2. Slow Practice   — turtle mode, word-by-word, syllables + Hebrew transliteration, echo
  *  3. Interactive Game — sound→picture · fill the gap · build the sentence

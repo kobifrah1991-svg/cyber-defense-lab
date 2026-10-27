@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "app.langquest.learn"
+    namespace = "app.scitedra.tedralingo"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "app.langquest.learn"
+        applicationId "app.scitedra.tedralingo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
