@@ -236,17 +236,30 @@
    * Portrait: realistic photo when present (img/teachers/<id>.webp, img/npc/<station>.webp),
    * otherwise a neutral monogram / emoji. `.live` portraits glow while the narrator is speaking.
    */
+  // which photos exist — img/media.json is written by `npm run media`; until it loads, monograms show
+  let media = { teachers: [], npc: [] };
+  fetch('img/media.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).then(m => {
+    if (!m) return;
+    media = m;
+    if ((m.teachers || []).length || (m.npc || []).length) document.dispatchEvent(new Event('lq:media'));
+  }).catch(() => {});
+
+  function photo(folder, id) {
+    const file = (media[folder] || []).find(f => f.replace(/\.\w+$/, '') === id);
+    return file ? `img/${folder}/${file}` : null;
+  }
+
   function portrait({ src, alt, fallback, hue = 200, size = 56, live = false }) {
     return `<span class="t-ava${live ? ' live' : ''}" style="--h:${hue};--sz:${size}px" role="img" aria-label="${esc(alt)}">
-      <b>${esc(fallback)}</b><img src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>`;
+      <b>${esc(fallback)}</b>${src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ''}</span>`;
   }
 
   function teacherAvatar(teacher, size = 56, live = true) {
-    return portrait({ src: `img/teachers/${teacher.id}.webp`, alt: teacher.name, fallback: teacher.name[0], hue: teacher.hue, size, live });
+    return portrait({ src: photo('teachers', teacher.id), alt: teacher.name, fallback: teacher.name[0], hue: teacher.hue, size, live });
   }
 
   function npcAvatar(station, size = 48) {
-    return portrait({ src: `img/npc/${station.id}.webp`, alt: LQI18n.f(station, 'name'), fallback: station.npc, hue: 260, size, live: true });
+    return portrait({ src: photo('npc', station.id), alt: LQI18n.f(station, 'name'), fallback: station.npc, hue: 260, size, live: true });
   }
 
   function currentTeacher() {

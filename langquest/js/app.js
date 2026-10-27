@@ -554,6 +554,9 @@
   $('#logoBtn').onclick = e => { e.preventDefault(); go('map'); };
   LQAudio.onVoices(() => { if ($('#modal[open] [data-f=voice]')) openSettings(); });
 
+  // photos listed in img/media.json arrived after the first paint → redraw the map's teacher cards
+  document.addEventListener('lq:media', () => { if (current === 'map') renderMap(); });
+
   LQReminders.onDue(slotTime => {
     toast(t('rem.dueToast', { t: slotTime }), 5000);
     if (current === 'map') renderMap();

@@ -227,7 +227,7 @@
     $('#heroShot').src = `img/${lang}-lesson.jpg`;
     $('#teachers').innerHTML = TEACHERS.map(tc => `
       <div class="teacher">
-        <span class="t-ava" style="--h:${tc.hue}"><b>${tc.name[0]}</b><img src="../img/teachers/${tc.id}.webp" alt="" loading="lazy" onerror="this.remove()"></span>
+        <span class="t-ava" style="--h:${tc.hue}"><b>${tc.name[0]}</b>${photos.includes(tc.id + '.webp') ? `<img src="../img/teachers/${tc.id}.webp" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>
         <b>${esc(tc.name)} ${tc.flag}</b><small>📍 ${esc(tc.city[lang])}</small>
       </div>`).join('');
     $('#learn').innerHTML = LEARN.map(([f, n, ok]) => `<li class="${ok ? '' : 'soon'}">${f} <span dir="ltr">${n}</span>${ok ? '' : ` <small>${esc(t.soon)}</small>`}</li>`).join('');
@@ -254,6 +254,9 @@
 
   $('#langSel').innerHTML = Object.entries(LANGS).map(([c, L]) => `<option value="${c}">${L.name}</option>`).join('');
   $('#langSel').onchange = e => { lang = e.target.value; render(); };
+  let photos = [];
+  fetch('../img/media.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null))
+    .then(m => { if (m && m.teachers && m.teachers.length) { photos = m.teachers; render(); } }).catch(() => {});
   $('#year').textContent = new Date().getFullYear();
   render();
 })();

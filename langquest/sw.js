@@ -9,7 +9,7 @@ const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/langquest.css',
   './js/data.js', './js/store.js', './js/i18n.js', './js/audio.js', './js/native.js', './js/ui.js',
   './js/commerce.js', './js/reminders.js', './js/onboarding.js', './js/lesson.js', './js/boss.js', './js/app.js',
-  './icons/icon-192.png', './icons/icon-512.png'
+  './icons/icon-192.png', './icons/icon-512.png', './img/media.json'
 ];
 
 self.addEventListener('install', e => {
