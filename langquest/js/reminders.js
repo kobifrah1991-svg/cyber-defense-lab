@@ -6,7 +6,8 @@
  */
 (function () {
   const { esc, $, $$ } = LQUI;
-  const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];   // Sunday = 0
+  const { t, f } = LQI18n;
+  const dayNames = () => t('rem.dayNames');   // Sunday = 0
   const ICS_DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
   const MAX_TIMES = 3;
   const LATE_WINDOW_MIN = 30;   // still notify if the app was opened up to 30 min after the slot
@@ -58,10 +59,8 @@
     const L = LQData.LANGS[LQStore.getSettings().lang];
     const st = LQStore.getStreak();
     return {
-      title: `⏰ הגיע זמן ה${L.name} שלך!`,
-      body: st.count
-        ? `${p.minutes} דקות תרגול שומרות על רצף של ${st.count} ימים 🔥`
-        : `${p.minutes} דקות של שמיעה ודיבור — בואו נתחיל 🗺️`
+      title: t('rem.title', { lang: f(L, 'name') }),
+      body: st.count ? t('rem.bodyStreak', { m: p.minutes, n: st.count }) : t('rem.body', { m: p.minutes })
     };
   }
 
@@ -117,8 +116,8 @@
     const p = LQStore.getProfile();
     const L = LQData.LANGS[LQStore.getSettings().lang];
     return {
-      summary: `🗺️ LangQuest — ${p.minutes} דקות ${L.name}`,
-      details: `זמן התרגול היומי שלך: ${p.minutes} דקות של שמיעה, הגייה ודיבור ב${L.name}. ${location.href.split('#')[0]}`
+      summary: t('rem.summary', { m: p.minutes, lang: f(L, 'name') }),
+      details: t('rem.details', { m: p.minutes, lang: f(L, 'name') }) + ' ' + location.href.split('#')[0]
     };
   }
 
@@ -176,12 +175,6 @@
   }
 
   /* ---------- editor UI (used in onboarding and settings) ---------- */
-  const PERM_TEXT = {
-    granted: '✅ התראות מערכת מאושרות',
-    denied: '🚫 התראות חסומות בדפדפן — אפשר לאשר מחדש בהגדרות האתר, או להשתמש ביומן',
-    default: '🔔 עוד לא אישרתם התראות',
-    unsupported: 'הדפדפן לא תומך בהתראות — השתמשו בהוספה ליומן'
-  };
 
   function editor(container, { onChange } = {}) {
     const draw = () => {
@@ -189,27 +182,27 @@
       const perm = permission();
       container.innerHTML = `
         <div class="rem">
-          <label class="field check"><input type="checkbox" data-r="enabled" ${r.enabled ? 'checked' : ''}> <span>להזכיר לי לתרגל</span></label>
+          <label class="field check"><input type="checkbox" data-r="enabled" ${r.enabled ? 'checked' : ''}> <span>${t('rem.enable')}</span></label>
           <div class="rem-body ${r.enabled ? '' : 'off'}">
-            <div class="field"><span>באיזו שעה אתם פנויים?</span>
+            <div class="field"><span>${t('rem.timeQ')}</span>
               <div class="times">
                 ${r.times.map((t, i) => `
                   <span class="time-item"><input type="time" value="${esc(t)}" data-t="${i}">
-                  ${r.times.length > 1 ? `<button class="btn ghost sm" data-rm="${i}" title="הסרה">✕</button>` : ''}</span>`).join('')}
-                ${r.times.length < MAX_TIMES ? '<button class="btn ghost sm" data-r="add">＋ שעה נוספת</button>' : ''}
+                  ${r.times.length > 1 ? `<button class="btn ghost sm" data-rm="${i}" title="${t('common.remove')}">✕</button>` : ''}</span>`).join('')}
+                ${r.times.length < MAX_TIMES ? `<button class="btn ghost sm" data-r="add">${t('rem.addTime')}</button>` : ''}
               </div>
             </div>
-            <div class="field"><span>באילו ימים?</span>
-              <div class="days">${DAY_NAMES.map((n, d) => `<button class="day ${r.days.includes(d) ? 'on' : ''}" data-d="${d}" aria-pressed="${r.days.includes(d)}">${n}</button>`).join('')}</div>
+            <div class="field"><span>${t('rem.daysQ')}</span>
+              <div class="days">${dayNames().map((n, d) => `<button class="day ${r.days.includes(d) ? 'on' : ''}" data-d="${d}" aria-pressed="${r.days.includes(d)}">${n}</button>`).join('')}</div>
             </div>
-            <div class="perm">${PERM_TEXT[perm]}</div>
+            <div class="perm">${t('rem.perm.' + perm)}</div>
             <div class="row">
-              ${perm === 'default' ? '<button class="btn primary sm" data-r="perm">🔔 אישור התראות</button>' : ''}
-              ${perm === 'granted' ? '<button class="btn ghost sm" data-r="test">🔔 התראת בדיקה</button>' : ''}
-              <button class="btn ghost sm" data-r="ics">📅 הוספה ליומן (.ics)</button>
+              ${perm === 'default' ? `<button class="btn primary sm" data-r="perm">${t('rem.allow')}</button>` : ''}
+              ${perm === 'granted' ? `<button class="btn ghost sm" data-r="test">${t('rem.test')}</button>` : ''}
+              <button class="btn ghost sm" data-r="ics">${t('rem.ics')}</button>
               ${r.times.map(t => `<a class="btn ghost sm" target="_blank" rel="noopener" href="${esc(googleLink(t))}">Google Calendar ${esc(t)}</a>`).join('')}
             </div>
-            <p class="muted small">התראות מהלומדה מגיעות כשהיא פתוחה (גם בלשונית ברקע). כדי לקבל תזכורת גם כשהיא סגורה — הוסיפו ליומן.</p>
+            <p class="muted small">${t('rem.note')}</p>
           </div>
         </div>`;
 
@@ -242,7 +235,7 @@
         const d = +b.dataset.d;
         let days = LQStore.getProfile().reminder.days;
         days = days.includes(d) ? days.filter(x => x !== d) : [...days, d].sort();
-        if (!days.length) return LQUI.toast('צריך לבחור לפחות יום אחד');
+        if (!days.length) return LQUI.toast(t('rem.oneDay'));
         LQStore.setReminder({ days });
         changed();
       });
@@ -258,8 +251,8 @@
 
   function summary() {
     const r = LQStore.getProfile().reminder;
-    if (!r.enabled) return 'כבויות';
-    const days = r.days.length === 7 ? 'כל יום' : r.days.map(d => DAY_NAMES[d]).join(' ');
+    if (!r.enabled) return t('rem.off');
+    const days = r.days.length === 7 ? t('rem.everyDay') : r.days.map(d => dayNames()[d]).join(' ');
     return `${days} · ${r.times.join(', ')}`;
   }
 

@@ -3,6 +3,7 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const t = (k, v) => LQI18n.t(k, v);
 
   function currentAccent() {
     const s = LQStore.getSettings();
@@ -12,7 +13,7 @@
   /* ---------- syllables & stress ---------- */
   function sylHtml(word) {
     return word.syl.map((s, k) => (k === word.stress && word.syl.length > 1
-      ? `<b class="stress" title="הברה מוטעמת">${esc(s)}</b>`
+      ? `<b class="stress" title="${t('ui.stressed')}">${esc(s)}</b>`
       : `<span>${esc(s)}</span>`)).join('<i class="dot">·</i>');
   }
 
@@ -45,11 +46,11 @@
     pop.className = 'word-pop';
     pop.innerHTML = `
       <div class="wp-word" dir="ltr">${sylHtml(word)}</div>
-      ${LQStore.getSettings().translit ? `<div class="wp-he">${heHtml(word)}</div>` : ''}
-      <div class="wp-meaning">${esc(word.meaning)}</div>
+      ${LQI18n.showTranslit() ? `<div class="wp-he">${heHtml(word)}</div>` : ''}
+      <div class="wp-meaning">${esc(LQI18n.f(word, 'meaning'))}</div>
       <div class="wp-actions">
-        <button class="chip" data-r="1">▶️ רגיל</button>
-        <button class="chip" data-r="slow">🐢 איטי</button>
+        <button class="chip" data-r="1">${t('common.normal')}</button>
+        <button class="chip" data-r="slow">${t('common.slow')}</button>
       </div>`;
     document.body.appendChild(pop);
     const r = anchor.getBoundingClientRect();
@@ -124,14 +125,14 @@
 
   /* ---------- phonetic breakdown ---------- */
   function breakdown(phrase, { onlyHard = false } = {}) {
-    const showHe = LQStore.getSettings().translit;
+    const showHe = LQI18n.showTranslit();
     const list = phrase.words.map((w, i) => ({ w, i })).filter(({ w }) => !onlyHard || w.syl.length > 1);
     if (!list.length) return '';
     return `<div class="breakdown">${list.map(({ w, i }) => `
       <button class="bd-card" data-wi="${i}">
         <span class="bd-syl" dir="ltr">${sylHtml(w)}</span>
         ${showHe ? `<span class="bd-he">${heHtml(w)}</span>` : ''}
-        <span class="bd-mean">${esc(w.meaning)}</span>
+        <span class="bd-mean">${esc(LQI18n.f(w, 'meaning'))}</span>
       </button>`).join('')}</div>`;
   }
 
@@ -146,19 +147,21 @@
 
   /* ---------- voice check widget ---------- */
   const MIC_ERRORS = {
-    'not-allowed': 'צריך לאשר גישה למיקרופון בדפדפן 🎙️',
-    'service-not-allowed': 'צריך לאשר גישה למיקרופון בדפדפן 🎙️',
-    'no-speech': 'לא שמענו כלום — נסו שוב, קרוב יותר למיקרופון',
-    'audio-capture': 'לא נמצא מיקרופון במכשיר',
-    'network': 'זיהוי הדיבור דורש חיבור לאינטרנט',
-    'aborted': 'ההקלטה בוטלה'
+    'not-allowed': 'mic.notAllowed',
+    'service-not-allowed': 'mic.notAllowed',
+    'no-speech': 'mic.noSpeech',
+    'audio-capture': 'mic.noCapture',
+    'network': 'mic.network',
+    'aborted': 'mic.aborted'
   };
 
+  function micError(code) { return t(MIC_ERRORS[code] || 'mic.generic'); }
+
   function scoreLabel(score) {
-    if (score >= 90) return ['מושלם! נשמעת כמו מקומי 🌟', 'great'];
-    if (score >= 70) return ['יפה מאוד! כמעט מושלם 👏', 'good'];
-    if (score >= 40) return ['בכיוון — הקשיבו למילים באדום ונסו שוב', 'mid'];
-    return ['בואו ננסה שוב, לאט ובבירור 🐢', 'low'];
+    if (score >= 90) return [t('score.great'), 'great'];
+    if (score >= 70) return [t('score.good'), 'good'];
+    if (score >= 40) return [t('score.mid'), 'mid'];
+    return [t('score.low'), 'low'];
   }
 
   /**
@@ -170,10 +173,10 @@
       <div class="vc">
         <div class="vc-text"></div>
         <div class="vc-controls">
-          <button class="btn ghost" data-act="model">▶️ שמע</button>
+          <button class="btn ghost" data-act="model">${t('common.play')}</button>
           <button class="btn ghost" data-act="slow">🐢</button>
           ${LQAudio.canListen
-            ? '<button class="btn mic" data-act="mic"><span class="mic-ico">🎙️</span> <span class="mic-lbl">דברו עכשיו</span></button>'
+            ? `<button class="btn mic" data-act="mic"><span class="mic-ico">🎙️</span> <span class="mic-lbl">${t('vc.speak')}</span></button>`
             : ''}
         </div>
         <div class="vc-result" aria-live="polite"></div>
@@ -187,8 +190,8 @@
 
     if (!LQAudio.canListen) {
       result.innerHTML = `
-        <p class="note">הדפדפן הזה לא תומך בזיהוי דיבור (נסו Chrome או Edge). אמרו את המשפט בקול והעריכו בעצמכם:</p>
-        <div class="row"><button class="btn" data-self="1">✅ אמרתי נכון</button><button class="btn ghost" data-self="0">🔁 צריך עוד תרגול</button></div>`;
+        <p class="note">${t('vc.noRec')}</p>
+        <div class="row"><button class="btn" data-self="1">${t('vc.selfOk')}</button><button class="btn ghost" data-self="0">${t('vc.selfBad')}</button></div>`;
       $$('[data-self]', result).forEach(b => b.onclick = () => onResult(b.dataset.self === '1' ? 100 : 0, true));
       return kara;
     }
@@ -198,8 +201,8 @@
       if (mic.classList.contains('live')) { LQAudio.cancelListen(); return; }
       kara.mark(null);
       mic.classList.add('live');
-      $('.mic-lbl', mic).textContent = 'מקשיבים…';
-      result.innerHTML = '<p class="note pulse">אמרו את המשפט עכשיו…</p>';
+      $('.mic-lbl', mic).textContent = t('vc.listening');
+      result.innerHTML = `<p class="note pulse">${t('vc.sayNow')}</p>`;
       try {
         const alts = await LQAudio.listen(accent);
         const best = LQAudio.bestScore(phrase.words.map(w => w.clean), alts, accent);
@@ -210,16 +213,16 @@
             <div class="ring ${tone}" style="--p:${best.score}"><span>${best.score}%</span></div>
             <div>
               <div class="score-label">${label}</div>
-              <div class="heard">שמענו: <span dir="ltr">“${esc(best.transcript)}”</span></div>
-              ${best.matches.includes(false) ? '<div class="note">לחצו על מילה אדומה כדי לשמוע אותה לאט</div>' : ''}
+              <div class="heard">${t('vc.heard')} <span dir="ltr">“${esc(best.transcript)}”</span></div>
+              ${best.matches.includes(false) ? `<div class="note">${t('vc.tapRed')}</div>` : ''}
             </div>
           </div>`;
         onResult(best.score, false);
       } catch (e) {
-        result.innerHTML = `<p class="note warn">${esc(MIC_ERRORS[e.message] || 'משהו השתבש בזיהוי — נסו שוב')}</p>`;
+        result.innerHTML = `<p class="note warn">${esc(micError(e.message))}</p>`;
       } finally {
         mic.classList.remove('live');
-        $('.mic-lbl', mic).textContent = 'נסו שוב';
+        $('.mic-lbl', mic).textContent = t('vc.retry');
       }
     };
     return kara;
@@ -263,6 +266,6 @@
     esc, $, $$, currentAccent,
     sylHtml, heHtml, translitLine,
     karaoke, breakdown, bindBreakdown, voiceCheck,
-    showWordPop, closePop, toast, burst, shuffle
+    showWordPop, closePop, toast, burst, shuffle, micError
   };
 })();

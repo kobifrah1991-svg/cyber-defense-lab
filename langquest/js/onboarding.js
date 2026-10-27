@@ -7,22 +7,31 @@
 (function () {
   const { esc, $, $$ } = LQUI;
   const { LEVELS, KNOWN_LANGS, LANGS } = LQData;
+  const { t, f } = LQI18n;
   const MINUTES = [3, 5, 10, 15];
-  const STEPS = ['השפות שלי', 'מה לומדים', 'זמן ותזכורות', 'התוכנית שלי'];
+  const STEPS = ['onb.s1', 'onb.s2', 'onb.s3', 'onb.s4'];
 
   let O = null;
 
   function start(root, onDone) {
     const p = LQStore.getProfile();
     const s = LQStore.getSettings();
+    const ui = LQI18n.ui();
+    // the base language counts as a native language unless the learner already said otherwise
+    if (!p.known.some(k => k.lang === ui)) LQStore.updateProfile({ known: [{ lang: ui, level: 4 }, ...p.known.filter(k => k.lang !== 'he' || ui === 'he')] });
     O = {
       root, onDone, step: 0,
-      known: p.known.map(k => ({ ...k })),
-      target: s.lang,
+      known: LQStore.getProfile().known.map(k => ({ ...k })),
+      target: s.lang === ui ? firstTarget() : s.lang,
       level: LQStore.getLevel(s.lang),
       minutes: p.minutes
     };
     render();
+  }
+
+  function firstTarget() {
+    const L = Object.values(LANGS).find(x => x.status === 'ready' && x.id !== LQI18n.ui());
+    return L ? L.id : null;
   }
 
   function knownLevel(lang) {
@@ -33,11 +42,11 @@
   function render() {
     O.root.innerHTML = `
       <section class="onb">
-        <ol class="onb-steps">${STEPS.map((n, i) => `<li class="${i < O.step ? 'done' : i === O.step ? 'cur' : ''}"><i>${i + 1}</i><span>${n}</span></li>`).join('')}</ol>
+        <ol class="onb-steps">${STEPS.map((n, i) => `<li class="${i < O.step ? 'done' : i === O.step ? 'cur' : ''}"><i>${i + 1}</i><span>${t(n)}</span></li>`).join('')}</ol>
         <div class="card onb-body"></div>
         <div class="lesson-nav">
-          <button class="btn primary" data-act="next">${O.step === STEPS.length - 1 ? '🚀 יוצאים למסע' : 'המשך ←'}</button>
-          ${O.step > 0 ? '<button class="btn ghost" data-act="back">→ חזרה</button>' : ''}
+          <button class="btn primary" data-act="next">${O.step === STEPS.length - 1 ? t('onb.go') : t('common.continue')}</button>
+          ${O.step > 0 ? `<button class="btn ghost" data-act="back">${t('common.back')}</button>` : ''}
         </div>
       </section>`;
     const body = $('.onb-body', O.root);
@@ -50,7 +59,7 @@
 
   function validate() {
     const ok = O.step === 0 ? O.known.length > 0
-      : O.step === 1 ? !!O.target && O.level != null
+      : O.step === 1 ? !!O.target && O.target !== LQI18n.ui() && O.level != null
       : true;
     $('[data-act=next]', O.root).disabled = !ok;
   }
@@ -73,35 +82,47 @@
   /* ---------- step 1: languages I know ---------- */
   function levelChips(lang, current, { knownOnly = true } = {}) {
     return `<div class="lvl-chips" role="radiogroup">${LEVELS.filter(l => knownOnly || !l.knownOnly).filter(l => l.id > 0).map(l => `
-      <button class="lvl ${current === l.id ? 'on' : ''}" role="radio" aria-checked="${current === l.id}" data-lang="${lang}" data-lvl="${l.id}" title="${esc(l.desc)}">
-        ${l.icon} ${esc(l.name)} <small dir="ltr">${l.cefr}</small>
+      <button class="lvl ${current === l.id ? 'on' : ''}" role="radio" aria-checked="${current === l.id}" data-lang="${lang}" data-lvl="${l.id}" title="${esc(f(l, 'desc'))}">
+        ${l.icon} ${esc(f(l, 'name'))} ${l.cefr !== f(l, 'name') ? `<small dir="ltr">${l.cefr}</small>` : ''}
       </button>`).join('')}</div>`;
   }
 
   function stepKnown(body) {
     body.innerHTML = `
       <div class="onb-hero">👋</div>
-      <h2>ברוכים הבאים ל-LangQuest!</h2>
-      <p class="muted">כדי להתאים את הקצב בשבילכם — אילו שפות אתם כבר יודעים, ובאיזו רמה?</p>
+      <h2>${t('onb.welcome')}</h2>
+      <div class="ui-pick">
+        <span>🌐 ${t('onb.uiQ')}</span>
+        <div class="min-chips">${Object.entries(LQI18n.UI_LANGS).map(([code, U]) => `
+          <button class="lvl ${code === LQI18n.ui() ? 'on' : ''}" data-ui="${code}">${U.flag} ${esc(U.name)}</button>`).join('')}</div>
+      </div>
+      <p class="muted">${t('onb.knownQ')}</p>
       <div class="known-list">
         ${KNOWN_LANGS.map(L => {
           const lvl = knownLevel(L.id);
           return `
             <div class="known ${lvl != null ? 'on' : ''}">
               <button class="known-toggle" data-k="${L.id}" aria-pressed="${lvl != null}">
-                <span class="flag">${L.flag}</span> <b>${esc(L.name)}</b> <span class="tick">${lvl != null ? '✓' : '＋'}</span>
+                <span class="flag">${L.flag}</span> <b>${esc(f(L, 'name'))}</b> <span class="tick">${lvl != null ? '✓' : '＋'}</span>
               </button>
               ${lvl != null ? levelChips(L.id, lvl) : ''}
             </div>`;
         }).join('')}
       </div>
-      <details class="lvl-help"><summary>מה אומרת כל רמה?</summary>
-        <ul>${LEVELS.filter(l => l.id > 0).map(l => `<li>${l.icon} <b>${esc(l.name)}</b> <small dir="ltr">(${l.cefr})</small> — ${esc(l.desc)}</li>`).join('')}</ul>
+      <details class="lvl-help"><summary>${t('onb.levelsHelp')}</summary>
+        <ul>${LEVELS.filter(l => l.id > 0).map(l => `<li>${l.icon} <b>${esc(f(l, 'name'))}</b> <small dir="ltr">(${l.cefr})</small> — ${esc(f(l, 'desc'))}</li>`).join('')}</ul>
       </details>`;
+    $$('[data-ui]', body).forEach(b => b.onclick = () => {
+      const code = b.dataset.ui;
+      LQApp.switchUi(code);
+      if (!O.known.some(k => k.lang === code)) O.known.unshift({ lang: code, level: 4 });
+      if (O.target === code) { O.target = firstTarget(); O.level = null; }
+      render();
+    });
     $$('[data-k]', body).forEach(b => b.onclick = () => {
       const id = b.dataset.k;
       if (knownLevel(id) != null) O.known = O.known.filter(k => k.lang !== id);
-      else O.known.push({ lang: id, level: id === 'he' ? 4 : 1 });
+      else O.known.push({ lang: id, level: id === LQI18n.ui() ? 4 : 1 });
       stepKnown(body);
       validate();
     });
@@ -115,20 +136,23 @@
   function stepTarget(body) {
     const T = LANGS[O.target];
     body.innerHTML = `
-      <h2>איזו שפה נלמד? 🧭</h2>
+      <h2>${t('onb.targetQ')}</h2>
       <div class="lang-grid">
-        ${Object.values(LANGS).map(L => `
-          <button class="lang-card ${L.id === O.target ? 'on' : ''}" data-lang="${L.id}" ${L.status === 'ready' ? '' : 'disabled'}>
-            <span class="flag big">${L.flag}</span><b>${esc(L.name)}</b><small dir="ltr">${esc(L.native)}</small>
-            <small>${L.status === 'ready' ? L.accents.map(a => a.flag).join(' ') : 'בקרוב'}</small>
-          </button>`).join('')}
+        ${Object.values(LANGS).map(L => {
+          const isUi = L.id === LQI18n.ui();
+          return `
+          <button class="lang-card ${L.id === O.target ? 'on' : ''}" data-lang="${L.id}" ${L.status === 'ready' && !isUi ? '' : 'disabled'}>
+            <span class="flag big">${L.flag}</span><b>${esc(f(L, 'name'))}</b><small dir="ltr">${esc(L.native)}</small>
+            <small>${isUi ? t('langs.isUi') : L.status === 'ready' ? L.accents.map(a => a.flag).join(' ') : t('common.soon')}</small>
+          </button>`;
+        }).join('')}
       </div>
-      <h3 class="sub">מה הרמה שלכם ב${esc(T.name)} היום?</h3>
+      ${T ? `<h3 class="sub">${esc(t('onb.levelQ', { lang: f(T, 'name') }))}</h3>`: ''}
       <div class="level-cards">
         ${LEVELS.filter(l => !l.knownOnly).map(l => `
           <button class="level-card ${O.level === l.id ? 'on' : ''}" data-level="${l.id}">
             <span class="lc-ico">${l.icon}</span>
-            <span><b>${esc(l.name)}</b> <small dir="ltr">${l.cefr}</small><br><small class="muted">${esc(l.desc)}</small></span>
+            <span><b>${esc(f(l, 'name'))}</b> <small dir="ltr">${l.cefr}</small><br><small class="muted">${esc(f(l, 'desc'))}</small></span>
           </button>`).join('')}
       </div>`;
     $$('[data-lang]', body).forEach(b => b.onclick = () => {
@@ -149,10 +173,10 @@
   /* ---------- step 3: time & reminders ---------- */
   function stepTime(body) {
     body.innerHTML = `
-      <h2>כמה זמן ביום? ⏱️</h2>
-      <p class="muted">עדיף מעט כל יום מאשר הרבה פעם בשבוע. הרצף 🔥 נספר כשמגיעים ליעד היומי.</p>
-      <div class="min-chips">${MINUTES.map(m => `<button class="lvl ${O.minutes === m ? 'on' : ''}" data-min="${m}"><b>${m}</b> דקות</button>`).join('')}</div>
-      <h3 class="sub">⏰ מתי אתם פנויים ללמוד?</h3>
+      <h2>${t('onb.timeQ')}</h2>
+      <p class="muted">${t('onb.timeSub')}</p>
+      <div class="min-chips">${MINUTES.map(m => `<button class="lvl ${O.minutes === m ? 'on' : ''}" data-min="${m}">${t('common.minutes', { n: `<b>${m}</b>` })}</button>`).join('')}</div>
+      <h3 class="sub">${t('onb.whenQ')}</h3>
       <div class="rem-slot"></div>`;
     $$('[data-min]', body).forEach(b => b.onclick = () => { O.minutes = +b.dataset.min; LQStore.updateProfile({ minutes: O.minutes }); stepTime(body); });
     if (!LQStore.getProfile().reminder.enabled && !O.remTouched) {
@@ -180,19 +204,17 @@
     const boostLang = pace.boost && KNOWN_LANGS.find(k => k.id === pace.boost.lang);
     body.innerHTML = `
       <div class="onb-hero">${T.flag}</div>
-      <h2>התוכנית שלכם ל${esc(T.name)}</h2>
+      <h2>${esc(t('onb.planTitle', { lang: f(T, 'name') }))}</h2>
       <div class="plan">
-        <div class="plan-row"><span>רמה נוכחית</span><b>${lvl.icon} ${esc(lvl.name)} <small dir="ltr">${lvl.cefr}</small></b></div>
-        <div class="plan-row"><span>קצב למידה</span><b>${pace.icon} ${esc(pace.name)}</b></div>
-        <p class="plan-desc">${esc(pace.desc)}</p>
-        ${boostLang ? `<p class="plan-boost">✨ ${pace.boost.type === 'related'
-          ? `${esc(boostLang.name)} שלכם קרובה ל${esc(T.name)} — הרבה מילים וצלילים יהיו מוכרים, אז מתחילים קצת מהר יותר.`
-          : `אתם כבר דוברים ${esc(boostLang.name)} — יש לכם ניסיון בלמידת שפה, אז מתחילים בקצב רגיל.`}</p>` : ''}
-        <div class="plan-row"><span>יעד יומי</span><b>🔥 ${O.minutes} דקות</b></div>
-        <div class="plan-row"><span>תזכורות</span><b>⏰ ${esc(LQReminders.summary())}</b></div>
-        <div class="plan-row"><span>תחנות פתוחות</span><b>🗺️ ${pace.unlocked} מתוך ${LQData.STATIONS.length}</b></div>
+        <div class="plan-row"><span>${t('onb.curLevel')}</span><b>${lvl.icon} ${esc(f(lvl, 'name'))} <small dir="ltr">${lvl.cefr}</small></b></div>
+        <div class="plan-row"><span>${t('onb.pace')}</span><b>${pace.icon} ${esc(f(pace, 'name'))}</b></div>
+        <p class="plan-desc">${esc(f(pace, 'desc'))}</p>
+        ${boostLang ? `<p class="plan-boost">✨ ${esc(t(pace.boost.type === 'related' ? 'onb.boostRelated' : 'onb.boostMulti', { known: f(boostLang, 'name'), lang: f(T, 'name') }))}</p>` : ''}
+        <div class="plan-row"><span>${t('onb.goal')}</span><b>🔥 ${t('common.minutes', { n: O.minutes })}</b></div>
+        <div class="plan-row"><span>${t('onb.rem')}</span><b>⏰ ${esc(LQReminders.summary())}</b></div>
+        <div class="plan-row"><span>${t('onb.open')}</span><b>🗺️ ${t('onb.of', { a: pace.unlocked, b: LQData.STATIONS.length })}</b></div>
       </div>
-      <p class="muted small">אפשר לשנות הכול בכל רגע דרך ⚙️ הגדרות.</p>`;
+      <p class="muted small">${t('onb.editLater')}</p>`;
   }
 
   function finish() {
@@ -209,13 +231,13 @@
   function levelPicker(container, lang, onPick) {
     const T = LANGS[lang];
     container.innerHTML = `
-      <h2>${T.flag} מה הרמה שלכם ב${esc(T.name)}?</h2>
-      <p class="muted">נתאים את הקצב, מהירות ההקראה והתעתיק.</p>
+      <h2>${T.flag} ${esc(t('onb.lvlPickTitle', { lang: f(T, 'name') }))}</h2>
+      <p class="muted">${t('onb.lvlPickSub')}</p>
       <div class="level-cards">
         ${LEVELS.filter(l => !l.knownOnly).map(l => `
           <button class="level-card" data-level="${l.id}">
             <span class="lc-ico">${l.icon}</span>
-            <span><b>${esc(l.name)}</b> <small dir="ltr">${l.cefr}</small><br><small class="muted">${esc(l.desc)}</small></span>
+            <span><b>${esc(f(l, 'name'))}</b> <small dir="ltr">${l.cefr}</small><br><small class="muted">${esc(f(l, 'desc'))}</small></span>
           </button>`).join('')}
       </div>`;
     $$('[data-level]', container).forEach(b => b.onclick = () => onPick(+b.dataset.level));

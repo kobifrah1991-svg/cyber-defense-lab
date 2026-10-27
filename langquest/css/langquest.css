@@ -386,6 +386,7 @@ h1, h2, h3, h4 { margin: 0 0 .4em; line-height: 1.2; }
 .plan-desc { margin: 4px 0 8px; color: var(--muted); font-size: .92rem; }
 .plan-boost { background: var(--sea-soft); border-radius: 10px; padding: 8px 12px; font-size: .92rem; }
 body.onboarding .hdr { visibility: hidden; }
+.ui-pick { text-align: center; margin: 8px 0 14px; padding: 10px; border-radius: 14px; background: var(--bg-2); font-weight: 700; }
 
 /* ---------- reminders ---------- */
 .rem-body.off { opacity: .45; pointer-events: none; }

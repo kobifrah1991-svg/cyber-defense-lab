@@ -6,18 +6,15 @@
  */
 (function () {
   const { esc, $, $$, karaoke, breakdown, bindBreakdown, translitLine, voiceCheck, toast, burst, shuffle } = LQUI;
+  const { t, f, tr } = LQI18n;
 
   const STEPS = [
-    { id: 'listen', icon: '👂', name: 'שמיעה וזיהוי', hint: 'הקשיבו למשפט בקצב טבעי ועקבו אחרי המילה המוארת. לחצו על מילה לפירוש.' },
-    { id: 'slow', icon: '🐢', name: 'תרגול איטי', hint: 'אותו משפט — לאט. הקשיבו מילה-אחר-מילה וחזרו בקול.' },
-    { id: 'game', icon: '🎮', name: 'משחק חיזוק', hint: '' },
-    { id: 'voice', icon: '🎙️', name: 'סימולציית דיבור', hint: 'אמרו את המשפט למיקרופון — ירוק = נהגה נכון, אדום = לשפר.' }
+    { id: 'listen', icon: '👂' },
+    { id: 'slow', icon: '🐢' },
+    { id: 'game', icon: '🎮' },
+    { id: 'voice', icon: '🎙️' }
   ];
-  const GAMES = [
-    { name: 'צליל ← תמונה', hint: 'הקשיבו ובחרו את התמונה שמתאימה למשפט.' },
-    { name: 'השלימו את החסר', hint: 'הקשיבו ובחרו את המילה החסרה.' },
-    { name: 'הרכיבו את המשפט', hint: 'הקשיבו ולחצו על המילים לפי הסדר.' }
-  ];
+  const GAMES = ['pic', 'gap', 'build'];
 
   let S = null;
 
@@ -55,23 +52,24 @@
     LQAudio.stop();
     LQUI.closePop();
     const step = STEPS[S.step];
-    const hint = step.id === 'game' ? GAMES[S.pi % GAMES.length].hint : step.hint;
+    const game = GAMES[S.pi % GAMES.length];
+    const hint = step.id === 'game' ? t(`game.${game}.hint`) : t(`step.${step.id}.hint`);
     S.root.innerHTML = `
       <section class="lesson">
         <div class="lesson-top">
-          <button class="btn ghost sm" data-act="exit">✕ יציאה</button>
-          <div class="lesson-title">${S.meta.icon} ${esc(S.meta.name)}</div>
+          <button class="btn ghost sm" data-act="exit">${t('common.exit')}</button>
+          <div class="lesson-title">${S.meta.icon} ${esc(f(S.meta, 'name'))}</div>
           <div class="pdots">${S.phrases.map((_, i) => `<i class="${i < S.pi ? 'done' : i === S.pi ? 'cur' : ''}"></i>`).join('')}</div>
         </div>
         <ol class="stepper">
-          ${STEPS.map((s, i) => `<li class="${i < S.step ? 'done' : i === S.step ? 'cur' : ''}"><span>${s.icon}</span><em>${s.name}</em></li>`).join('')}
+          ${STEPS.map((s, i) => `<li class="${i < S.step ? 'done' : i === S.step ? 'cur' : ''}"><span>${s.icon}</span><em>${t('step.' + s.id)}</em></li>`).join('')}
         </ol>
-        <div class="step-hint">${step.id === 'game' ? `<b>${GAMES[S.pi % GAMES.length].name}</b> · ` : ''}${esc(hint)}</div>
+        <div class="step-hint">${step.id === 'game' ? `<b>${t('game.' + game)}</b> · ` : ''}${esc(hint)}</div>
         <div class="card step-body"></div>
         <div class="lesson-nav">
-          <button class="btn primary" data-act="next">${isLast() ? 'סיום 🏁' : 'הבא ←'}</button>
-          ${step.id === 'voice' ? '<button class="btn ghost sm" data-act="skip">דלג</button>' : ''}
-          ${S.pace.skipSteps && (step.id === 'listen' || step.id === 'slow') ? '<button class="btn ghost sm" data-act="skip-step">⏭️ דלג לשלב המשחק</button>' : ''}
+          <button class="btn primary" data-act="next">${isLast() ? t('common.finish') : t('common.next')}</button>
+          ${step.id === 'voice' ? `<button class="btn ghost sm" data-act="skip">${t('common.skip')}</button>` : ''}
+          ${S.pace.skipSteps && (step.id === 'listen' || step.id === 'slow') ? `<button class="btn ghost sm" data-act="skip-step">${t('lesson.skipStep')}</button>` : ''}
         </div>
       </section>`;
     $('[data-act=exit]', S.root).onclick = () => { const cb = S.onExit; stop(); cb(); };
@@ -109,16 +107,16 @@
 
   /* ---------- shared phrase header ---------- */
   function phraseHead(phrase, pi) {
-    const showHe = LQStore.getSettings().translit;
+    const showHe = LQI18n.showTranslit();
     const saved = LQStore.inVault(vid(pi));
     return `
       <div class="phrase-head">
         <div class="phrase-emoji">${phrase.emoji}</div>
-        <button class="star ${saved ? 'on' : ''}" data-act="star" title="שמירה לאוסף הביטויים">${saved ? '⭐' : '☆'}</button>
+        <button class="star ${saved ? 'on' : ''}" data-act="star" title="${t('lesson.star')}">${saved ? '⭐' : '☆'}</button>
       </div>
       <div class="kara-slot"></div>
       ${showHe ? `<div class="translit">${translitLine(phrase)}</div>` : ''}
-      <div class="translation">${esc(phrase.he)}</div>`;
+      <div class="translation">${esc(tr(phrase))}</div>`;
   }
 
   function bindStar(body, pi) {
@@ -126,8 +124,8 @@
     if (!star) return;
     star.onclick = () => {
       const id = vid(pi);
-      if (LQStore.inVault(id)) { LQStore.vaultRemove(id); star.textContent = '☆'; star.classList.remove('on'); toast('הוסר מאוסף הביטויים'); }
-      else { LQStore.vaultAdd(id); star.textContent = '⭐'; star.classList.add('on'); toast('נשמר לאוסף הביטויים ⭐'); }
+      if (LQStore.inVault(id)) { LQStore.vaultRemove(id); star.textContent = '☆'; star.classList.remove('on'); toast(t('lesson.starOff')); }
+      else { LQStore.vaultAdd(id); star.textContent = '⭐'; star.classList.add('on'); toast(t('lesson.starOn')); }
       LQApp.refreshHeader();
     };
   }
@@ -137,10 +135,10 @@
     body.innerHTML = `
       ${phraseHead(phrase, S.pi)}
       <div class="row center">
-        <button class="btn play" data-act="play">▶️ השמע בקצב טבעי</button>
-        <button class="btn ghost" data-act="slow">🐢 איטי</button>
+        <button class="btn play" data-act="play">${t('lesson.playNatural')}</button>
+        <button class="btn ghost" data-act="slow">${t('common.slow')}</button>
       </div>
-      ${phrase.words.some(w => w.syl.length > 1) ? `<h4 class="sub">🔍 צלילים מורכבים</h4>${breakdown(phrase, { onlyHard: true })}` : ''}`;
+      ${phrase.words.some(w => w.syl.length > 1) ? `<h4 class="sub">${t('lesson.hard')}</h4>${breakdown(phrase, { onlyHard: true })}` : ''}`;
     const k = karaoke($('.kara-slot', body), { text: phrase.text, words: phrase.words, accent: S.accent, big: true });
     $('[data-act=play]', body).onclick = () => k.play(1);
     $('[data-act=slow]', body).onclick = () => k.play(LQStore.getSettings().slowRate);
@@ -155,13 +153,13 @@
     body.innerHTML = `
       ${phraseHead(phrase, S.pi)}
       <div class="row center">
-        <button class="btn play" data-act="slow">🐢 השמע לאט (${Math.round(rate * 100)}%)</button>
-        <button class="btn ghost" data-act="words">🧩 מילה-אחר-מילה</button>
+        <button class="btn play" data-act="slow">${t('lesson.playSlow', { n: Math.round(rate * 100) })}</button>
+        <button class="btn ghost" data-act="words">${t('lesson.wordByWord')}</button>
       </div>
-      <h4 class="sub">פירוק פונטי — לחצו על מילה לשמיעה איטית</h4>
+      <h4 class="sub">${t('lesson.breakdown')}</h4>
       ${breakdown(phrase)}
       <details class="echo">
-        <summary>🗣️ עכשיו תורכם — חזרו אחריי (לא נספר בציון)</summary>
+        <summary>${t('lesson.echo')}</summary>
         <div class="echo-slot"></div>
       </details>`;
     const k = karaoke($('.kara-slot', body), { text: phrase.text, words: phrase.words, accent: S.accent, big: true });
@@ -190,13 +188,13 @@
     if (ok) {
       if (S.gameFirstTry[S.pi] == null) S.gameFirstTry[S.pi] = S.gameTries === 1;
       setNext(true);
-      toast(S.gameTries === 1 ? 'נכון! 🎯' : 'נכון! 👍', 1400);
+      toast(S.gameTries === 1 ? t('lesson.correct') : t('lesson.correct2'), 1400);
     } else {
       markMissed(S.pi);
     }
   }
 
-  function playBar(phrase, label = '🔊 השמע שוב') {
+  function playBar(phrase, label = t('common.replay')) {
     return `<div class="row center"><button class="btn play" data-act="hear">${label}</button>
       <button class="btn ghost" data-act="hear-slow">🐢</button></div>`;
   }
@@ -226,7 +224,7 @@
       b.classList.add(ok ? 'ok' : 'bad');
       if (!ok) setTimeout(() => b.classList.remove('bad'), 600);
       gameResult(ok);
-      if (ok) body.insertAdjacentHTML('beforeend', `<div class="reveal" dir="ltr">${esc(phrase.text)}</div><div class="translation">${esc(phrase.he)}</div>`);
+      if (ok) body.insertAdjacentHTML('beforeend', `<div class="reveal" dir="ltr">${esc(phrase.text)}</div><div class="translation">${esc(tr(phrase))}</div>`);
     });
   }
 
@@ -249,7 +247,7 @@
     body.innerHTML = `
       ${playBar(phrase)}
       <div class="gap-sentence" dir="ltr">${sentence}</div>
-      <div class="translation">${esc(phrase.he)}</div>
+      <div class="translation">${esc(tr(phrase))}</div>
       <div class="opt-grid">${options.map(o => `<button class="opt" dir="ltr" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
     bindPlay(body, phrase);
     $$('.opt', body).forEach(b => b.onclick = () => {
@@ -269,15 +267,15 @@
     let answer = [];
     body.innerHTML = `
       ${playBar(phrase)}
-      <div class="translation">${esc(phrase.he)}</div>
+      <div class="translation">${esc(tr(phrase))}</div>
       <div class="build-answer" dir="ltr"></div>
       <div class="build-pool" dir="ltr"></div>
-      <div class="row center"><button class="btn ghost sm" data-act="clear">↺ נקה</button></div>`;
+      <div class="row center"><button class="btn ghost sm" data-act="clear">${t('lesson.clear')}</button></div>`;
     bindPlay(body, phrase);
     const ansEl = $('.build-answer', body);
     const poolEl = $('.build-pool', body);
     const draw = () => {
-      ansEl.innerHTML = answer.length ? answer.map((a, k) => `<button class="tok" data-k="${k}">${esc(a.t)}</button>`).join('') : '<span class="ph">לחצו על המילים לפי הסדר…</span>';
+      ansEl.innerHTML = answer.length ? answer.map((a, k) => `<button class="tok" data-k="${k}">${esc(a.t)}</button>`).join('') : `<span class="ph">${t('lesson.buildPh')}</span>`;
       poolEl.innerHTML = pool.map((p, k) => `<button class="tok" data-k="${k}">${esc(p.t)}</button>`).join('');
       $$('.tok', poolEl).forEach(b => b.onclick = () => {
         if (S.canNext) return;
@@ -303,7 +301,7 @@
 
   /* ---------- step 4: live voice check ---------- */
   function renderVoice(body, phrase) {
-    body.innerHTML = `<div class="translation big">${esc(phrase.he)}</div><div class="vc-slot"></div>`;
+    body.innerHTML = `<div class="translation big">${esc(tr(phrase))}</div><div class="vc-slot"></div>`;
     voiceCheck($('.vc-slot', body), {
       phrase,
       accent: S.accent,
@@ -332,17 +330,17 @@
     LQApp.view.innerHTML = `
       <section class="card finish">
         <div class="finish-emoji">${meta.icon}</div>
-        <h2>תחנת ${esc(meta.name)} — הושלמה!</h2>
+        <h2>${esc(t('fin.title', { name: f(meta, 'name') }))}</h2>
         <div class="stats">
           <div><b>+${xp}</b><span>XP</span></div>
-          <div><b>${avgVoice}%</b><span>דיוק הגייה</span></div>
-          <div><b>${firstTry}/3</b><span>משחקים בניסיון ראשון</span></div>
+          <div><b>${avgVoice}%</b><span>${t('fin.accuracy')}</span></div>
+          <div><b>${firstTry}/3</b><span>${t('fin.games')}</span></div>
         </div>
-        ${missed.size ? `<p class="note">📒 ${missed.size} ביטויים נשמרו לאוסף לחזרה חכמה.</p>` : ''}
-        ${!prev.lesson ? '<p class="note">🔓 התחנה הבאה נפתחה!</p>' : ''}
+        ${missed.size ? `<p class="note">${t('fin.saved', { n: missed.size })}</p>` : ''}
+        ${!prev.lesson ? `<p class="note">${t('fin.unlocked')}</p>` : ''}
         <div class="row center">
-          <button class="btn boss" data-act="boss">👑 לאתגר ה-Audio Boss</button>
-          <button class="btn ghost" data-act="map">🗺️ למפה</button>
+          <button class="btn boss" data-act="boss">${t('fin.boss')}</button>
+          <button class="btn ghost" data-act="map">${t('common.toMap')}</button>
         </div>
       </section>`;
     $('[data-act=boss]', LQApp.view).onclick = () => LQApp.go('boss', { lang, station: meta.id });

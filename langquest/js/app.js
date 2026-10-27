@@ -2,6 +2,7 @@
 (function () {
   const { esc, $, $$, karaoke, translitLine, toast, burst, shuffle } = LQUI;
   const { STATIONS, LANGS } = LQData;
+  const { t, f, tr } = LQI18n;
   const LEARNING_VIEWS = ['lesson', 'boss', 'review'];
 
   const view = $('#view');
@@ -33,13 +34,14 @@
     const L = LANGS[lang()];
     const st = LQStore.getStreak();
     const due = LQStore.vaultList(lang()).filter(v => v.isDue).length;
-    $('#hdrLang').innerHTML = `<span class="flag">${L.flag}</span><span class="hide-sm">${esc(L.name)}</span>`;
+    LQI18n.apply();
+    $('#hdrLang').innerHTML = `<span class="flag">${L.flag}</span><span class="hide-sm">${esc(f(L, 'name'))}</span>`;
     $('#hdrStreak').innerHTML = `
       <span class="fire-ring ${st.doneToday ? 'lit' : ''}" style="--p:${Math.min(100, Math.round(100 * st.todaySec / st.goalSec))}"><span>🔥</span></span>
       <b>${st.count}</b>`;
     $('#hdrStreak').title = st.doneToday
-      ? `יעד היום הושג! רצף: ${st.count} ימים`
-      : `היום: ${Math.floor(st.todaySec / 60)} / ${st.goalSec / 60} דקות · רצף: ${st.count} ימים`;
+      ? t('hdr.streakDone', { n: st.count })
+      : t('hdr.streakTip', { m: Math.floor(st.todaySec / 60), g: st.goalSec / 60, n: st.count });
     document.body.classList.toggle('onboarding', current === 'onboarding');
     $('#hdrXp').innerHTML = `⭐ <b>${LQStore.getXp()}</b>`;
     $('#hdrVault').innerHTML = `📒${due ? `<i class="badge">${due}</i>` : ''}`;
@@ -63,29 +65,29 @@
       ${slot ? `
       <section class="card due-banner">
         <span class="due-ico">⏰</span>
-        <div><b>הגיע זמן התרגול של ${esc(slot)}!</b><small>עוד ${Math.max(1, goalMin - mins)} דקות ליעד היומי ${st.count ? `— שמרו על רצף של ${st.count} ימים 🔥` : ''}</small></div>
-        <button class="btn primary" data-act="due">${nextStation ? `▶️ ${nextStation.icon} ${esc(nextStation.name)}` : '🧠 חזרה'}</button>
+        <div><b>${esc(t('map.dueTitle', { t: slot }))}</b><small>${t('map.dueLeft', { n: Math.max(1, goalMin - mins) })} ${st.count ? t('map.dueStreak', { n: st.count }) : ''}</small></div>
+        <button class="btn primary" data-act="due">${nextStation ? `▶️ ${nextStation.icon} ${esc(f(nextStation, 'name'))}` : t('map.review')}</button>
       </section>` : ''}
       <section class="hero">
         <div>
-          <h1>המסע שלך ב${esc(L.name)} <span class="flag">${L.flag}</span></h1>
-          <p class="muted">שפה מדוברת לחו״ל — 3-5 דקות לתחנה: שומעים, מאטים, משחקים ומדברים.</p>
-          <div class="accent-pick" role="radiogroup" aria-label="מבטא">
-            ${L.accents.map(a => `<button role="radio" aria-checked="${s.accent[L.id] === a.code}" class="pill ${s.accent[L.id] === a.code ? 'on' : ''}" data-accent="${a.code}">${a.flag} ${esc(a.label)}</button>`).join('')}
-            <button class="pill ghost" data-act="test">🔊 בדיקת קול</button>
+          <h1>${esc(t('map.title', { lang: f(L, 'name') }))} <span class="flag">${L.flag}</span></h1>
+          <p class="muted">${t('map.sub')}</p>
+          <div class="accent-pick" role="radiogroup" aria-label="${t('map.accent')}">
+            ${L.accents.map(a => `<button role="radio" aria-checked="${s.accent[L.id] === a.code}" class="pill ${s.accent[L.id] === a.code ? 'on' : ''}" data-accent="${a.code}">${a.flag} ${esc(f(a, 'label'))}</button>`).join('')}
+            <button class="pill ghost" data-act="test">${t('map.testVoice')}</button>
           </div>
-          <button class="pace-pill" data-act="level" title="שינוי רמה">${lvl.icon} רמה: <b>${esc(lvl.name)}</b> · קצב ${pace.icon} <b>${esc(pace.name)}</b> <span class="muted">✎</span></button>
+          <button class="pace-pill" data-act="level" title="${t('map.changeLevel')}">${t('map.levelPill', { li: lvl.icon, level: esc(f(lvl, 'name')), pi: pace.icon, pace: esc(f(pace, 'name')) })} <span class="muted">✎</span></button>
         </div>
         <div class="goal card">
-          <div class="goal-top"><span class="big-fire ${st.doneToday ? 'lit' : ''}">🔥</span><div><b>${st.count} ימי רצף</b><small>שיא: ${st.best}</small></div></div>
+          <div class="goal-top"><span class="big-fire ${st.doneToday ? 'lit' : ''}">🔥</span><div><b>${t('map.streakDays', { n: st.count })}</b><small>${t('map.best', { n: st.best })}</small></div></div>
           <div class="bar"><i style="width:${Math.min(100, Math.round(100 * st.todaySec / st.goalSec))}%"></i></div>
-          <small>${st.doneToday ? `✅ יעד ${goalMin} הדקות של היום הושג` : `היום: ${mins} / ${goalMin} דקות למידה`}</small>
-          <button class="rem-line" data-act="reminders">⏰ תזכורות: ${esc(LQReminders.summary())}</button>
+          <small>${st.doneToday ? t('map.goalDone', { g: goalMin }) : t('map.goalProgress', { m: mins, g: goalMin })}</small>
+          <button class="rem-line" data-act="reminders">${esc(t('map.reminders', { s: LQReminders.summary() }))}</button>
         </div>
       </section>
 
       <section class="map card">
-        <div class="map-head"><h2>🗺️ מפת המסע</h2><span class="muted">${doneCount}/${STATIONS.length} תחנות</span></div>
+        <div class="map-head"><h2>${t('map.mapTitle')}</h2><span class="muted">${t('map.stationsCount', { d: doneCount, n: STATIONS.length })}</span></div>
         <ol class="path">
           ${STATIONS.map((x, i) => {
             const p = LQStore.stationProgress(L.id, x.id);
@@ -96,11 +98,11 @@
               <li class="node ${state}" style="--i:${i}">
                 <div class="node-ico">${open ? x.icon : '🔒'}</div>
                 <div class="node-body">
-                  <div class="node-name">${i + 1}. ${esc(x.name)}</div>
-                  <div class="node-meta">${p.lesson ? `✅ הושלם · הגייה ${p.bestVoice}%` : open ? '3 ביטויים · ~4 דק׳' : 'השלימו את התחנה הקודמת'}${p.boss ? ' · 👑 בוס הובס' : ''}</div>
+                  <div class="node-name">${i + 1}. ${esc(f(x, 'name'))}</div>
+                  <div class="node-meta">${p.lesson ? t('map.done', { n: p.bestVoice }) : open ? t('map.openMeta') : t('map.locked')}${p.boss ? t('map.bossBeaten') : ''}</div>
                   <div class="node-actions">
-                    <button class="btn sm ${p.lesson ? 'ghost' : 'primary'}" data-lesson="${x.id}" ${open ? '' : 'disabled'}>${p.lesson ? '🔁 שיעור' : '▶️ התחל'}</button>
-                    <button class="btn sm boss" data-boss="${x.id}" ${bossOpen ? '' : 'disabled'} title="${bossOpen ? '' : 'נפתח אחרי השיעור'}">👑 Boss</button>
+                    <button class="btn sm ${p.lesson ? 'ghost' : 'primary'}" data-lesson="${x.id}" ${open ? '' : 'disabled'}>${p.lesson ? t('map.redo') : t('map.start')}</button>
+                    <button class="btn sm boss" data-boss="${x.id}" ${bossOpen ? '' : 'disabled'} title="${bossOpen ? '' : t('map.bossLocked')}">👑 Boss</button>
                   </div>
                 </div>
               </li>`;
@@ -109,10 +111,10 @@
       </section>
 
       <section class="card vault-cta">
-        <div><h3>📒 אוסף הביטויים</h3><p class="muted">${due ? `${due} ביטויים מחכים לחזרה היום` : 'אין חזרות להיום — ביטויים קשים נשמרים כאן אוטומטית'}</p></div>
+        <div><h3>${t('map.vaultTitle')}</h3><p class="muted">${due ? t('map.vaultDue', { n: due }) : t('map.vaultEmpty')}</p></div>
         <div class="row">
-          ${due ? '<button class="btn primary" data-act="review">🧠 חזרה עכשיו</button>' : ''}
-          <button class="btn ghost" data-act="vault">לאוסף</button>
+          ${due ? `<button class="btn primary" data-act="review">${t('map.reviewNow')}</button>` : ''}
+          <button class="btn ghost" data-act="vault">${t('map.toVault')}</button>
         </div>
       </section>`;
 
@@ -138,8 +140,8 @@
     const accent = LQUI.currentAccent();
     const v = LQAudio.pickVoice(accent);
     LQAudio.speak(p.text, { accent, rate: 1 });
-    if (!LQAudio.hasTTS) toast('הדפדפן לא תומך בהקראה (TTS)');
-    else if (!v) toast(`לא נמצא קול ${accent} במכשיר — ייתכן שיושמע קול ברירת מחדל`);
+    if (!LQAudio.hasTTS) toast(t('voice.noTts'));
+    else if (!v) toast(t('voice.noVoice', { a: accent }));
     else toast(`🔊 ${v.name}`);
   }
 
@@ -159,22 +161,22 @@
     const accent = LQUI.currentAccent();
     view.innerHTML = `
       <section class="card">
-        <div class="map-head"><h2>📒 אוסף הביטויים</h2><button class="btn ghost sm" data-act="back">→ למפה</button></div>
-        <p class="muted">ביטויים שהתקשיתם בהם נשמרים כאן אוטומטית (או בלחיצה על ☆). החזרות מתוזמנות בשיטת Spaced Repetition: 1 → 3 → 7 → 14 → 30 ימים.</p>
-        ${due ? `<button class="btn primary" data-act="review">🧠 חזרה על ${due} ביטויים</button>` : ''}
+        <div class="map-head"><h2>${t('vault.title')}</h2><button class="btn ghost sm" data-act="back">${t('common.backToMap')}</button></div>
+        <p class="muted">${t('vault.desc')}</p>
+        ${due ? `<button class="btn primary" data-act="review">${t('vault.reviewN', { n: due })}</button>` : ''}
         ${items.length ? `<ul class="vault-list">${items.map(i => `
           <li>
             <span class="v-emoji">${i.phrase.emoji}</span>
             <div class="v-body">
               <button class="v-text" dir="ltr" data-say="${esc(i.id)}">${esc(i.phrase.text)}</button>
-              <div class="muted">${esc(i.phrase.he)} · ${i.station.icon}</div>
+              <div class="muted">${esc(tr(i.phrase))} · ${i.station.icon}</div>
             </div>
             <div class="v-meta">
-              <div class="boxes" title="רמת שליטה">${LQStore.SRS_INTERVALS.map((_, k) => `<i class="${k <= i.box ? 'on' : ''}"></i>`).join('')}</div>
-              <small>${i.isDue ? '⏰ היום' : esc(i.due)}</small>
+              <div class="boxes" title="${t('vault.mastery')}">${LQStore.SRS_INTERVALS.map((_, k) => `<i class="${k <= i.box ? 'on' : ''}"></i>`).join('')}</div>
+              <small>${i.isDue ? t('vault.today') : esc(i.due)}</small>
             </div>
-            <button class="btn ghost sm" data-rm="${esc(i.id)}" title="הסרה">✕</button>
-          </li>`).join('')}</ul>` : '<p class="empty">האוסף ריק — התחילו שיעור ושמרו ביטויים עם ☆</p>'}
+            <button class="btn ghost sm" data-rm="${esc(i.id)}" title="${t('common.remove')}">✕</button>
+          </li>`).join('')}</ul>` : `<p class="empty">${t('vault.empty')}</p>`}
       </section>`;
     $('[data-act=back]', view).onclick = () => go('map');
     const r = $('[data-act=review]', view);
@@ -195,24 +197,24 @@
     const card = () => {
       if (idx >= queue.length) return done();
       const it = queue[idx];
-      const showHe = LQStore.getSettings().translit;
+      const showHe = LQI18n.showTranslit();
       view.innerHTML = `
         <section class="lesson">
           <div class="lesson-top">
-            <button class="btn ghost sm" data-act="exit">✕ יציאה</button>
-            <div class="lesson-title">🧠 חזרה חכמה</div>
+            <button class="btn ghost sm" data-act="exit">${t('common.exit')}</button>
+            <div class="lesson-title">${t('review.title')}</div>
             <div class="muted">${idx + 1}/${queue.length}</div>
           </div>
           <div class="card review">
             <div class="phrase-emoji">${it.phrase.emoji}</div>
-            <div class="translation big">${esc(it.phrase.he)}</div>
-            <p class="muted">איך אומרים את זה? אמרו בקול ואז חשפו.</p>
+            <div class="translation big">${esc(tr(it.phrase))}</div>
+            <p class="muted">${t('review.ask')}</p>
             <div class="reveal-slot hidden">
               <div class="kara-slot"></div>
               ${showHe ? `<div class="translit">${translitLine(it.phrase)}</div>` : ''}
             </div>
             <div class="row center actions">
-              <button class="btn primary" data-act="reveal">👀 חשוף ושמע</button>
+              <button class="btn primary" data-act="reveal">${t('review.reveal')}</button>
             </div>
           </div>
         </section>`;
@@ -224,8 +226,8 @@
         $('.actions', view).innerHTML = `
           <button class="btn ghost" data-act="replay">🔊</button>
           <button class="btn ghost" data-act="slow">🐢</button>
-          <button class="btn bad" data-k="0">🔁 שוב</button>
-          <button class="btn ok" data-k="1">✅ ידעתי</button>`;
+          <button class="btn bad" data-k="0">${t('common.again')}</button>
+          <button class="btn ok" data-k="1">${t('review.knew')}</button>`;
         $('[data-act=replay]', view).onclick = () => k.play(1);
         $('[data-act=slow]', view).onclick = () => k.play(LQStore.getSettings().slowRate);
         $$('[data-k]', view).forEach(b => b.onclick = () => {
@@ -246,9 +248,9 @@
       view.innerHTML = `
         <section class="card finish">
           <div class="finish-emoji">🧠</div>
-          <h2>${queue.length ? 'סיימתם את החזרה של היום!' : 'אין חזרות להיום'}</h2>
-          ${queue.length ? `<div class="stats"><div><b>${knew}/${queue.length}</b><span>ידעתם</span></div><div><b>+${xp}</b><span>XP</span></div></div>` : ''}
-          <div class="row center"><button class="btn primary" data-act="map">🗺️ למפה</button><button class="btn ghost" data-act="vault">📒 לאוסף</button></div>
+          <h2>${queue.length ? t('review.doneTitle') : t('review.none')}</h2>
+          ${queue.length ? `<div class="stats"><div><b>${knew}/${queue.length}</b><span>${t('review.knewLabel')}</span></div><div><b>+${xp}</b><span>XP</span></div></div>` : ''}
+          <div class="row center"><button class="btn primary" data-act="map">${t('common.toMap')}</button><button class="btn ghost" data-act="vault">${t('common.toVault')}</button></div>
         </section>`;
       $('[data-act=map]', view).onclick = () => go('map');
       $('[data-act=vault]', view).onclick = () => go('vault');
@@ -272,15 +274,18 @@
 
   function openLangPicker() {
     openModal(`
-      <h2>באיזו שפה נדבר?</h2>
+      <h2>${t('langs.title')}</h2>
       <div class="lang-grid">
-        ${Object.values(LANGS).map(L => `
-          <button class="lang-card ${L.id === lang() ? 'on' : ''}" data-lang="${L.id}" ${L.status === 'ready' ? '' : 'disabled'}>
+        ${Object.values(LANGS).map(L => {
+          const isUi = L.id === LQI18n.ui();
+          return `
+          <button class="lang-card ${L.id === lang() ? 'on' : ''}" data-lang="${L.id}" ${L.status === 'ready' && !isUi ? '' : 'disabled'}>
             <span class="flag big">${L.flag}</span>
-            <b>${esc(L.name)}</b>
+            <b>${esc(f(L, 'name'))}</b>
             <small dir="ltr">${esc(L.native)}</small>
-            <small>${L.status === 'ready' ? L.accents.map(a => a.flag).join(' ') : 'בקרוב'}</small>
-          </button>`).join('')}
+            <small>${isUi ? t('langs.isUi') : L.status === 'ready' ? L.accents.map(a => a.flag).join(' ') : t('common.soon')}</small>
+          </button>`;
+        }).join('')}
       </div>`, body => {
       $$('[data-lang]', body).forEach(b => b.onclick = () => {
         const id = b.dataset.lang;
@@ -298,47 +303,54 @@
     const accent = LQUI.currentAccent();
     const voices = LQAudio.voicesFor(accent);
     const chosen = LQAudio.pickVoice(accent);
+    const pace = LQStore.getPace(L.id);
+    const lvl = LQData.LEVELS[pace.level];
     openModal(`
-      <h2>⚙️ הגדרות</h2>
+      <h2>${t('set.title')}</h2>
       <div class="set-group">
-        <div class="plan-row"><span>רמה ב${esc(L.name)}</span><b>${LQData.LEVELS[LQStore.getPace(L.id).level].icon} ${esc(LQData.LEVELS[LQStore.getPace(L.id).level].name)} · ${LQStore.getPace(L.id).icon} ${esc(LQStore.getPace(L.id).name)}</b></div>
-        <label class="field"><span>יעד יומי</span>
-          <select data-f="minutes">${[3, 5, 10, 15].map(m => `<option value="${m}" ${LQStore.getProfile().minutes === m ? 'selected' : ''}>${m} דקות</option>`).join('')}</select>
+        <label class="field"><span>🌐 ${t('common.uiLang')}</span>
+          <select data-f="ui">${Object.entries(LQI18n.UI_LANGS).map(([code, U]) => `<option value="${code}" ${code === LQI18n.ui() ? 'selected' : ''}>${U.flag} ${esc(U.name)}</option>`).join('')}</select>
+        </label>
+        <div class="plan-row"><span>${esc(t('set.levelIn', { lang: f(L, 'name') }))}</span><b>${lvl.icon} ${esc(f(lvl, 'name'))} · ${pace.icon} ${esc(f(pace, 'name'))}</b></div>
+        <label class="field"><span>${t('set.goal')}</span>
+          <select data-f="minutes">${[3, 5, 10, 15].map(m => `<option value="${m}" ${LQStore.getProfile().minutes === m ? 'selected' : ''}>${t('common.minutes', { n: m })}</option>`).join('')}</select>
         </label>
         <div class="row">
-          <button class="btn ghost sm" data-act="level">🎚️ שינוי רמה</button>
-          <button class="btn ghost sm" data-act="reminders">⏰ תזכורות (${esc(LQReminders.summary())})</button>
-          <button class="btn ghost sm" data-act="profile">👤 עריכת פרופיל השפות</button>
+          <button class="btn ghost sm" data-act="level">${t('set.changeLevel')}</button>
+          <button class="btn ghost sm" data-act="reminders">${esc(t('set.reminders', { s: LQReminders.summary() }))}</button>
+          <button class="btn ghost sm" data-act="profile">${t('set.profile')}</button>
         </div>
       </div>
-      <h3 class="sub">🔊 קול והגייה</h3>
-      <label class="field"><span>מבטא (${esc(L.name)})</span>
-        <select data-f="accent">${L.accents.map(a => `<option value="${a.code}" ${a.code === accent ? 'selected' : ''}>${a.flag} ${esc(a.label)} · ${a.code}</option>`).join('')}</select>
+      <h3 class="sub">${t('set.voiceTitle')}</h3>
+      <label class="field"><span>${esc(t('set.accent', { lang: f(L, 'name') }))}</span>
+        <select data-f="accent">${L.accents.map(a => `<option value="${a.code}" ${a.code === accent ? 'selected' : ''}>${a.flag} ${esc(f(a, 'label'))} · ${a.code}</option>`).join('')}</select>
       </label>
-      <label class="field"><span>קריין</span>
+      <label class="field"><span>${t('set.voice')}</span>
         <select data-f="voice" ${voices.length ? '' : 'disabled'}>
-          ${voices.length ? voices.map(v => `<option ${chosen && v.name === chosen.name ? 'selected' : ''}>${esc(v.name)}</option>`).join('') : '<option>לא נמצאו קולות למבטא הזה במכשיר</option>'}
+          ${voices.length ? voices.map(v => `<option ${chosen && v.name === chosen.name ? 'selected' : ''}>${esc(v.name)}</option>`).join('') : `<option>${t('set.noVoices')}</option>`}
         </select>
-        <small class="muted">קולות המסומנים Natural / Neural / Online נשמעים הכי טבעיים.</small>
+        <small class="muted">${t('set.voiceHint')}</small>
       </label>
-      <label class="field"><span>מהירות מצב צב 🐢: <b data-out>${Math.round(s.slowRate * 100)}%</b></span>
+      <label class="field"><span>${t('set.slow')} <b data-out>${Math.round(s.slowRate * 100)}%</b></span>
         <input type="range" min="0.5" max="0.7" step="0.05" value="${s.slowRate}" data-f="rate">
       </label>
-      <label class="field check"><input type="checkbox" data-f="translit" ${s.translit ? 'checked' : ''}> <span>הצגת תעתיק עברי מנוקד</span></label>
+      ${LQI18n.ui() === 'he' ? `<label class="field check"><input type="checkbox" data-f="translit" ${s.translit ? 'checked' : ''}> <span>${t('set.translit')}</span></label>` : ''}
       <div class="row">
-        <button class="btn ghost" data-act="test">🔊 בדיקה</button>
-        <button class="btn ghost" data-act="test-slow">🐢 בדיקה איטית</button>
+        <button class="btn ghost" data-act="test">${t('set.test')}</button>
+        <button class="btn ghost" data-act="test-slow">${t('set.testSlow')}</button>
       </div>
-      <p class="muted small">${LQAudio.canListen ? '🎙️ זיהוי דיבור זמין בדפדפן הזה.' : '🎙️ זיהוי דיבור לא זמין בדפדפן הזה — מומלץ Chrome או Edge.'}</p>
+      <p class="muted small">${LQAudio.canListen ? t('set.micYes') : t('set.micNo')}</p>
       <hr>
-      <div class="row spread"><button class="btn bad sm" data-act="reset">איפוס כל ההתקדמות</button><button class="btn primary" data-act="close">סגירה</button></div>`, body => {
+      <div class="row spread"><button class="btn bad sm" data-act="reset">${t('set.reset')}</button><button class="btn primary" data-act="close">${t('common.close')}</button></div>`, body => {
+      $('[data-f=ui]', body).onchange = e => { switchUi(e.target.value); openSettings(); };
       $('[data-f=accent]', body).onchange = e => { LQStore.setAccent(L.id, e.target.value); openSettings(); if (current === 'map') renderMap(); };
       const vs = $('[data-f=voice]', body);
       vs.onchange = () => LQStore.setVoice(accent, vs.value);
       const rate = $('[data-f=rate]', body);
       rate.oninput = () => { $('[data-out]', body).textContent = Math.round(rate.value * 100) + '%'; };
       rate.onchange = () => LQStore.setSetting('slowRate', +rate.value);
-      $('[data-f=translit]', body).onchange = e => { LQStore.setSetting('translit', e.target.checked); };
+      const tl = $('[data-f=translit]', body);
+      if (tl) tl.onchange = e => { LQStore.setSetting('translit', e.target.checked); };
       $('[data-f=minutes]', body).onchange = e => { LQStore.updateProfile({ minutes: +e.target.value }); refreshHeader(); };
       $('[data-act=level]', body).onclick = () => openLevelPicker(L.id);
       $('[data-act=reminders]', body).onclick = openReminders;
@@ -347,7 +359,7 @@
       $('[data-act=test]', body).onclick = () => LQAudio.speak(sample.text, { accent, rate: 1 });
       $('[data-act=test-slow]', body).onclick = () => LQAudio.speak(sample.text, { accent, rate: +rate.value });
       $('[data-act=reset]', body).onclick = () => {
-        if (confirm('לאפס את כל ההתקדמות, הרצף והאוסף?')) { LQStore.resetAll(); closeModal(); go('map'); }
+        if (confirm(t('set.resetConfirm'))) { LQStore.resetAll(); closeModal(); go('map'); }
       };
       $('[data-act=close]', body).onclick = () => { closeModal(); if (current === 'map') renderMap(); };
     });
@@ -357,20 +369,33 @@
     openModal('', body => LQOnboarding.levelPicker(body, langId, level => {
       const pace = LQStore.setLevel(langId, level);
       closeModal();
-      toast(`${pace.icon} קצב ${pace.name} — ${LQData.LEVELS[level].name}`);
+      toast(t('set.levelToast', { icon: pace.icon, pace: f(pace, 'name'), level: f(LQData.LEVELS[level], 'name') }));
       go('map');
     }));
   }
 
   function openReminders() {
     openModal(`
-      <h2>⏰ תזכורות ללמידה</h2>
-      <p class="muted">בחרו שעה קבועה ביום שבה אתם פנויים לכמה דקות תרגול.</p>
+      <h2>${t('rem.modalTitle')}</h2>
+      <p class="muted">${t('rem.modalSub')}</p>
       <div class="rem-slot"></div>
-      <div class="row spread"><span></span><button class="btn primary" data-act="close">שמירה</button></div>`, body => {
+      <div class="row spread"><span></span><button class="btn primary" data-act="close">${t('common.save')}</button></div>`, body => {
       LQReminders.editor($('.rem-slot', body));
       $('[data-act=close]', body).onclick = () => { closeModal(); if (current === 'map') renderMap(); };
     });
+  }
+
+  /** Change the base language: re-render in place, keep the learner's own language in their profile. */
+  function switchUi(code) {
+    LQI18n.setUi(code);
+    const p = LQStore.getProfile();
+    if (!p.known.some(k => k.lang === code)) LQStore.updateProfile({ known: [...p.known, { lang: code, level: 4 }] });
+    if (lang() === code) {
+      const other = Object.values(LANGS).find(L => L.status === 'ready' && L.id !== code);
+      if (other) LQStore.setSetting('lang', other.id);
+    }
+    refreshHeader();
+    if (current === 'map' || current === 'vault') go(current);
   }
 
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
@@ -382,7 +407,7 @@
     if (document.hidden || !LEARNING_VIEWS.includes(current)) return;
     if (Date.now() - lastInteraction > 90000) return;
     if (LQStore.addActiveSeconds(5)) {
-      toast(`🔥 יעד ${LQStore.getProfile().minutes} הדקות היומי הושג! הרצף ממשיך (+20 XP)`, 3500);
+      toast(t('streak.reached', { n: LQStore.getProfile().minutes }), 3500);
       burst(['🔥', '⭐', '🔥']);
     }
     refreshHeader();
@@ -395,11 +420,11 @@
   $('#logoBtn').onclick = e => { e.preventDefault(); go('map'); };
   LQAudio.onVoices(() => { if ($('#modal[open] [data-f=voice]')) openSettings(); });
 
-  LQReminders.onDue(t => {
-    toast(`⏰ ${t} — הגיע זמן התרגול היומי!`, 5000);
+  LQReminders.onDue(slotTime => {
+    toast(t('rem.dueToast', { t: slotTime }), 5000);
     if (current === 'map') renderMap();
   });
 
-  window.LQApp = { go, refreshHeader, view };
+  window.LQApp = { go, refreshHeader, view, switchUi };
   go(LQStore.getProfile().onboarded ? 'map' : 'onboarding');
 })();

@@ -4,6 +4,7 @@
  */
 (function () {
   const { esc, $, $$, karaoke, toast, burst, shuffle } = LQUI;
+  const { t, f, tr } = LQI18n;
   const MAX_TRIES = 3;
 
   let B = null;
@@ -23,12 +24,12 @@
     root.innerHTML = `
       <section class="boss-wrap">
         <div class="lesson-top">
-          <button class="btn ghost sm" data-act="exit">✕ יציאה</button>
-          <div class="lesson-title">👑 Audio Boss · ${esc(B.meta.name)}</div>
+          <button class="btn ghost sm" data-act="exit">${t('common.exit')}</button>
+          <div class="lesson-title">👑 Audio Boss · ${esc(f(B.meta, 'name'))}</div>
           <div class="pdots">${B.boss.turns.map(() => '<i></i>').join('')}</div>
         </div>
         <div class="card boss">
-          <div class="boss-npc"><span class="npc-ava">${B.meta.npc}</span><div><b>${esc(B.boss.title)}</b><small>דמות AI · ${esc(LQData.LANGS[lang].name)}</small></div></div>
+          <div class="boss-npc"><span class="npc-ava">${B.meta.npc}</span><div><b>${esc(f(B.boss, 'title'))}</b><small>${esc(t('boss.ai', { lang: f(LQData.LANGS[lang], 'name') }))}</small></div></div>
           <div class="chat" aria-live="polite"></div>
           <div class="boss-controls"></div>
         </div>
@@ -50,11 +51,12 @@
     c.scrollTop = c.scrollHeight;
   }
 
-  function npcSay([text, he]) {
+  function npcSay(line) {
+    const text = line.text;
     const my = B;
     const row = document.createElement('div');
     row.className = 'msg npc';
-    row.innerHTML = `<span class="ava">${B.meta.npc}</span><div class="bubble"><div class="bk"></div><div class="bhe">${esc(he)}</div><button class="replay" title="השמע שוב">🔊</button></div>`;
+    row.innerHTML = `<span class="ava">${B.meta.npc}</span><div class="bubble"><div class="bk"></div><div class="bhe">${esc(tr(line))}</div><button class="replay" title="${t('boss.replay')}">🔊</button></div>`;
     chat().appendChild(row);
     scrollChat();
     const k = karaoke($('.bk', row), { text, accent: B.accent });
@@ -86,11 +88,11 @@
     const phrase = B.phrases[B.boss.turns[B.turn].expect];
     const ctl = $('.boss-controls', B.root);
     ctl.innerHTML = `
-      <div class="task">🎯 תגידו: <b>${esc(phrase.he)}</b></div>
+      <div class="task">${t('boss.say')} <b>${esc(tr(phrase))}</b></div>
       <div class="hint-slot"></div>
       <div class="row center">
-        <button class="btn ghost sm" data-act="hint">💡 רמז</button>
-        ${LQAudio.canListen ? '<button class="btn mic" data-act="mic"><span class="mic-ico">🎙️</span> <span class="mic-lbl">ענו בקול</span></button>' : ''}
+        <button class="btn ghost sm" data-act="hint">${t('boss.hint')}</button>
+        ${LQAudio.canListen ? `<button class="btn mic" data-act="mic"><span class="mic-ico">🎙️</span> <span class="mic-lbl">${t('boss.answer')}</span></button>` : ''}
       </div>
       <div class="boss-fb" aria-live="polite"></div>`;
     $('[data-act=hint]', ctl).onclick = () => {
@@ -108,18 +110,18 @@
     mic.onclick = async () => {
       if (mic.classList.contains('live')) { LQAudio.cancelListen(); return; }
       mic.classList.add('live');
-      $('.mic-lbl', mic).textContent = 'מקשיבים…';
+      $('.mic-lbl', mic).textContent = t('vc.listening');
       fb.textContent = '';
       let res = null;
       try {
         const alts = await LQAudio.listen(B.accent);
         res = LQAudio.bestScore(phrase.words.map(w => w.clean), alts, B.accent);
       } catch (e) {
-        fb.textContent = e.message === 'not-allowed' ? 'צריך לאשר גישה למיקרופון 🎙️' : 'לא שמענו — נסו שוב';
+        fb.textContent = e.message === 'not-allowed' ? t('mic.notAllowed') : t('boss.notHeard');
       }
       if (!B) return;
       mic.classList.remove('live');
-      $('.mic-lbl', mic).textContent = 'ענו בקול';
+      $('.mic-lbl', mic).textContent = t('boss.answer');
       if (!res) return;
       B.tries++;
       const score = B.hinted ? Math.min(res.score, 80) : res.score;
@@ -127,11 +129,11 @@
         return answered(phrase, score, res.matches);
       }
       if (B.tries >= MAX_TRIES) {
-        toast('נמשיך הלאה — הביטוי נשמר לאוסף לחזרה 📒');
+        toast(t('boss.moveOn'));
         LQStore.vaultAdd(LQStore.vaultId(B.lang, B.stationId, B.boss.turns[B.turn].expect));
         return answered(phrase, score, res.matches);
       }
-      fb.innerHTML = `${res.score}% — כמעט! שמענו <span dir="ltr">“${esc(res.transcript)}”</span>. נסו שוב (${MAX_TRIES - B.tries} ניסיונות)`;
+      fb.innerHTML = t('boss.almost', { s: res.score, heard: `<span dir="ltr">“${esc(res.transcript)}”</span>`, n: MAX_TRIES - B.tries });
     };
   }
 
@@ -139,7 +141,7 @@
     const turnPhrases = B.boss.turns.map(t => B.phrases[t.expect]);
     const opts = shuffle(turnPhrases);
     $('.boss-fb', ctl).insertAdjacentHTML('beforebegin', `
-      <p class="note">אין זיהוי דיבור בדפדפן הזה — אמרו בקול ואז בחרו את התשובה:</p>
+      <p class="note">${t('boss.noMic')}</p>
       <div class="opt-grid one">${opts.map(p => `<button class="opt" dir="ltr" data-t="${esc(p.text)}">${esc(p.text)}</button>`).join('')}</div>`);
     $$('.opt', ctl).forEach(b => b.onclick = () => {
       B.tries++;
@@ -176,11 +178,11 @@
     ctl.innerHTML = `
       <div class="boss-end ${won ? 'won' : ''}">
         <div class="big-emoji">${won ? '🏆' : '💪'}</div>
-        <h3>${won ? 'ניצחתם את הבוס!' : 'כמעט! עוד ניסיון אחד'}</h3>
-        <p>ציון שיחה: <b>${total}%</b>${won && !prev.boss ? ' · +50 XP' : ''}</p>
+        <h3>${won ? t('boss.won') : t('boss.lost')}</h3>
+        <p>${t('boss.score')} <b>${total}%</b>${won && !prev.boss ? ' · +50 XP' : ''}</p>
         <div class="row center">
-          <button class="btn ghost" data-act="again">🔁 שוב</button>
-          <button class="btn primary" data-act="map">🗺️ למפה</button>
+          <button class="btn ghost" data-act="again">${t('common.again')}</button>
+          <button class="btn primary" data-act="map">${t('common.toMap')}</button>
         </div>
       </div>`;
     const { root, lang, stationId, onExit } = B;
