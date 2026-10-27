@@ -30,7 +30,13 @@
     else if (name === 'boss') LQBoss.start(view, params.lang, params.station, back);
     else if (name === 'vault') renderVault();
     else if (name === 'review') startReview();
-    else if (name === 'onboarding') LQOnboarding.start(view, () => { go('map'); LQUI.burst(['🗺️', '✨', '⭐']); });
+    else if (name === 'onboarding') LQOnboarding.start(view, () => {
+      go('map');
+      LQUI.burst(['🗺️', '✨', '⭐']);
+      let pending = false;
+      try { pending = sessionStorage.getItem('lq_upgrade') === '1'; sessionStorage.removeItem('lq_upgrade'); } catch { /* private mode */ }
+      if (pending) setTimeout(openPaywall, 600);
+    });
     else renderMap();
     refreshHeader();
   }
@@ -554,6 +560,17 @@
   });
 
   window.LQApp = { go, refreshHeader, view, switchUi, openPaywall };
+
+  // links from the website's pricing table: ?upgrade=<plan> opens the paywall (after onboarding if needed)
+  (function () {
+    const params = new URLSearchParams(location.search);
+    if (!params.has('upgrade')) return;
+    params.delete('upgrade');
+    history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash);
+    if (LQCommerce.isPremium()) return;
+    if (LQStore.getProfile().onboarded) setTimeout(openPaywall, 300);
+    else try { sessionStorage.setItem('lq_upgrade', '1'); } catch { /* private mode */ }
+  })();
 
   // back from Stripe Checkout → verify; and re-check subscriptions now and then
   LQCommerce.handleReturn()

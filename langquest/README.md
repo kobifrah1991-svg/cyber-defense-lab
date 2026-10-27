@@ -37,7 +37,12 @@ python3 -m http.server 8080
 ```
 langquest/
 ├── index.html
-├── sw.js           # service worker להצגת התראות בלבד (בלי cache)
+├── sw.js           # service worker: אופליין + לחיצה על התראה
+├── manifest.webmanifest, icons/   # PWA
+├── site/           # אתר המכירה + פרטיות + תנאים
+├── server/         # שרת רישיונות (Cloudflare Worker) + בדיקות
+├── android/        # פרויקט האנדרואיד (Capacitor)
+├── img/teachers, img/npc  # תמונות המורים והדמויות
 ├── css/langquest.css
 └── js/
     ├── i18n.js     # שפת בסיס: טקסטי ממשק, כיוון, זיהוי שפת דפדפן
@@ -45,12 +50,55 @@ langquest/
     ├── store.js    # LocalStorage: הגדרות, התקדמות, XP, רצף, אוסף SRS
     ├── audio.js    # TTS + קריוקי, בחירת קול, זיהוי דיבור וניקוד הגייה
     ├── ui.js       # רכיבים: קריוקי, חלון מילה, פירוק הברות, בדיקת דיבור
+    ├── native.js   # שכבת פלטפורמה: דפדפן / אפליקציית אנדרואיד
+    ├── commerce.js # Freemium, רכישה ורישיון
     ├── reminders.js # תזכורות: מתזמן, התראות, יצוא ליומן
     ├── onboarding.js # פרופיל שפות, רמות וקצב אישי
     ├── lesson.js   # מחזור 4 השלבים
     ├── boss.js     # שיחת Audio Boss
     └── app.js      # מפה, אוסף, הגדרות, ניווט, מעקב זמן יומי
 ```
+
+## מודל לימוד: מורים וסיפור
+
+- **מורים לכל שפה** — אנגלית: Emma 🇺🇸 ו-Oliver 🇬🇧 · ספרדית: Lucía 🇪🇸 ו-Mateo 🇲🇽. בחירת מורה = בחירת מבטא + מגדר הקריין.
+- **סצנת פתיחה** לכל תחנה (״נחתנו במדריד!״), המורה מלווה כל שלב, ודמויות ה-Boss מדברות בקול משלהן.
+- **תמונות ריאליסטיות**: מניחים קבצים ב-`img/teachers/` וב-`img/npc/` — בריף ופרומפטים ב-[`img/teachers/README.md`](img/teachers/README.md). עד אז מוצג מונוגרמה.
+- **תעתיק בכתב של הלומד** לכל מילה: ניקוד עברי, ערבית, קירילית, ו-respelling לאנגלית.
+
+## מסכים, PWA ואפליקציה
+
+- **כל גודל מסך**: טלפון קטן (320px), טלפון לרוחב, טאבלט, מחשב (מפה + פאנל צד), מסכים גדולים; תמיכה ב-notch ובאזורים בטוחים.
+- **PWA**: ניתן להתקנה מהדפדפן (כפתור 📲), עובד אופליין אחרי הפתיחה הראשונה.
+- **APK לאנדרואיד** (Capacitor 8, `android/`): הקראה וזיהוי דיבור נייטיב, תזכורות כהתראות מערכת גם כשהאפליקציה סגורה, כפתור חזרה, אייקונים ומסכי פתיחה בכל הרזולוציות.
+  - **בנייה אוטומטית**: GitHub Actions (`.github/workflows/langquest-android.yml`) בונה APK בכל שינוי — מורידים מ-Actions ← הריצה ← Artifacts.
+  - **בנייה מקומית**: `npm install && npm run apk:debug` (דורש Android SDK + JDK 21).
+  - **חתימה לשחרור**: יוצרים keystore (`keytool -genkey -v -keystore release.jks -alias langquest -keyalg RSA -keysize 2048 -validity 10000`) ומוסיפים ב-GitHub Secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` — ה-workflow יבנה APK חתום ו-AAB לחנות.
+
+## מודל מכירה (Freemium)
+
+| | חינם | Premium |
+|---|---|---|
+| תחנות | 2 הראשונות בכל שפה | כל התחנות + שפות עתידיות |
+| Boss, אוסף ביטויים, תזכורות | ✓ | ✓ |
+| מחיר | — | חודשי ₪24.90 · שנתי ₪149 · לכל החיים ₪299 (3 ימי ניסיון במנויים) |
+
+המחירים והגדרות התשלום במקום אחד: `js/commerce.js` (`PLANS`, `CONFIG`).
+
+**חיבור תשלומים (Stripe):**
+1. ב-Stripe יוצרים 3 מחירים (חודשי/שנתי עם trial של 3 ימים, ו-lifetime חד-פעמי) ו-Payment Link לכל אחד. ב-Payment Link מגדירים כתובת חזרה: `https://<האתר>/index.html?session_id={CHECKOUT_SESSION_ID}`.
+2. פורסים את שרת הרישיונות: `cd server && npx wrangler deploy`, ומגדירים `npx wrangler secret put STRIPE_SECRET_KEY` ו-`LICENSE_SECRET`; ב-`wrangler.toml` ממפים מזהי מחיר לתוכניות.
+3. ממלאים ב-`js/commerce.js`: `CONFIG.checkout` (3 הקישורים) ו-`CONFIG.licenseApi`.
+4. בדיקות השרת: `npm run test:server`.
+
+עד שמגדירים — רכישה פועלת **במצב הדגמה ב-localhost בלבד**, מסומן בבירור.
+
+> **Google Play:** רכישה דיגיטלית בתוך אפליקציה שמופצת ב-Play חייבת לעבור ב-Google Play Billing. ה-APK שמופץ מהאתר יכול להשתמש ב-Stripe; לגרסת Play יש להוסיף ספק חיוב של Play (למשל RevenueCat) מאחורי אותו `LQCommerce`.
+
+## אתר המכירה
+
+`site/index.html` — דף נחיתה בארבע שפות (עברית · English · العربية · Русский) עם צילומי מסך אמיתיים מהלומדה, יכולות, מורים, טבלת מחירים (מחוברת ל-`commerce.js` — כפתור תוכנית פותח את מסך הרכישה בלומדה), שאלות נפוצות, `privacy.html` ו-`terms.html` (טיוטות שדורשות השלמת פרטי מפעיל ובדיקה משפטית).
+אחרי מיזוג ל-`main` אפשר לפרסם ב-GitHub Pages: `/langquest/site/` (האתר) ו-`/langquest/` (הלומדה).
 
 ## הוספת שפת בסיס (ממשק)
 

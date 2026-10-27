@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>LangQuest · מדברים שפה חדשה כבר מהשיעור הראשון</title>
+  <meta name="description" content="LangQuest — שיעורים של 3–5 דקות לשפה מדוברת: מקראה עוקבת, מצב צב, פירוק הברות, תעתיק בשפה שלכם ובדיקת הגייה חיה. אנגלית וספרדית, בעברית, אנגלית, ערבית ורוסית.">
+  <meta name="theme-color" content="#0e7490">
+  <meta property="og:title" content="LangQuest — Speak a new language from your first lesson">
+  <meta property="og:description" content="3–5 minute spoken-language lessons with live pronunciation check, transliteration in your own script and real conversations.">
+  <meta property="og:image" content="img/en-lesson.jpg">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#top"><img src="../icons/icon-192.png" alt="" width="34" height="34"><span>Lang<b>Quest</b></span></a>
+    <nav class="links">
+      <a href="#features" data-t="nav_features"></a>
+      <a href="#how" data-t="nav_how"></a>
+      <a href="#teachers-sec" data-t="nav_teachers"></a>
+      <a href="#pricing" data-t="nav_pricing"></a>
+      <a href="#faq-sec" data-t="nav_faq"></a>
+    </nav>
+    <div class="nav-end">
+      <select id="langSel" aria-label="Language"></select>
+      <a class="btn primary sm" href="../index.html" data-t="open_app"></a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-text">
+        <h1 data-t="hero_title"></h1>
+        <p class="lead" data-t="hero_sub"></p>
+        <div class="ctas">
+          <a class="btn primary big" href="../index.html" data-t="cta_free"></a>
+          <a class="btn ghost big" data-android></a>
+        </div>
+        <ul class="proof" id="proof"></ul>
+      </div>
+      <div class="hero-visual">
+        <div class="phone hero-phone"><img id="heroShot" src="img/he-lesson.jpg" alt="" width="390" height="844"></div>
+        <span class="bubble b1">🎙️ 92%</span>
+        <span class="bubble b2">🐢 60%</span>
+        <span class="bubble b3">🔥 7</span>
+      </div>
+    </section>
+
+    <section id="features" class="sec">
+      <h2 data-t="feat_title"></h2>
+      <div class="feats" id="feats"></div>
+    </section>
+
+    <section id="how" class="sec alt">
+      <h2 data-t="how_title"></h2>
+      <ol class="how" id="how"></ol>
+    </section>
+
+    <section class="sec">
+      <h2 data-t="shots_title"></h2>
+      <div class="shots" id="shots"></div>
+    </section>
+
+    <section id="teachers-sec" class="sec alt">
+      <h2 data-t="teach_title"></h2>
+      <p class="sub" data-t="teach_sub"></p>
+      <div class="teachers" id="teachers"></div>
+      <div class="langs">
+        <div><h3 data-t="langs_learn"></h3><ul id="learn"></ul></div>
+        <div><h3 data-t="langs_ui"></h3><ul id="uiLangs"></ul></div>
+      </div>
+    </section>
+
+    <section id="pricing" class="sec">
+      <h2 data-t="price_title"></h2>
+      <div class="plans" id="plans"></div>
+    </section>
+
+    <section id="faq-sec" class="sec alt">
+      <h2 data-t="faq_title"></h2>
+      <div class="faq" id="faq"></div>
+    </section>
+
+    <section class="final">
+      <h2 data-t="final_title"></h2>
+      <div class="ctas center">
+        <a class="btn primary big" href="../index.html" data-t="cta_free"></a>
+        <a class="btn light big" data-android></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>© <span id="year"></span> LangQuest</span>
+    <nav>
+      <a href="privacy.html" data-t="footer_privacy"></a>
+      <a href="terms.html" data-t="footer_terms"></a>
+      <a href="mailto:support@langquest.app" data-t="footer_contact"></a>
+    </nav>
+  </footer>
+
+  <script src="../js/commerce.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>
