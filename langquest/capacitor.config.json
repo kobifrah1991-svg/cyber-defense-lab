@@ -4,17 +4,17 @@
   "webDir": "www",
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#fdf8f1"
+    "backgroundColor": "#f6f7ff"
   },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 900,
-      "backgroundColor": "#0e7490",
+      "backgroundColor": "#4361ee",
       "showSpinner": false
     },
     "LocalNotifications": {
       "smallIcon": "ic_stat_tedralingo",
-      "iconColor": "#0e7490"
+      "iconColor": "#4361ee"
     }
   }
 }

@@ -242,7 +242,7 @@
     const g = cv.getContext('2d');
     const rtl = LQI18n.UI_LANGS[LQI18n.ui()].dir === 'rtl';
     const grad = g.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, '#0891b2'); grad.addColorStop(0.6, '#0e7490'); grad.addColorStop(1, '#f97316');
+    grad.addColorStop(0, '#3a18ad'); grad.addColorStop(0.55, '#4361ee'); grad.addColorStop(1, '#10a6d8');
     g.fillStyle = grad; g.fillRect(0, 0, W, H);
     g.fillStyle = 'rgba(255,255,255,.12)';
     g.beginPath(); g.arc(W * 0.85, H * 0.12, 260, 0, Math.PI * 2); g.fill();

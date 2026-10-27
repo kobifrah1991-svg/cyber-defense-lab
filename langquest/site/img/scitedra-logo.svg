@@ -1,1 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#07131c"/><path d="M32 8l20 8v14c0 13-9 22-20 26-11-4-20-13-20-26V16z" fill="#19c38a"/><text x="32" y="42" font-size="24" font-family="Arial" font-weight="900" text-anchor="middle" fill="#07131c">S</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Scitedra Labs">
+  <defs>
+    <linearGradient id="sl-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a18ad"/>
+      <stop offset=".55" stop-color="#4361ee"/>
+      <stop offset="1" stop-color="#10a6d8"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="34" fill="url(#sl-bg)"/>
+  <!-- open book -->
+  <path d="M37 76 Q70 72 100 82 L100 160 Q70 150 37 153 Z" fill="#ffffff"/>
+  <path d="M163 76 Q130 72 100 82 L100 160 Q130 150 163 153 Z" fill="#eaf1ff"/>
+  <path d="M100 82 V160" stroke="#b9c3e8" stroke-width="2"/>
+  <!-- circuit traces -->
+  <g fill="none" stroke="#4058e8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M54 98 H75 L83 107 H93"/><path d="M54 117 H73 L81 126 H92"/><path d="M54 136 H86"/>
+    <path d="M146 98 H125 L117 107 H107"/><path d="M146 117 H127 L119 126 H108"/><path d="M146 136 H114"/>
+  </g>
+  <g fill="#2ec4a0"><circle cx="50" cy="98" r="4.3"/><circle cx="50" cy="117" r="4.3"/><circle cx="50" cy="136" r="4.3"/>
+    <circle cx="150" cy="98" r="4.3"/><circle cx="150" cy="117" r="4.3"/><circle cx="150" cy="136" r="4.3"/></g>
+  <!-- mortarboard -->
+  <path d="M66 62 H134 V78 Q100 90 66 78 Z" fill="#f0b000"/>
+  <path d="M31 52 L100 28 L169 52 L100 76 Z" fill="#ffd167"/>
+  <path d="M157 56 V84" stroke="#f3e2b5" stroke-width="2.4"/>
+  <circle cx="157" cy="87" r="5" fill="#ffd167" stroke="#f0b000" stroke-width="1.5"/>
+</svg>
