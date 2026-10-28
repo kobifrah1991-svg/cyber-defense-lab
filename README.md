@@ -55,3 +55,12 @@ cyber-defense-lab/
 ---
 
 🛡️ HackerBot Defense Lab — ללמוד להגן, לא לתקוף.
+
+---
+
+## ARENA RUSH (משחק יריות)
+
+| תיקייה | מה יש |
+|---|---|
+| `unity/` | פרויקט Unity 6: להעתיק לתוך תיקיית הפרויקט. הוראות ב-`unity/README.md` |
+| `arena-rush/` | אב-טיפוס דפדפן (Node.js ו-Three.js) לבדיקת תחושת המשחק: `npm install && npm start` |
