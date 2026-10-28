@@ -9,6 +9,9 @@
  *    3. The app asks the license server (server/license-worker.js) to verify the session; the server
  *       answers with a signed license key, stored locally and re-validated periodically.
  *    4. "Restore" accepts that license key on another device.
+ *    5. Signed in with Google (js/cloud.js), the license is put on the learner's account (POST /link): the server
+ *       writes tedralingo_entitlements/{uid} in Firestore and every device signed in to that account is Premium.
+ *       Google Play purchases will write the same account entitlement (source 'play').
  *  Until CONFIG is filled in, purchases run in demo mode on localhost only (clearly labelled).
  *  Google Play builds must use Play Billing for in-app digital purchases instead — see README.
  */
@@ -59,7 +62,26 @@
     return lic;
   }
 
-  function isPremium() { return !!license(); }
+  /* ---------- Premium on the account (read from Firestore by js/cloud.js, cached for offline use) ---------- */
+  const ACC_KEY = 'tedralingo_entitlement_v1';
+  let account = (() => { try { return JSON.parse(localStorage.getItem(ACC_KEY)) || null; } catch { return null; } })();
+
+  /** Called by cloud.js with the signed-in uid and the entitlement document ({ premium, plan, source, expiresAt sec|null }), or nulls on sign-out. */
+  function setAccountEntitlement(uid, e) {
+    const next = uid && e && e.premium ? { uid, plan: e.plan || '', source: e.source || '', expiresAt: e.expiresAt || null } : null;
+    if (JSON.stringify(next) === JSON.stringify(account)) return;
+    account = next;
+    try { next ? localStorage.setItem(ACC_KEY, JSON.stringify(next)) : localStorage.removeItem(ACC_KEY); } catch { /* private mode */ }
+    document.dispatchEvent(new Event('lq:premium'));
+  }
+
+  function accountEntitlement() {
+    if (!account) return null;
+    if (account.expiresAt && account.expiresAt * 1000 < Date.now()) return null;
+    return account;
+  }
+
+  function isPremium() { return !!license() || !!accountEntitlement(); }
 
   function stationIsFree(index) { return index < FREE_STATIONS; }
 
@@ -89,7 +111,20 @@
   function store(body) {
     const lic = { plan: body.plan, exp: body.exp || null, token: body.token, checkedAt: Date.now() };
     save(lic);
+    document.dispatchEvent(new Event('lq:license'));   // signed in → cloud.js puts it on the account
     return lic;
+  }
+
+  /** Put this device's license on the signed-in learner's account. `idToken` is their Firebase ID token. */
+  async function linkToAccount(idToken) {
+    const lic = license();
+    if (!lic || !CONFIG.licenseApi || lic.token.startsWith('DEMO-')) return null;
+    const res = await fetch(CONFIG.licenseApi.replace(/\/$/, '') + '/link', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken, token: lic.token })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.ok) throw new Error(body.error || 'link_failed');
+    return body;
   }
 
   /** Returns from Stripe Checkout with ?session_id=… → verify and store the license. */
@@ -140,6 +175,7 @@
   window.LQCommerce = {
     CONFIG, PLANS, FREE_STATIONS,
     license, isPremium, stationIsFree, canOpen, priceLabel, demoMode, configured,
-    handleReturn, restore, revalidate, buy, signOut
+    handleReturn, restore, revalidate, buy, signOut,
+    setAccountEntitlement, accountEntitlement, linkToAccount
   };
 })();

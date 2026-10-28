@@ -22,6 +22,16 @@
 - הגדרה חד-פעמית ב-Firebase: [`firebase/README.md`](firebase/README.md) (דומיין מאושר + כללי Firestore).
 - בדיקות: `npm test` (מיזוג + שרת).
 
+## Premium על החשבון (כל המכשירים)
+
+- **מקור אחד:** הזכאות שמורה ב-Firestore, במסמך `tedralingo_entitlements/{uid}` = `{ premium, plan, source, expiresAt, ref, updatedAt }`. **רק השרת כותב אליו**, באמצעות service account. המשתמש יכול לקרוא רק את שלו (`firebase/firestore.rules`).
+- **רכישה באתר (Stripe):** הרישיון נשמר במכשיר. כשהמשתמש מחובר עם Google, האפליקציה שולחת `POST /link` עם טוקן ה-Firebase והרישיון. השרת מאמת את שניהם, קורא את המנוי מחדש מ-Stripe וכותב את הזכאות לחשבון (`server/accounts.js`).
+- **גוגל פליי:** ייכתב לאותו מסמך עם `source: 'play'`, לפי המסלול שייבחר (RevenueCat או חיבור ישיר).
+- **באפליקציה:** הזכאות נקראת בזמן אמת, כך שרכישה במכשיר אחר פותחת את המכשיר הזה מיד, ומנוי שפג נועל. היא נשמרת גם במכשיר לשימוש אופליין, ונמחקת בהתנתקות. מסך ההגדרות מציין "שמור בחשבון ה-Google".
+- **המורה ה-AI:** מקבל רישיון או חשבון עם Premium פעיל.
+- **הגדרה בשרת:** `FIREBASE_PROJECT_ID` (ב-`wrangler.toml`), ו-`npx wrangler secret put GOOGLE_SERVICE_ACCOUNT` (מפתח JSON עם הרשאת "Cloud Datastore User").
+- **בדיקות:** `npm test`. כולל טוקנים מזויפים, טוקנים שפג תוקפם, פרויקט אחר ומנוי שבוטל, ובאף אחד מהמקרים האלה לא נכתב כלום.
+
 ## פרסום — מסונכרן עם GitHub
 
 - **אתר + לומדה** (`.github/workflows/hosting.yml`): כל push ל-`main` עולה ל-Firebase Hosting (`npm run build:hosting` ← `dist/`), וכל Pull Request מקבל קישור תצוגה מקדימה.

@@ -3,6 +3,7 @@
  *  GET /verify?session_id=cs_…   after Stripe Checkout: confirms payment, returns a signed license key
  *  GET /verify?token=…           re-validates a license key (subscription still active?) and refreshes it
  *  POST /tutor                   AI conversation partner for Premium licenses (see tutor.js)
+ *  POST /link                    { idToken, token } → puts a paid license on the learner's Firebase account (see accounts.js)
  *
  *  Secrets / vars (wrangler secret put …):
  *    STRIPE_SECRET_KEY   sk_live_… (or sk_test_…)
@@ -11,11 +12,13 @@
  *    ALLOWED_ORIGINS     comma-separated, e.g. "https://tedralingo.web.app,https://localhost"
  *    ANTHROPIC_API_KEY   for the AI tutor (wrangler secret put ANTHROPIC_API_KEY)
  *    TUTOR_KV            optional KV namespace binding → daily message cap (TUTOR_DAILY_LIMIT, default 60)
+ *    FIREBASE_PROJECT_ID, GOOGLE_SERVICE_ACCOUNT   for /link (see accounts.js)
  *
  *  A license key is base64url(payload).base64url(hmac); payload = { plan, exp, sub?, cus, iat }.
  *  It carries no personal data beyond Stripe's opaque customer/subscription ids.
  */
 import { tutorTurn, underDailyCap, makeClient } from './tutor.js';
+import { verifyIdToken, writeEntitlement, activeEntitlement } from './accounts.js';
 
 const enc = new TextEncoder();
 const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -94,16 +97,41 @@ function json(body, status, headers) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...headers } });
 }
 
-/** POST /tutor — only for a valid, unexpired license. `deps.client` is injectable for tests. */
+/** POST /tutor — for a valid, unexpired license, or a signed-in account with Premium on it
+ *  (e.g. bought in Google Play). `deps.client` is injectable for tests. */
 export async function handleTutor(req, env, h, deps = {}) {
   let input;
   try { input = await req.json(); } catch { return json({ ok: false, error: 'bad_json' }, 400, h); }
+  let who = null;
   const lic = await verifyToken(input && input.token, env.LICENSE_SECRET);
-  if (!lic) return json({ ok: false, error: 'invalid_token' }, 401, h);
-  if (lic.plan !== 'lifetime' && lic.exp && lic.exp * 1000 < Date.now()) return json({ ok: false, error: 'expired' }, 402, h);
-  if (!(await underDailyCap(env, lic.sub || lic.cus || 'anon'))) return json({ ok: false, error: 'daily_limit' }, 429, h);
+  if (lic) {
+    if (lic.plan !== 'lifetime' && lic.exp && lic.exp * 1000 < Date.now()) return json({ ok: false, error: 'expired' }, 402, h);
+    who = lic.sub || lic.cus || 'anon';
+  } else if (input && input.idToken && env.FIREBASE_PROJECT_ID) {
+    const uid = await verifyIdToken(input.idToken, env);
+    if (!uid) return json({ ok: false, error: 'invalid_id_token' }, 401, h);
+    if (!(await activeEntitlement(env, uid))) return json({ ok: false, error: 'not_premium' }, 402, h);
+    who = 'uid:' + uid;
+  } else {
+    return json({ ok: false, error: 'invalid_token' }, 401, h);
+  }
+  if (!(await underDailyCap(env, who))) return json({ ok: false, error: 'daily_limit' }, 429, h);
   const { status, body } = await tutorTurn(deps.client || makeClient(env), input);
   return json(body, status, h);
+}
+
+/** POST /link — the signed-in learner's paid license becomes their account's entitlement (all devices). */
+export async function handleLink(req, env, h) {
+  let input;
+  try { input = await req.json(); } catch { return json({ ok: false, error: 'bad_json' }, 400, h); }
+  const uid = await verifyIdToken(input && input.idToken, env);
+  if (!uid) return json({ ok: false, error: 'invalid_id_token' }, 401, h);
+  const prev = await verifyToken(input.token, env.LICENSE_SECRET);
+  if (!prev) return json({ ok: false, error: 'invalid_token' }, 400, h);
+  const lic = await refresh(env, prev);     // a subscription is re-read from Stripe; lifetime stays valid
+  if (!lic) return json({ ok: false, error: 'inactive' }, 402, h);
+  await writeEntitlement(env, uid, { premium: true, plan: lic.plan, source: 'stripe', expiresAt: lic.exp, ref: lic.sub || lic.cus || '' });
+  return json({ ok: true, plan: lic.plan, exp: lic.exp }, 200, h);
 }
 
 export default {
@@ -111,6 +139,9 @@ export default {
     const h = cors(env, req);
     if (req.method === 'OPTIONS') return new Response(null, { headers: h });
     const url = new URL(req.url);
+    if (url.pathname === '/link' && req.method === 'POST') {
+      try { return await handleLink(req, env, h); } catch { return json({ ok: false, error: 'server_error' }, 502, h); }
+    }
     if (url.pathname === '/tutor' && req.method === 'POST') {
       try { return await handleTutor(req, env, h); } catch { return json({ ok: false, error: 'server_error' }, 502, h); }
     }

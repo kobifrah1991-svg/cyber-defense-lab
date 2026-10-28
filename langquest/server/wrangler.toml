@@ -7,8 +7,11 @@ compatibility_date = "2026-01-01"
 [vars]
 # Stripe price id → plan (create the three prices in Stripe, then paste their ids here)
 PRICE_PLANS = '{"price_monthly_xxx":"monthly","price_yearly_xxx":"yearly","price_lifetime_xxx":"lifetime"}'
-ALLOWED_ORIGINS = "https://localhost,http://localhost:8080"
+ALLOWED_ORIGINS = "https://tedralingo.web.app,https://localhost,http://localhost:8080"
 TUTOR_DAILY_LIMIT = "60"
+# Premium on the learner's account (POST /link): the Firebase project, plus
+#   npx wrangler secret put GOOGLE_SERVICE_ACCOUNT   (JSON key with "Cloud Datastore User")
+FIREBASE_PROJECT_ID = "cyberlab-3d"
 
 # AI tutor: npx wrangler secret put ANTHROPIC_API_KEY
 # Optional daily cap per license — create a KV namespace and bind it:

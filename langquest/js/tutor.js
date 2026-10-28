@@ -203,11 +203,14 @@
   async function callServer() {
     const lic = LQCommerce.license();
     const tc = C.teacher || {};
+    // Premium on the Google account (no license on this device): the server checks the account instead
+    const idToken = !lic && window.LQCloud && LQCloud.idToken ? await LQCloud.idToken() : '';
     const r = await fetch(apiUrl(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token: lic ? lic.token : '',
+        idToken,
         target: C.lang,
         base: LQI18n.ui(),
         level: LQStore.getPace(C.lang).level,

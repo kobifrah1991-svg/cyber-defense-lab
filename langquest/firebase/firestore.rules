@@ -54,6 +54,12 @@ service cloud.firestore {
       allow create, update: if tlOwner() && tlValid();
       allow delete: if tlOwner();
     }
+    // TedraLingo Premium on the account: written only by the license server (service account, server/accounts.js);
+    // a learner can read their own entitlement and nothing else.
+    match /tedralingo_entitlements/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

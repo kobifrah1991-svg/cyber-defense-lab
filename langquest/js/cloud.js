@@ -7,7 +7,7 @@
  */
 import { initializeApp } from './vendor/firebase/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithCredential, signOut, onAuthStateChanged } from './vendor/firebase/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from './vendor/firebase/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, onSnapshot } from './vendor/firebase/firebase-firestore.js';
 
 const cfg = window.LQ_FIREBASE_CONFIG;
 const C = window.LQ_CLOUD || {};
@@ -22,6 +22,25 @@ let state = 'off'; // off · out · saving · saved · pending · error
 let note = '';
 let merged = false; // first full merge done for this user
 let timer = 0;
+let stopEntitlement = null;
+
+/* ---------- Premium on the account: tedralingo_entitlements/{uid}, written by the license server ---------- */
+const seconds = t => (t && typeof t.toMillis === 'function' ? Math.floor(t.toMillis() / 1000) : typeof t === 'number' ? t : null);
+
+function watchEntitlement(u) {
+  if (stopEntitlement) { stopEntitlement(); stopEntitlement = null; }
+  if (!u) { LQCommerce.setAccountEntitlement(null, null); return; }
+  stopEntitlement = onSnapshot(doc(db, 'tedralingo_entitlements', u.uid), snap => {
+    const d = snap.exists() ? snap.data() : null;
+    LQCommerce.setAccountEntitlement(u.uid, d && { premium: d.premium === true, plan: d.plan, source: d.source, expiresAt: seconds(d.expiresAt) });
+  }, () => { /* offline or not allowed yet — keep the cached entitlement */ });
+}
+
+/** A license bought or restored on this device goes onto the signed-in account. */
+async function linkLicense() {
+  if (!user || !LQCommerce.license()) return;
+  try { await LQCommerce.linkToAccount(await user.getIdToken()); } catch { /* server not configured / offline — the device license still works */ }
+}
 
 function setPending(on) { try { on ? localStorage.setItem(PENDING, '1') : localStorage.removeItem(PENDING); } catch { /* private mode */ } }
 function changed() { document.dispatchEvent(new CustomEvent('lq:cloud', { detail: { state } })); }
@@ -165,8 +184,10 @@ if (cfg && (native || webOk)) {
       merged = false;
       state = u ? 'saving' : 'out';
       changed();
-      if (u) sync();
+      watchEntitlement(u);
+      if (u) { sync(); linkLicense(); }
     });
+    document.addEventListener('lq:license', linkLicense);
     LQStore.onSave = queue;
     addEventListener('online', () => { if (user) sync(); });
     document.addEventListener('visibilitychange', () => { if (!document.hidden && user) sync(); });
@@ -182,6 +203,7 @@ if (cfg && (native || webOk)) {
 
 window.LQCloud = {
   render, login, logout, sync,
+  idToken: async () => (user ? user.getIdToken() : ''),
   get state() { return state; },
   get user() { return user ? { uid: user.uid, name: user.displayName, email: user.email } : null; },
   _deepLink: onDeepLink

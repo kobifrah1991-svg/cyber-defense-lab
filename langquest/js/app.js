@@ -195,6 +195,11 @@
     if (current === 'map' && !!cloudCard() !== !!$('.cloud-cta', view)) return renderMap();
     renderCloudBoxes();
   });
+  // Premium arrived / ended on the account (another device bought it, a subscription lapsed)
+  document.addEventListener('lq:premium', () => {
+    refreshHeader();
+    if (current === 'map') renderMap();
+  });
   // a merged cloud copy replaced the local state
   document.addEventListener('lq:state', () => {
     refreshHeader();
@@ -522,19 +527,22 @@
 
   function premiumSection() {
     const lic = LQCommerce.license();
+    const acc = LQCommerce.accountEntitlement();       // Premium on the Google account (any device)
     const ui = LQI18n.ui();
-    const status = !lic ? t('pay.statusFree')
-      : lic.plan === 'lifetime' ? t('pay.lifetime')
-      : t('pay.until', { plan: t('pay.' + lic.plan), date: new Date(lic.exp * 1000).toLocaleDateString({ he: 'he-IL', ar: 'ar', ru: 'ru-RU' }[ui] || 'en-US') });
+    const p = lic || (acc && { plan: acc.plan, exp: acc.expiresAt });
+    const status = !p ? t('pay.statusFree')
+      : p.plan === 'lifetime' || !p.exp ? t('pay.lifetime')
+      : t('pay.until', { plan: t('pay.' + p.plan), date: new Date(p.exp * 1000).toLocaleDateString({ he: 'he-IL', ar: 'ar', ru: 'ru-RU' }[ui] || 'en-US') });
     return `
       <div class="set-group prem">
-        <div class="plan-row"><span>${t('pay.status')}</span><b>${lic ? '⭐ ' : ''}${esc(status)}</b></div>
+        <div class="plan-row"><span>${t('pay.status')}</span><b>${p ? '⭐ ' : ''}${esc(status)}</b></div>
+        ${acc ? `<p class="muted small">☁️ ${esc(t('pay.onAccount'))}</p>` : ''}
         ${lic ? `
           <label class="field"><span>${t('pay.key')}</span>
             <div class="row"><input class="key-input" dir="ltr" readonly value="${esc(lic.token)}"><button class="btn ghost sm" data-act="copy-key">${t('pay.copy')}</button></div>
           </label>
           <button class="btn ghost sm" data-act="sign-out">${t('pay.signOut')}</button>`
-        : `<div class="row"><button class="btn premium sm" data-act="upgrade">${t('pay.upgrade')}</button></div>`}
+        : acc ? '' : `<div class="row"><button class="btn premium sm" data-act="upgrade">${t('pay.upgrade')}</button></div>`}
       </div>`;
   }
 
