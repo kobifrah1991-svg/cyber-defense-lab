@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
 import { createApp } from './app.js';
+import { EntitlementSigner } from './billing/entitlements.js';
+import { GooglePlayClient, loadServiceAccount } from './billing/google-play.js';
 import { loadConfig } from './config.js';
 import { JobManager } from './jobs.js';
 import { Ytdlp } from './ytdlp.js';
@@ -41,7 +43,23 @@ const jobs = new JobManager({
   ttlMs: config.fileTtlMinutes * 60_000,
 });
 
-const app = createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion });
+let play = null;
+const { billing } = config;
+if (billing.packageName) {
+  const credentials = loadServiceAccount({ file: billing.serviceAccountFile, json: billing.serviceAccountJson });
+  if (!credentials) {
+    console.error('GOOGLE_PLAY_PACKAGE is set but no service account was given (GOOGLE_SERVICE_ACCOUNT_FILE or _JSON).');
+    process.exit(1);
+  }
+  play = new GooglePlayClient({ packageName: billing.packageName, credentials });
+  console.log(`Subscriptions on: ${billing.packageName} / ${billing.productId} (free: ${billing.freeDownloadsPerDay}/day up to ${billing.freeMaxHeight}p)`);
+}
+const signer = new EntitlementSigner(billing.entitlementSecret);
+if (play && signer.ephemeral) {
+  console.warn('⚠ ENTITLEMENT_SECRET not set: subscribers will be re-verified with Google after every restart.');
+}
+
+const app = createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion, play, signer });
 const server = app.listen(config.port, config.host, () => {
   console.log(`MediaDownloader Pro on http://localhost:${config.port}  (yt-dlp ${ytdlpVersion || 'missing'}, ffmpeg ${hasFfmpeg ? 'yes' : 'no'})`);
 });

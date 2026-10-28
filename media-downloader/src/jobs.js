@@ -32,7 +32,7 @@ export class JobManager {
     return count;
   }
 
-  create({ url, platform, choice, title, client }) {
+  create({ url, platform, choice, title, client, onSuccess = null }) {
     if (this.activeCount(client) >= this.maxActivePerClient) {
       throw new YtdlpError('busy_client', 'יש לך כבר הורדות פעילות. חכו שיסתיימו ונסו שוב');
     }
@@ -57,6 +57,7 @@ export class JobManager {
       createdAt: Date.now(),
       finishedAt: null,
       controller: new AbortController(),
+      onSuccess,
     };
     this.jobs.set(job.id, job);
     this.queue.push(job);
@@ -102,6 +103,7 @@ export class JobManager {
       job.fileSize = (await stat(job.filePath)).size;
       job.status = 'done';
       job.stage = 'done';
+      job.onSuccess?.();
     } catch (err) {
       job.status = 'error';
       job.error = err instanceof YtdlpError

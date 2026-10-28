@@ -14,9 +14,11 @@ COPY media-downloader/package.json media-downloader/package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY media-downloader/src ./src
 
-COPY products.html index.html media-downloader.html /app/site/
+COPY products.html index.html media-downloader.html app.html privacy.html terms.html manifest.webmanifest app-release.json /app/site/
 COPY css /app/site/css
 COPY js /app/site/js
+COPY icons /app/site/icons
+COPY images /app/site/images
 
 ENV NODE_ENV=production SITE_ROOT=/app/site PORT=8080
 USER node

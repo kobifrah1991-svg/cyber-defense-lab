@@ -18,7 +18,8 @@ function findPlatform(hostname) {
 }
 
 // Returns { ok: true, url, platform } or { ok: false, error } with a user-facing message.
-export function parseMediaUrl(input) {
+// `exclude` lists platform ids that this client may not use (e.g. YouTube in the Google Play app).
+export function parseMediaUrl(input, { exclude = [] } = {}) {
   if (typeof input !== 'string' || !input.trim()) {
     return { ok: false, error: 'נא להדביק קישור' };
   }
@@ -48,6 +49,9 @@ export function parseMediaUrl(input) {
   const platform = findPlatform(hostname);
   if (!platform) {
     return { ok: false, error: 'הפלטפורמה הזו לא נתמכת עדיין' };
+  }
+  if (exclude.includes(platform.id)) {
+    return { ok: false, error: `${platform.name} לא נתמך באפליקציה` };
   }
 
   url.protocol = 'https:';

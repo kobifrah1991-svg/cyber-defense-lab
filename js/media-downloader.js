@@ -1,9 +1,23 @@
 // MediaDownloader Pro — client. Talks to the server API when it's there,
 // and falls back to a link-detection demo on static hosting.
+// The Android app reuses this file and plugs in through window.MDP_CONFIG:
+//   app            true inside the app (no demo mode)
+//   apiBase()      server origin, e.g. "https://dl.example.com/"
+//   headers()      extra request headers (device id, entitlement)
+//   exclude        platform ids the app doesn't offer
+//   openFile(url)  how to save a finished file
+//   onPremium(msg) called when a download needs Premium
 (() => {
   'use strict';
 
   const $ = id => document.getElementById(id);
+  const cfg = window.MDP_CONFIG || {};
+  const PREMIUM_CODES = new Set(['premium_required', 'quota_exceeded']);
+
+  function apiUrl(path) {
+    const base = typeof cfg.apiBase === 'function' ? cfg.apiBase() : '';
+    return base ? `${base.replace(/\/+$/, '')}/api/${path}` : `api/${path}`;
+  }
 
   const PLATFORMS = [
     { id: 'youtube', name: 'YouTube', hosts: ['youtube.com', 'youtu.be'], icon: 'fa-brands fa-youtube', tint: 'bg-red-900/40 text-red-300' },
@@ -45,7 +59,9 @@
     }
     if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
     const host = url.hostname.toLowerCase();
-    return PLATFORMS.find(p => p.hosts.some(h => host === h || host.endsWith('.' + h))) || null;
+    const platform = PLATFORMS.find(p => p.hosts.some(h => host === h || host.endsWith('.' + h))) || null;
+    if (platform && (cfg.exclude || []).includes(platform.id)) return { ...platform, excluded: true };
+    return platform;
   }
 
   function formatDuration(sec) {
@@ -87,6 +103,12 @@
     toastTimer = setTimeout(() => el.classList.add('translate-y-32', 'opacity-0'), 3800);
   }
 
+  // Brings a status box into view (on phones it is often below the fold).
+  function reveal(el) {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
+  }
+
   function showError(message) {
     $('error-text').textContent = message;
     show($('error-box'), Boolean(message));
@@ -99,9 +121,12 @@
   }
 
   async function api(path, options = {}) {
-    const res = await fetch(`api/${path}`, {
+    const res = await fetch(apiUrl(path), {
       ...options,
-      headers: options.body ? { 'Content-Type': 'application/json' } : undefined,
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(cfg.headers ? cfg.headers() : {}),
+      },
       cache: 'no-store',
     });
     let data = null;
@@ -111,7 +136,9 @@
       // Non-JSON answer (e.g. a proxy error page).
     }
     if (!res.ok) {
-      throw new Error(data?.error?.message || 'השרת לא זמין כרגע. נסו שוב בעוד רגע');
+      const err = new Error(data?.error?.message || 'השרת לא זמין כרגע. נסו שוב בעוד רגע');
+      err.code = data?.error?.code;
+      throw err;
     }
     return data;
   }
@@ -120,7 +147,7 @@
   async function checkServer() {
     let health = null;
     try {
-      const res = await fetch('api/health', { cache: 'no-store', signal: AbortSignal.timeout(4000) });
+      const res = await fetch(apiUrl('health'), { cache: 'no-store', signal: AbortSignal.timeout(6000) });
       if (res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
         health = await res.json();
       }
@@ -136,10 +163,37 @@
     } else if (health) {
       dot.className = 'h-2 w-2 rounded-full bg-red-400';
       $('server-text').textContent = 'השרת פועל אבל yt-dlp חסר';
+    } else if (cfg.app) {
+      dot.className = 'h-2 w-2 rounded-full bg-red-400';
+      $('server-text').textContent = 'אין חיבור לשרת';
     } else {
       dot.className = 'h-2 w-2 rounded-full bg-amber-400';
       $('server-text').textContent = 'מצב דמו · ללא שרת';
       show($('demo-banner'), true);
+    }
+    return state.live;
+  }
+
+  // Premium-only action: the app opens its paywall; the website points to the app.
+  function needPremium(message) {
+    if (cfg.onPremium) cfg.onPremium(message);
+    else toast('זמין ב־Premium', message || 'האפשרות הזו זמינה במנוי Premium באפליקציית Android');
+  }
+
+  function handleError(err) {
+    if (PREMIUM_CODES.has(err.code)) needPremium(err.message);
+    showError(err.message);
+  }
+
+  function renderPlan(plan) {
+    const note = $('plan-note');
+    if (!note) return;
+    const limited = plan?.enabled && !plan.premium;
+    show(note, Boolean(limited));
+    if (limited) {
+      note.textContent = plan.freeLeft > 0
+        ? `גרסה חינמית: נשארו ${plan.freeLeft} הורדות היום, עד ${plan.freeMaxHeight}p`
+        : 'ניצלת את ההורדות החינמיות של היום';
     }
   }
 
@@ -172,20 +226,24 @@
     for (const opt of options) {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'option-chip' + (opt.kind === 'audio' ? ' text-pink-200' : '');
+      // An odd option out (usually audio) fills the row instead of sitting alone in half of it.
+      const wide = opt.kind === 'audio' && options.length % 2 === 1;
+      btn.className = 'option-chip' + (opt.kind === 'audio' ? ' text-pink-200' : '') + (opt.locked ? ' option-locked' : '') + (wide ? ' col-span-2' : '');
       btn.dataset.option = opt.id;
 
       const label = document.createElement('span');
       const icon = document.createElement('i');
-      icon.className = (opt.kind === 'audio' ? 'fa-solid fa-music' : 'fa-solid fa-film') + ' ml-1.5 opacity-80';
+      icon.className = (opt.locked ? 'fa-solid fa-crown text-amber-300' : opt.kind === 'audio' ? 'fa-solid fa-music' : 'fa-solid fa-film') + ' ml-1.5 opacity-90';
       label.append(icon, opt.label);
 
       const sub = document.createElement('span');
-      sub.className = 'text-[11px] font-medium text-gray-400';
-      sub.textContent = opt.kind === 'audio' ? 'שמע בלבד' : opt.ext.toUpperCase();
+      sub.className = 'text-[11px] font-medium ' + (opt.locked ? 'text-amber-300/90' : 'text-gray-400');
+      sub.textContent = opt.locked ? 'Premium' : opt.kind === 'audio' ? 'שמע בלבד' : opt.ext.toUpperCase();
 
       btn.append(label, sub);
-      btn.addEventListener('click', () => startDownload(opt));
+      btn.addEventListener('click', () => (opt.locked
+        ? needPremium(`${opt.label} זמין במנוי Premium`)
+        : startDownload(opt)));
       wrap.append(btn);
     }
   }
@@ -198,6 +256,7 @@
     $('media-title').textContent = info.title || 'ללא כותרת';
     $('media-uploader').textContent = info.uploader || '';
     renderOptions(info.options);
+    renderPlan(info.plan);
     show($('demo-note'), !state.live);
     show($('progress-box'), false);
     show($('done-box'), false);
@@ -220,12 +279,18 @@
       return;
     }
     const platform = detectPlatform(url);
-    if (!platform) {
+    if (!platform || platform.excluded) {
       show($('media-box'), false);
-      showError('הקישור לא תקין או שהפלטפורמה לא נתמכת. בדקו שהוא מתחיל ב־https://');
+      showError(platform
+        ? `${platform.name} לא נתמך באפליקציה`
+        : 'הקישור לא תקין או שהפלטפורמה לא נתמכת. בדקו שהוא מתחיל ב־https://');
       return;
     }
 
+    if (!state.live && cfg.app) {
+      showError('אין חיבור לשרת. בדקו את החיבור לאינטרנט ונסו שוב');
+      return;
+    }
     if (!state.live) {
       renderInfo({
         url,
@@ -245,7 +310,7 @@
       const info = await api('info', { method: 'POST', body: JSON.stringify({ url }) });
       renderInfo(info);
     } catch (err) {
-      showError(err.message);
+      handleError(err);
     } finally {
       setBusy(false);
     }
@@ -261,6 +326,7 @@
     show($('done-box'), false);
     updateProgress({ status: 'queued', stage: 'queued', progress: null }, opt);
     show($('progress-box'), true);
+    reveal($('progress-box'));
     try {
       const job = await api('jobs', { method: 'POST', body: JSON.stringify({ url: state.info.url, option: opt.id }) });
       state.jobId = job.id;
@@ -268,7 +334,7 @@
     } catch (err) {
       show($('progress-box'), false);
       lockOptions(false);
-      showError(err.message);
+      handleError(err);
     }
   }
 
@@ -330,13 +396,15 @@
     show($('progress-box'), false);
     lockOptions(false);
 
-    const href = `api/jobs/${encodeURIComponent(job.id)}/file`;
+    const href = apiUrl(`jobs/${encodeURIComponent(job.id)}/file`);
     const link = $('save-link');
     link.href = href;
     link.setAttribute('download', job.fileName || '');
     $('done-name').textContent = [job.fileName, formatBytes(job.fileSize)].filter(Boolean).join(' · ');
     show($('done-box'), true);
-    link.click();
+    reveal($('done-box'));
+    if (cfg.openFile) cfg.openFile(new URL(href, location.href).href, job);
+    else link.click();
 
     addHistory({
       url: state.info.url,
@@ -430,6 +498,12 @@
     }
   });
 
+  $('save-link').addEventListener('click', event => {
+    if (!cfg.openFile) return;
+    event.preventDefault();
+    cfg.openFile($('save-link').href);
+  });
+
   $('history-clear').addEventListener('click', () => {
     writeHistory([]);
     renderHistory();
@@ -439,10 +513,21 @@
   const shared = new URLSearchParams(location.search).get('url');
 
   renderHistory();
-  checkServer().then(() => {
-    if (shared) {
-      $('url-input').value = shared;
-      lookup(shared);
-    }
-  });
+  const ready = checkServer();
+
+  // Lets the app re-check the server (new address), refresh locks after a purchase, or open a shared link.
+  window.MDP = {
+    checkServer,
+    refresh() {
+      if (state.info?.url && state.live) lookup(state.info.url);
+    },
+    open(url) {
+      return ready.then(() => {
+        $('url-input').value = url;
+        return lookup(url);
+      });
+    },
+  };
+
+  if (shared) window.MDP.open(shared);
 })();

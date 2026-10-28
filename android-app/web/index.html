@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0B0914">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https:; base-uri 'none'">
+    <title>MediaDownloader Pro</title>
+    <link rel="stylesheet" href="css/vendor/heebo/heebo.css">
+    <link rel="stylesheet" href="css/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="css/media-downloader.css">
+</head>
+<body class="min-h-screen flex flex-col select-none">
+
+    <div class="fixed -top-24 right-0 w-80 h-80 bg-purple-600/25 rounded-full blur-[110px] pointer-events-none" aria-hidden="true"></div>
+    <div class="fixed bottom-0 -left-20 w-80 h-80 bg-pink-600/15 rounded-full blur-[120px] pointer-events-none" aria-hidden="true"></div>
+    <div id="demo-banner" class="hidden"></div>
+
+    <!-- Top bar -->
+    <header class="safe-top sticky top-0 z-40 bg-skitdra-bg/80 backdrop-blur-xl border-b border-white/5">
+        <div class="h-16 px-4 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <span class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 flex-shrink-0">
+                    <i class="fa-solid fa-cloud-arrow-down text-lg text-white"></i>
+                </span>
+                <span class="min-w-0">
+                    <span class="block text-base font-black text-white leading-tight">MediaDownloader</span>
+                    <span class="flex items-center gap-1.5 text-[11px] text-gray-400">
+                        <span class="h-1.5 w-1.5 rounded-full bg-gray-500" id="server-dot"></span>
+                        <span id="server-text" class="truncate">מתחבר…</span>
+                    </span>
+                </span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" id="plan-badge" class="hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black"></button>
+                <button type="button" id="settings-btn" class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 text-gray-200 flex items-center justify-center active:scale-95 transition-transform" aria-label="הגדרות">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="downloader" class="flex-grow px-4 pt-6 pb-10 max-w-2xl w-full mx-auto">
+        <h1 class="text-[28px] font-black leading-tight text-white">מה מורידים <span class="gradient-text">היום?</span></h1>
+        <p class="text-sm text-gray-400 mt-1">העתיקו קישור מ־TikTok, Instagram ועוד, ולחצו "הדבק".</p>
+
+        <section class="mt-5 glass-card rounded-[26px] p-4 shadow-2xl">
+            <form id="url-form" class="space-y-3" novalidate>
+                <label for="url-input" class="sr-only">קישור לסרטון</label>
+                <div class="relative">
+                    <i class="fa-solid fa-link absolute right-4 top-1/2 -translate-y-1/2 text-purple-400" aria-hidden="true"></i>
+                    <input type="url" id="url-input" dir="ltr" autocomplete="off" spellcheck="false" inputmode="url"
+                           placeholder="https://www.tiktok.com/@…"
+                           class="w-full pr-11 pl-4 py-4 bg-skitdra-bg/90 border border-skitdra-border rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all text-sm text-left select-text">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" id="paste-btn" class="py-3.5 rounded-2xl font-bold text-sm text-purple-100 bg-purple-900/40 border border-purple-600/40 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+                        <i class="fa-solid fa-paste"></i>הדבק
+                    </button>
+                    <button type="submit" id="fetch-btn" class="glow-button py-3.5 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2 active:scale-[0.98]">
+                        <i class="fa-solid fa-bolt" id="fetch-icon"></i><span>הורדה</span>
+                    </button>
+                </div>
+            </form>
+
+            <div id="error-box" class="hidden mt-4 flex items-start gap-3 bg-red-950/40 border border-red-500/30 text-red-200 rounded-2xl p-3.5 text-sm" role="alert">
+                <i class="fa-solid fa-circle-exclamation mt-0.5 text-red-400"></i>
+                <span id="error-text"></span>
+            </div>
+
+            <div id="media-box" class="hidden mt-4 pt-4 border-t border-white/5">
+                <div id="media-thumb" class="relative w-full aspect-video rounded-2xl overflow-hidden flex items-center justify-center bg-purple-900/40 border border-purple-500/20 text-5xl text-purple-300">
+                    <i class="fa-solid fa-photo-film"></i>
+                </div>
+                <div class="mt-3 space-y-1.5">
+                    <div class="flex items-center gap-2 text-xs text-gray-400">
+                        <span id="media-platform" class="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full"></span>
+                        <span id="media-duration" class="font-mono"></span>
+                    </div>
+                    <h2 id="media-title" dir="auto" class="font-bold text-white text-base leading-snug break-words"></h2>
+                    <p id="media-uploader" dir="auto" class="text-xs text-gray-400"></p>
+                </div>
+                <div id="options" class="grid grid-cols-2 gap-2 mt-4"></div>
+                <p id="plan-note" class="hidden mt-3 text-xs text-amber-200/90"></p>
+                <p id="demo-note" class="hidden"></p>
+
+                <div id="progress-box" class="hidden mt-4 bg-skitdra-bg/70 border border-purple-500/20 rounded-2xl p-4 space-y-3" aria-live="polite">
+                    <div class="flex items-center justify-between gap-3 text-sm">
+                        <span id="progress-stage" class="font-bold text-white"></span>
+                        <span id="progress-percent" class="font-mono text-purple-300"></span>
+                    </div>
+                    <div class="progress-track" id="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+                    <div class="flex items-center justify-between text-[11px] text-gray-400 font-mono" dir="ltr">
+                        <span id="progress-size"></span><span id="progress-speed"></span>
+                    </div>
+                </div>
+
+                <div id="done-box" class="hidden mt-4 bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check"></i></span>
+                        <span class="min-w-0">
+                            <span class="block font-bold text-white">הקובץ מוכן!</span>
+                            <span class="block text-xs text-gray-400 truncate" id="done-name" dir="auto"></span>
+                        </span>
+                    </div>
+                    <a id="save-link" href="#" class="glow-button w-full py-3.5 rounded-2xl font-black text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i><span>שמור בהורדות</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upsell (free users only) -->
+        <button type="button" id="upsell" class="hidden mt-4 w-full premium-card rounded-[26px] p-4 text-right items-center gap-3 active:scale-[0.99] transition-transform">
+            <span class="crown-badge w-11 h-11 rounded-2xl flex items-center justify-center text-lg flex-shrink-0"><i class="fa-solid fa-crown"></i></span>
+            <span class="flex-grow min-w-0">
+                <span class="block font-black text-white">נסו Premium · 7 ימים חינם</span>
+                <span class="block text-xs text-purple-100/80">ללא הגבלה · עד 4K · MP3</span>
+            </span>
+            <i class="fa-solid fa-chevron-left text-purple-200"></i>
+        </button>
+
+        <section id="history-box" class="hidden mt-4 glass-card rounded-[26px] p-4">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="font-bold text-white text-sm flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-amber-400"></i>הורדות אחרונות</h2>
+                <button type="button" id="history-clear" class="text-xs text-gray-400">ניקוי</button>
+            </div>
+            <ul id="history-list" class="divide-y divide-white/5"></ul>
+        </section>
+    </main>
+
+    <!-- Settings / subscription sheet -->
+    <div id="sheet-backdrop" class="sheet-backdrop"></div>
+    <section id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+        <div class="flex justify-center pt-3 pb-1"><span class="h-1.5 w-10 rounded-full bg-white/15"></span></div>
+        <div class="flex items-center justify-between px-5 py-2">
+            <h2 id="sheet-title" class="text-lg font-black text-white">הגדרות</h2>
+            <button type="button" id="sheet-close" class="w-9 h-9 rounded-full bg-white/5 text-gray-300 flex items-center justify-center" aria-label="סגירה"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="overflow-y-auto px-4 pb-4 safe-bottom space-y-4">
+            <div id="paywall-reason" class="hidden rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-100 text-sm px-4 py-3"></div>
+
+            <!-- Free: plans -->
+            <div id="premium-offer" class="premium-card rounded-[26px] p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="crown-badge w-12 h-12 rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-crown"></i></span>
+                    <div>
+                        <div class="text-lg font-black text-white">MediaDownloader Premium</div>
+                        <div class="text-xs text-purple-100/80">שבוע ראשון חינם · ביטול בכל עת</div>
+                    </div>
+                </div>
+                <ul class="grid grid-cols-2 gap-2 text-[13px] text-gray-100">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-infinity text-pink-300 w-4"></i>הורדות ללא הגבלה</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-film text-pink-300 w-4"></i>איכות עד 4K</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-music text-pink-300 w-4"></i>חילוץ MP3</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-bolt text-pink-300 w-4"></i>עדיפות בתור</li>
+                </ul>
+
+                <div id="plans" class="space-y-2.5" role="radiogroup" aria-label="מסלול"></div>
+                <p id="plans-status" class="text-xs text-purple-100/70 text-center"></p>
+
+                <button type="button" id="subscribe-btn" class="glow-button w-full py-4 rounded-2xl font-black text-white text-base shadow-xl" disabled>התחילו 7 ימים חינם</button>
+                <p id="plan-terms" class="text-[11px] leading-relaxed text-purple-100/60 text-center"></p>
+            </div>
+
+            <!-- Premium: status -->
+            <div id="premium-status" class="hidden premium-card rounded-[26px] p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="crown-badge w-12 h-12 rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-crown"></i></span>
+                    <div>
+                        <div class="text-lg font-black text-white">Premium פעיל</div>
+                        <div id="premium-detail" class="text-xs text-purple-100/80"></div>
+                    </div>
+                </div>
+                <button type="button" id="manage-btn" class="w-full py-3 rounded-2xl font-bold text-sm text-white bg-white/10 border border-white/15">ניהול המנוי ב־Google Play</button>
+            </div>
+
+            <div class="glass-card rounded-[22px] p-1.5">
+                <button type="button" id="restore-btn" class="settings-row">
+                    <span class="settings-icon bg-purple-500/15 text-purple-300"><i class="fa-solid fa-rotate"></i></span>
+                    <span class="flex-grow"><span class="block text-sm font-bold text-white">שחזור רכישות</span><span class="block text-xs text-gray-400">אם כבר נרשמתם במכשיר אחר</span></span>
+                </button>
+                <div class="settings-row" id="usage-row">
+                    <span class="settings-icon bg-emerald-500/15 text-emerald-300"><i class="fa-solid fa-gauge"></i></span>
+                    <span class="flex-grow"><span class="block text-sm font-bold text-white">שימוש היום</span><span class="block text-xs text-gray-400" id="usage-text">…</span></span>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-[22px] p-1.5">
+                <button type="button" id="server-toggle" class="settings-row">
+                    <span class="settings-icon bg-sky-500/15 text-sky-300"><i class="fa-solid fa-server"></i></span>
+                    <span class="flex-grow"><span class="block text-sm font-bold text-white">שרת</span><span class="block text-xs text-gray-400 truncate" id="server-current" dir="ltr"></span></span>
+                    <i class="fa-solid fa-chevron-down text-gray-500 text-xs"></i>
+                </button>
+                <form id="server-form" class="hidden px-3 pb-3 space-y-2">
+                    <input type="url" id="server-input" dir="ltr" placeholder="https://dl.example.com" class="w-full px-3 py-3 bg-skitdra-bg border border-skitdra-border rounded-xl text-sm text-white text-left select-text">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="submit" class="py-2.5 rounded-xl bg-purple-600 text-white text-sm font-bold">שמירה</button>
+                        <button type="button" id="server-reset" class="py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-bold">ברירת מחדל</button>
+                    </div>
+                </form>
+                <button type="button" id="clear-data-btn" class="settings-row">
+                    <span class="settings-icon bg-red-500/15 text-red-300"><i class="fa-solid fa-trash-can"></i></span>
+                    <span class="flex-grow"><span class="block text-sm font-bold text-white">ניקוי היסטוריה</span></span>
+                </button>
+            </div>
+
+            <div class="glass-card rounded-[22px] p-1.5">
+                <button type="button" class="settings-row" data-link="privacy">
+                    <span class="settings-icon bg-white/5 text-gray-300"><i class="fa-solid fa-user-shield"></i></span>
+                    <span class="flex-grow text-sm font-bold text-white">מדיניות פרטיות</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-gray-500 text-xs"></i>
+                </button>
+                <button type="button" class="settings-row" data-link="terms">
+                    <span class="settings-icon bg-white/5 text-gray-300"><i class="fa-solid fa-file-contract"></i></span>
+                    <span class="flex-grow text-sm font-bold text-white">תנאי שימוש</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-gray-500 text-xs"></i>
+                </button>
+                <button type="button" class="settings-row" data-link="support">
+                    <span class="settings-icon bg-white/5 text-gray-300"><i class="fa-solid fa-life-ring"></i></span>
+                    <span class="flex-grow text-sm font-bold text-white">תמיכה</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-gray-500 text-xs"></i>
+                </button>
+            </div>
+
+            <p class="text-center text-[11px] text-gray-500 pb-2">MediaDownloader Pro · גרסה <span id="app-version"></span><br>לשימוש אישי בלבד, בכפוף לזכויות יוצרים</p>
+        </div>
+    </section>
+
+    <div id="toast" role="status" aria-live="polite" class="fixed bottom-6 left-4 right-4 z-[60] translate-y-32 opacity-0 transition-all duration-300 glass-card border-purple-500 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-none">
+        <span class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-200 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-info"></i></span>
+        <span>
+            <span class="block text-xs font-bold text-white" id="toast-title"></span>
+            <span class="block text-xs text-gray-300" id="toast-msg"></span>
+        </span>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script src="js/media-downloader.js"></script>
+</body>
+</html>

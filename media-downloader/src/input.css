@@ -51,6 +51,57 @@
     animation: progress-flow 2.4s linear infinite;
     transition: width .5s ease;
   }
+  .option-locked { @apply border-amber-500/30 bg-amber-500/[0.06]; }
+  .option-locked:hover:not(:disabled) { @apply border-amber-400/70 bg-amber-500/10; }
+
+  /* Premium / subscription UI */
+  .premium-card {
+    background:
+      radial-gradient(120% 110% at 100% 0%, rgba(236, 72, 153, 0.32), transparent 52%),
+      radial-gradient(120% 120% at 0% 100%, rgba(124, 58, 237, 0.45), transparent 55%),
+      #151226;
+    border: 1px solid rgba(192, 132, 252, 0.35);
+  }
+  .plan-tile {
+    @apply relative w-full rounded-2xl border border-skitdra-border bg-skitdra-bg/70 p-4 text-right transition-all;
+  }
+  .plan-tile[aria-checked="true"] {
+    border-color: #A855F7;
+    background: linear-gradient(180deg, rgba(124, 58, 237, 0.22), rgba(21, 18, 38, 0.85));
+    box-shadow: 0 0 0 1px #A855F7, 0 12px 32px -14px rgba(168, 85, 247, 0.7);
+  }
+  .plan-radio { @apply flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-500 transition-colors; }
+  .plan-tile[aria-checked="true"] .plan-radio { @apply border-purple-400 bg-purple-500; }
+  .plan-tile[aria-checked="true"] .plan-radio::after { content: ''; @apply h-2 w-2 rounded-full bg-white; }
+  .crown-badge { background: linear-gradient(135deg, #FBBF24, #F472B6); @apply text-skitdra-bg; }
+
+  /* Bottom sheet (settings / paywall) */
+  .sheet-backdrop { @apply fixed inset-0 z-50 bg-black/60 opacity-0 pointer-events-none; backdrop-filter: blur(4px); transition: opacity .3s ease; }
+  .sheet-backdrop.open { @apply opacity-100 pointer-events-auto; }
+  .sheet {
+    @apply fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92vh] max-w-2xl flex-col rounded-t-[28px] border border-b-0 border-purple-500/25 bg-skitdra-card;
+    transform: translateY(105%);
+    visibility: hidden;
+    transition: transform .42s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .42s;
+    box-shadow: 0 -24px 60px -20px rgba(124, 58, 237, 0.45);
+  }
+  .sheet.open { transform: translateY(0); visibility: visible; transition-delay: 0s; }
+  .settings-row { @apply flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-right transition-colors hover:bg-white/5; }
+  .settings-icon { @apply flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-sm; }
+
+  /* Legal pages */
+  .legal h1 { @apply text-3xl sm:text-4xl font-black text-white mb-3; }
+  .legal .lead { @apply text-gray-400 mb-10; }
+  .legal h2 { @apply text-xl font-extrabold text-white mt-10 mb-3; }
+  .legal h3 { @apply font-bold text-purple-200 mt-6 mb-1.5; }
+  .legal p, .legal li { @apply text-[15px] leading-7 text-gray-300; }
+  .legal ul { @apply list-disc pr-6 space-y-1.5; }
+  .legal strong { @apply text-white; }
+  .todo { @apply rounded bg-amber-400/15 px-1.5 text-amber-200; }
+
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+
   .progress-indeterminate .progress-fill { width: 35% !important; animation: progress-flow 2.4s linear infinite, progress-slide 1.4s ease-in-out infinite; }
 }
 

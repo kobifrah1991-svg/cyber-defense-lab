@@ -1,0 +1,16 @@
+{
+  "appId": "com.kobifrah.mediadownloader",
+  "appName": "MediaDownloader Pro",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0B0914",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0B0914",
+      "overlaysWebView": false
+    }
+  }
+}

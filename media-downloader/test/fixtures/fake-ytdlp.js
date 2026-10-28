@@ -49,7 +49,7 @@ if (url.includes('huge')) {
 
 const dir = opt('-P');
 const ext = args.includes('-x') ? 'mp3' : 'mp4';
-const delay = url.includes('slow') ? 400 : 20;
+const delay = url.includes('slow') ? 900 : 20;
 console.log(`[download] Destination: ${path.join(dir, 'abc123.f137.mp4')}`);
 for (const done of [250, 500, 1000]) {
   console.log(`MDP ${done} 1000 NA 2048 ${Math.round((1000 - done) / 250)}`);

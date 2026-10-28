@@ -1,12 +1,20 @@
 import express from 'express';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { EntitlementSigner } from './billing/entitlements.js';
+import { BillingError, summarizeSubscription } from './billing/google-play.js';
+import { PlanPolicy } from './billing/plans.js';
 import { buildOptions, parseChoice } from './formats.js';
 import { RateLimiter, TtlCache } from './limits.js';
 import { PLATFORMS, parseMediaUrl } from './urls.js';
 import { YtdlpError } from './ytdlp.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const PURCHASE_TOKEN = /^[\w.\-:]{10,1024}$/;
+// Google Play doesn't allow YouTube downloaders, so the Play app sends X-Client: android and YouTube is refused.
+const CLIENT_EXCLUDES = { android: ['youtube'] };
+// Entitlements are re-checked with Google at least daily.
+const ENTITLEMENT_MAX_MS = 24 * 60 * 60 * 1000;
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -61,6 +69,8 @@ function statusForError(err) {
       return 504;
     case 'missing':
       return 503;
+    case 'network':
+      return 502;
     default:
       return 502;
   }
@@ -92,14 +102,25 @@ function publicJob(job) {
   };
 }
 
-export function createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion }) {
+export function createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion, play = null, signer = null }) {
   const app = express();
+  const billing = config.billing;
+  const entitlements = signer || new EntitlementSigner(billing.entitlementSecret);
+  const policy = new PlanPolicy({
+    enabled: Boolean(billing.packageName && play),
+    freeDownloadsPerDay: billing.freeDownloadsPerDay,
+    freeMaxHeight: billing.freeMaxHeight,
+    signer: entitlements,
+  });
+  const corsOrigins = new Set(config.corsOrigins);
+  const excludesFor = req => CLIENT_EXCLUDES[req.get('x-client')] || [];
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxy);
 
   const infoLimiter = new RateLimiter({ limit: config.infoPerMinute, windowMs: 60_000 });
   const downloadLimiter = new RateLimiter({ limit: config.downloadsPer10Min, windowMs: 10 * 60_000 });
   const infoCache = new TtlCache({ ttlMs: 10 * 60_000, maxEntries: 500 });
+  const billingLimiter = new RateLimiter({ limit: 20, windowMs: 60_000 });
 
   app.use((req, res, next) => {
     res.set(SECURITY_HEADERS);
@@ -114,6 +135,21 @@ export function createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion }) {
   };
 
   const api = express.Router();
+  // The Android app runs the UI from its own origin (https://localhost) and calls this API cross-origin.
+  api.use((req, res, next) => {
+    const origin = req.get('origin');
+    if (origin && corsOrigins.has(origin)) {
+      res.set({
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Device-Id, X-Client',
+        'Access-Control-Max-Age': '600',
+      });
+      res.vary('Origin');
+    }
+    if (req.method === 'OPTIONS') return res.status(origin && corsOrigins.has(origin) ? 204 : 403).end();
+    next();
+  });
   api.use(express.json({ limit: '4kb' }));
   api.use((req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -127,7 +163,47 @@ export function createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion }) {
       ffmpeg: hasFfmpeg,
       platforms: PLATFORMS.map(p => p.name),
       maxFilesizeMb: config.maxFilesizeMb,
+      billing: policy.enabled ? { productId: billing.productId } : null,
     });
+  });
+
+  api.get('/plan', (req, res) => {
+    const who = policy.identify(req);
+    res.json(policy.describe(who, jobs.activeCount(req.ip)));
+  });
+
+  // The app sends the Google Play purchase token; we confirm it with Google and hand back an entitlement.
+  api.post('/billing/verify', limit(billingLimiter), async (req, res) => {
+    if (!policy.enabled) return sendError(res, 404, 'billing_disabled', 'מנויים לא מופעלים בשרת הזה');
+    const { purchaseToken, productId } = req.body || {};
+    if (typeof purchaseToken !== 'string' || !PURCHASE_TOKEN.test(purchaseToken)) {
+      return sendError(res, 400, 'invalid_purchase', 'פרטי רכישה לא תקינים');
+    }
+    if (productId !== billing.productId) {
+      return sendError(res, 400, 'invalid_purchase', 'מוצר לא מוכר');
+    }
+    try {
+      const purchase = await play.getSubscription(purchaseToken);
+      const subscription = summarizeSubscription(purchase, billing.productId);
+      if (subscription.active && !subscription.acknowledged) {
+        // Google refunds subscriptions that aren't acknowledged within 3 days.
+        await play.acknowledge(billing.productId, purchaseToken).then(
+          () => { subscription.acknowledged = true; },
+          err => console.error(`[billing] acknowledge failed: ${err.message}`),
+        );
+      }
+      const entitlement = subscription.active
+        ? (() => {
+          const expiresAt = Math.min(subscription.expiresAt, Date.now() + ENTITLEMENT_MAX_MS);
+          return { token: entitlements.sign({ purchaseToken, plan: subscription.basePlanId, expiresAt }), expiresAt };
+        })()
+        : null;
+      res.json({ active: subscription.active, subscription, entitlement });
+    } catch (err) {
+      if (err instanceof BillingError) return sendError(res, err.status, err.code, err.message);
+      console.error('[billing]', err);
+      sendError(res, 503, 'billing_unavailable', 'לא הצלחנו לאמת את המנוי. נסו שוב');
+    }
   });
 
   async function loadInfo(url) {
@@ -142,29 +218,43 @@ export function createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion }) {
   }
 
   api.post('/info', limit(infoLimiter), async (req, res) => {
-    const parsed = parseMediaUrl(req.body?.url);
+    const parsed = parseMediaUrl(req.body?.url, { exclude: excludesFor(req) });
     if (!parsed.ok) return sendError(res, 400, 'invalid_url', parsed.error);
     try {
       const info = await loadInfo(parsed.url);
-      res.json({ url: parsed.url, ...publicInfo(info, parsed.platform, hasFfmpeg) });
+      const who = policy.identify(req);
+      const body = publicInfo(info, parsed.platform, hasFfmpeg);
+      body.options = body.options.map(opt => ({ ...opt, locked: !policy.allows(parseChoice(opt.id), who) }));
+      body.plan = policy.describe(who, jobs.activeCount(req.ip));
+      res.json({ url: parsed.url, ...body });
     } catch (err) {
       sendError(res, statusForError(err), err.code || 'failed', err instanceof YtdlpError ? err.message : 'שגיאה בשרת');
     }
   });
 
   api.post('/jobs', limit(downloadLimiter), async (req, res) => {
-    const parsed = parseMediaUrl(req.body?.url);
+    const parsed = parseMediaUrl(req.body?.url, { exclude: excludesFor(req) });
     if (!parsed.ok) return sendError(res, 400, 'invalid_url', parsed.error);
     const choice = parseChoice(req.body?.option);
     if (!choice) return sendError(res, 400, 'invalid_option', 'אפשרות הורדה לא תקינה');
+
+    const who = policy.identify(req);
+    if (!policy.allows(choice, who)) {
+      return sendError(res, 402, 'premium_required', 'האיכות הזו זמינה במנוי Premium');
+    }
+    if (!who.premium && policy.freeLeft(who, jobs.activeCount(req.ip)) <= 0) {
+      return sendError(res, 402, 'quota_exceeded', `ניצלת את ${billing.freeDownloadsPerDay} ההורדות החינמיות של היום. עם Premium אין הגבלה`);
+    }
+
     try {
       const info = await loadInfo(parsed.url);
       const job = jobs.create({
         url: parsed.url,
         platform: parsed.platform,
-        choice,
+        choice: policy.effectiveChoice(choice, who),
         title: typeof info.title === 'string' ? info.title : '',
         client: req.ip,
+        onSuccess: () => policy.record(who),
       });
       res.status(202).json(publicJob(job));
     } catch (err) {
@@ -201,11 +291,16 @@ export function createApp({ config, ytdlp, jobs, hasFfmpeg, ytdlpVersion }) {
   // The static site: only these files and folders are public, never the server source.
   const page = file => (req, res) => res.sendFile(path.join(config.siteRoot, file));
   app.get('/', page('products.html'));
-  for (const file of ['index.html', 'products.html', 'media-downloader.html']) {
+  const PUBLIC_FILES = [
+    'index.html', 'products.html', 'media-downloader.html', 'app.html', 'privacy.html', 'terms.html',
+    'manifest.webmanifest', 'app-release.json',
+  ];
+  for (const file of PUBLIC_FILES) {
     if (existsSync(path.join(config.siteRoot, file))) app.get(`/${file}`, page(file));
   }
-  app.use('/css', express.static(path.join(config.siteRoot, 'css'), { maxAge: '1h' }));
-  app.use('/js', express.static(path.join(config.siteRoot, 'js'), { maxAge: '1h' }));
+  for (const dir of ['css', 'js', 'icons', 'images']) {
+    app.use(`/${dir}`, express.static(path.join(config.siteRoot, dir), { maxAge: '1h' }));
+  }
 
   app.use((req, res) => res.status(404).type('text').send('Not found'));
   // eslint-disable-next-line no-unused-vars

@@ -1,3 +1,4 @@
 .git
 **/node_modules
 media-downloader/test
+android-app

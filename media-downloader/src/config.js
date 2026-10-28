@@ -29,5 +29,18 @@ export function loadConfig() {
     downloadTimeoutSec: int('DOWNLOAD_TIMEOUT_SEC', 15 * 60),
     infoPerMinute: int('INFO_REQUESTS_PER_MINUTE', 30),
     downloadsPer10Min: int('DOWNLOADS_PER_10_MIN', 15),
+    // Origins allowed to call the API from another origin: the Android app's WebView by default.
+    corsOrigins: (process.env.CORS_ORIGINS ?? 'https://localhost,capacitor://localhost')
+      .split(',').map(s => s.trim()).filter(Boolean),
+    billing: {
+      // Subscriptions are on when the Play package name is set; otherwise everything is free and unlimited.
+      packageName: process.env.GOOGLE_PLAY_PACKAGE || '',
+      productId: process.env.SUBSCRIPTION_PRODUCT_ID || 'premium',
+      serviceAccountFile: process.env.GOOGLE_SERVICE_ACCOUNT_FILE || '',
+      serviceAccountJson: process.env.GOOGLE_SERVICE_ACCOUNT_JSON || '',
+      entitlementSecret: process.env.ENTITLEMENT_SECRET || '',
+      freeDownloadsPerDay: int('FREE_DOWNLOADS_PER_DAY', 3),
+      freeMaxHeight: int('FREE_MAX_HEIGHT', 720),
+    },
   };
 }

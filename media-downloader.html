@@ -2,16 +2,20 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="MediaDownloader Pro — הורדת סרטונים ושמע מהרשתות החברתיות לשימוש אישי, מבוסס yt-dlp.">
     <meta name="theme-color" content="#0B0914">
     <title>MediaDownloader Pro</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MediaDownloader">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/vendor/heebo/heebo.css">
     <link rel="stylesheet" href="css/vendor/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="css/media-downloader.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📥</text></svg>">
+    <link rel="icon" type="image/png" href="icons/favicon-32.png">
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -25,7 +29,7 @@
         <a href="#run" class="underline hover:text-white">איך מפעילים הורדות אמיתיות?</a>
     </div>
 
-    <header class="sticky top-0 z-40 glass-card border-x-0 border-t-0">
+    <header class="sticky top-0 z-40 glass-card border-x-0 border-t-0 safe-top">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
             <a href="products.html" class="flex items-center gap-3" title="חזרה לדף המוצרים">
                 <span class="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
@@ -44,7 +48,7 @@
                 <a href="#downloader" class="hover:text-purple-400 transition-colors">הורדה</a>
                 <a href="#how" class="hover:text-purple-400 transition-colors">איך זה עובד</a>
                 <a href="#features" class="hover:text-purple-400 transition-colors">תכונות</a>
-                <a href="#android" class="hover:text-purple-400 transition-colors">Android</a>
+                <a href="app.html" class="hover:text-purple-400 transition-colors">אפליקציה</a>
             </nav>
 
             <a href="products.html" class="glass-card hover:bg-purple-900/20 px-4 py-2.5 rounded-xl font-bold text-sm text-gray-200 flex items-center gap-2 transition-all">
@@ -120,6 +124,7 @@
                             <h2 id="media-title" dir="auto" class="font-bold text-white text-lg leading-snug break-words"></h2>
                             <p id="media-uploader" dir="auto" class="text-sm text-gray-400"></p>
                             <div id="options" class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2"></div>
+                            <p id="plan-note" class="hidden text-xs text-amber-200/90 pt-1"></p>
                             <p id="demo-note" class="hidden text-xs text-amber-300/90 pt-1">
                                 <i class="fa-solid fa-circle-info ml-1"></i>במצב דמו אין שרת, ולכן לא יורד קובץ. <a href="#run" class="underline">הפעלת השרת</a>
                             </p>
@@ -238,29 +243,24 @@
 
         <!-- Android -->
         <section id="android" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24">
-            <div class="glass-card rounded-3xl p-8 sm:p-12 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500" aria-hidden="true"></div>
+            <div class="premium-card rounded-[32px] p-8 sm:p-12 relative overflow-hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                     <div class="lg:col-span-7 space-y-5">
-                        <span class="inline-flex items-center gap-2 bg-amber-900/30 border border-amber-500/30 text-amber-300 px-3 py-1 rounded-lg text-xs font-semibold">
-                            <i class="fa-brands fa-android"></i> אפליקציה בפיתוח
+                        <span class="inline-flex items-center gap-2 crown-badge px-3 py-1 rounded-full text-xs font-black">
+                            <i class="fa-solid fa-gift"></i> 7 ימים של Premium חינם
                         </span>
-                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight">בנייד? זה כבר עובד מהדפדפן</h2>
-                        <p class="text-gray-300 text-base sm:text-lg font-light leading-relaxed">
-                            האתר מותאם לגמרי לנייד. אפליקציית Android ייעודית בפיתוח, ועדיין <strong class="text-white">אין קובץ APK להורדה</strong>.
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight">האפליקציה לאנדרואיד</h2>
+                        <p class="text-gray-200 text-base sm:text-lg font-light leading-relaxed">
+                            לוחצים "שיתוף" ב־TikTok או ב־Instagram, בוחרים MediaDownloader, והסרטון אצלכם. עם Premium: הורדות ללא הגבלה, עד 4K ו־MP3.
                         </p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a href="app.html" class="glow-button px-7 py-4 rounded-2xl font-black text-white flex items-center justify-center gap-2"><i class="fa-brands fa-android text-xl"></i>לעמוד האפליקציה</a>
+                            <a href="app.html#iphone" class="px-7 py-4 rounded-2xl font-bold text-white bg-white/10 border border-white/15 flex items-center justify-center gap-2"><i class="fa-brands fa-apple text-xl"></i>באייפון</a>
+                        </div>
                     </div>
-                    <div class="lg:col-span-5">
-                        <div class="bg-gradient-to-b from-skitdra-card to-skitdra-bg p-6 rounded-3xl border border-emerald-500/30 shadow-2xl space-y-4">
-                            <div class="flex items-center gap-3 text-emerald-300 font-bold">
-                                <i class="fa-solid fa-shield-halved text-2xl"></i>
-                                <span>לפני שמתקינים APK כלשהו</span>
-                            </div>
-                            <ul class="space-y-2.5 text-sm text-gray-300 list-disc pr-5">
-                                <li>כשהאפליקציה תשוחרר, הקובץ יפורסם <strong>רק</strong> בעמוד הזה, יחד עם טביעת SHA-256.</li>
-                                <li>קובץ "MediaDownloader" שמופיע במקום אחר לפני כן אינו שלנו.</li>
-                                <li>אפליקציית הורדות לא צריכה גישה ל־SMS, אנשי קשר או נגישות.</li>
-                            </ul>
+                    <div class="lg:col-span-5 flex justify-center" aria-hidden="true">
+                        <div class="w-[230px] aspect-[9/19.5] rounded-[40px] bg-black p-2.5 rotate-[3deg] shadow-[0_30px_80px_-20px_rgba(124,58,237,0.7)] ring-1 ring-white/15">
+                            <img src="images/app-screen-1-result.png" alt="" class="w-full h-full object-cover object-top rounded-[32px]">
                         </div>
                     </div>
                 </div>
