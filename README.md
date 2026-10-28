@@ -35,9 +35,9 @@
 | מוצר | עמוד | סטטוס |
 |------|------|-------|
 | HackerBot Defense Lab | `index.html` | זמין ועובד |
-| MediaDownloader Pro | `media-downloader.html` | דמו ממשק בלבד: אין שרת הורדות ואין APK |
+| MediaDownloader Pro | `media-downloader.html` + שרת ב־`media-downloader/` | Web עובד עם השרת; בלי שרת — מצב דמו. Android בפיתוח |
 
-עמוד MediaDownloader משתמש ב־Tailwind ו־Font Awesome מ־CDN, ולכן צריך חיבור לאינטרנט כדי שיוצג כראוי.
+להפעלת ההורדות האמיתיות ראו [`media-downloader/README.md`](media-downloader/README.md). השרת מגיש גם את האתר כולו, כך שאחרי ההפעלה הכול זמין ב־`http://localhost:8080`.
 
 ## מבנה קבצים
 
@@ -45,13 +45,17 @@
 cyber-defense-lab/
 ├── index.html          # נקודת כניסה
 ├── products.html       # דף המוצרים
-├── media-downloader.html  # MediaDownloader Pro (דמו ממשק)
+├── media-downloader.html  # MediaDownloader Pro (ממשק)
+├── media-downloader/   # שרת MediaDownloader: Node.js + yt-dlp, בדיקות, Dockerfile
 ├── css/styles.css      # עיצוב כהה / ניאון
+├── css/media-downloader.css  # נבנה מ־Tailwind (npm run build:css)
+├── css/vendor/fontawesome/   # אייקונים מקומיים, בלי CDN
 ├── js/
 │   ├── storage.js      # LocalStorage · XP · רמות
 │   ├── rooms-meta.js   # מטא־דאטה של חדרים
 │   ├── room1.js … room5.js
-│   └── app.js          # ניווט ולוח בקרה
+│   ├── app.js          # ניווט ולוח בקרה
+│   └── media-downloader.js  # לקוח MediaDownloader
 └── README.md
 ```
 

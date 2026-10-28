@@ -1,0 +1,24 @@
+{
+  "name": "media-downloader-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MediaDownloader Pro — personal media downloader server built on yt-dlp",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i src/input.css -o ../css/media-downloader.css --minify",
+    "vendor:icons": "node scripts/vendor-icons.js"
+  },
+  "dependencies": {
+    "express": "5.1.0"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "6.7.2",
+    "tailwindcss": "3.4.17"
+  },
+  "license": "MIT"
+}

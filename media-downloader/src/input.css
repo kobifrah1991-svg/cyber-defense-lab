@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    @apply font-sans text-gray-100 antialiased;
+    background-color: #0B0914;
+    overflow-x: hidden;
+  }
+  ::selection { @apply bg-purple-500 text-white; }
+  :focus-visible { @apply outline-none ring-2 ring-purple-400/70 ring-offset-2 ring-offset-skitdra-bg; }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(21, 18, 38, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+  .glass-card-hover { transition: transform .3s cubic-bezier(.4,0,.2,1), border-color .3s, box-shadow .3s; }
+  .glass-card-hover:hover {
+    border-color: rgba(168, 85, 247, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px -10px rgba(124, 58, 237, 0.3);
+  }
+  .glow-button {
+    background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+    transition: transform .25s ease, box-shadow .25s ease, opacity .25s ease;
+  }
+  .glow-button:hover:not(:disabled) { box-shadow: 0 0 25px rgba(236, 72, 153, 0.5); transform: scale(1.02); }
+  .glow-button:disabled { opacity: .55; cursor: not-allowed; }
+  .gradient-text {
+    background: linear-gradient(135deg, #C084FC 0%, #F472B6 50%, #60A5FA 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .option-chip {
+    @apply flex flex-col items-center justify-center gap-0.5 rounded-xl border border-skitdra-border bg-skitdra-card px-4 py-2.5 text-sm font-bold text-gray-100 transition-all;
+  }
+  .option-chip:hover:not(:disabled) { @apply border-purple-400 bg-purple-900/30; }
+  .option-chip:disabled { @apply cursor-not-allowed opacity-50; }
+  .progress-track { @apply relative h-3 w-full overflow-hidden rounded-full bg-skitdra-bg; }
+  .progress-fill {
+    @apply absolute inset-y-0 right-0 rounded-full;
+    background: linear-gradient(90deg, #EC4899, #7C3AED, #60A5FA, #EC4899);
+    background-size: 300% 100%;
+    animation: progress-flow 2.4s linear infinite;
+    transition: width .5s ease;
+  }
+  .progress-indeterminate .progress-fill { width: 35% !important; animation: progress-flow 2.4s linear infinite, progress-slide 1.4s ease-in-out infinite; }
+}
+
+@keyframes progress-flow { from { background-position: 0% 0; } to { background-position: 300% 0; } }
+@keyframes progress-slide { 0% { transform: translateX(10%); } 50% { transform: translateX(-180%); } 100% { transform: translateX(10%); } }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0B0914; }
+::-webkit-scrollbar-thumb { background: #2A244D; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #7C3AED; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
