@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { MAP } from '/shared/map.js';
-import { WEAPONS, WEAPON_ORDER } from '/shared/weapons.js';
-import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from '/shared/physics.js';
+import { MAP } from './shared/map.js';
+import { WEAPONS, WEAPON_ORDER } from './shared/weapons.js';
+import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './shared/physics.js';
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -524,17 +524,38 @@ function muzzleWorld() {
 function net(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
 let rtt = 80;
 
-function connect(name) {
-  const url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
-  ws = new WebSocket(url);
-  $('menu-status').textContent = 'מתחבר לשרת…';
-  ws.onopen = () => net({ t: 'join', name });
-  ws.onerror = () => { $('menu-status').textContent = 'אין חיבור לשרת. ודאו שהשרת רץ (npm start).'; $('play').disabled = false; };
+// Offline practice: runs the match simulation in this tab instead of on a server.
+class LocalSocket {
+  constructor() {
+    this.readyState = 0;
+    import('./shared/game.js').then((game) => {
+      const toClient = { readyState: 1, send: (s) => setTimeout(() => this.onmessage?.({ data: s }), 0), close() {} };
+      game.start();
+      this.conn = game.connect(toClient);
+      this.readyState = 1;
+      this.onopen?.();
+    });
+  }
+  send(s) { this.conn?.message(s); }
+  close() {}
+}
+
+let pinger = null;
+function connect(name, offline = window.ARENA_OFFLINE || location.protocol === 'file:') {
+  let opened = false;
+  ws = offline ? new LocalSocket() : new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+  $('menu-status').textContent = offline ? 'מכין זירת אימון…' : 'מתחבר לשרת…';
+  ws.onopen = () => { opened = true; net({ t: 'join', name }); };
+  ws.onerror = () => {
+    // No server reachable: fall back to practice against bots in the browser
+    if (!opened) { $('menu-status').textContent = 'אין שרת, עובר לאימון נגד בוטים…'; connect(name, true); }
+  };
   ws.onclose = () => {
-    if (me.id) { addChat({ sys: true, text: 'החיבור לשרת נותק. מרענן…' }); setTimeout(() => location.reload(), 2500); }
+    if (me.id && !offline) { addChat({ sys: true, text: 'החיבור לשרת נותק. מרענן…' }); setTimeout(() => location.reload(), 2500); }
   };
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));
-  setInterval(() => net({ t: 'ping', c: performance.now() }), 2000);
+  clearInterval(pinger);
+  pinger = setInterval(() => net({ t: 'ping', c: performance.now() }), 2000);
 }
 
 function onMessage(m) {

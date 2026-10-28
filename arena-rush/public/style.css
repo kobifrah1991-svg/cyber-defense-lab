@@ -140,15 +140,26 @@ tr.me td { color: var(--yellow); font-weight: 700; }
 #t-jump { right: 140px; bottom: 110px; }
 #t-reload { right: 40px; bottom: 160px; }
 #t-swap { right: 100px; bottom: 200px; }
-#t-chat { right: 20px; top: 80px; width: 44px; height: 44px; font-size: 18px; }
-#t-quick { right: 70px; top: 80px; width: 44px; height: 44px; font-size: 18px; }
-#t-score { right: 120px; top: 80px; width: 44px; height: 44px; font-size: 18px; }
-body.touch #health { bottom: auto; top: 14px; right: 14px; }
+#t-chat { left: 14px; top: 12px; width: 44px; height: 44px; font-size: 18px; }
+#t-quick { left: 64px; top: 12px; width: 44px; height: 44px; font-size: 18px; }
+#t-score { left: 114px; top: 12px; width: 44px; height: 44px; font-size: 18px; }
+/* Phone layout: status top-right, social top-left, thumbs own the bottom corners */
+body.touch #health { bottom: auto; top: 12px; right: 14px; }
 body.touch #hp-bar { width: 120px; }
-body.touch #ammo { bottom: auto; top: 60px; left: auto; right: 14px; }
-body.touch #chat { bottom: auto; top: 130px; right: 14px; width: 46vw; }
-body.touch #killfeed { top: 60px; }
-body.touch #streak { bottom: auto; top: 46px; }
+body.touch #hp-text { font-size: 22px; }
+body.touch #ammo { bottom: auto; top: 48px; left: auto; right: 14px; text-align: right; }
+body.touch #weapon-name { text-align: right; }
+body.touch #mag { font-size: 30px; }
+body.touch #weapon-slots { display: none; }
+body.touch #streak { bottom: auto; top: 110px; right: 14px; }
+body.touch #killfeed { top: 64px; left: 14px; }
+body.touch .kf { font-size: 12px; padding: 2px 8px; }
+body.touch #chat { bottom: auto; top: 150px; left: 14px; right: auto; width: min(320px, 40vw); }
+body.touch #chat-log { max-height: 96px; font-size: 12px; }
+body.touch #timer { font-size: 18px; padding: 2px 12px; }
+body.touch #leader { font-size: 11px; }
+body.touch #center-msg { top: 30%; font-size: 16px; }
+@media (max-height: 380px) { body.touch #chat { display: none; } body.touch #chat.open { display: block; } }
 
 @media (max-width: 700px) {
   h1 { font-size: 34px; }
