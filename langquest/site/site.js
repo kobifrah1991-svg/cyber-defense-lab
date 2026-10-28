@@ -35,7 +35,7 @@
       shots: ['מפת המסע', 'שיעור עם תעתיק', 'בדיקת הגייה'],
       teach_title: 'מורים שמרגישים כמו חברים מחו״ל',
       teach_sub: 'בוחרים מורה — ובוחרים מבטא: אמריקאי או בריטי, ספרדית מספרד או ממקסיקו, ואיטלקית עם Giulia מרומא.',
-      langs_title: 'שפות', langs_learn: 'ללמוד', langs_ui: 'שפת הלומדה', soon: 'בקרוב',
+      langs_title: 'שפות', langs_learn: 'ללמוד', langs_more: 'ועוד:', langs_ui: 'שפת הלומדה', soon: 'בקרוב',
       price_title: 'מתחילים בחינם, ממשיכים עם Premium',
       plan_free: 'חינם', plan_free_desc: 'שלוש התחנות הראשונות בכל שפה, כולל ה-Boss, אוסף ביטויים ותזכורות',
       plan_monthly: 'חודשי', plan_yearly: 'שנתי', plan_lifetime: 'לכל החיים',
@@ -78,7 +78,7 @@
       shots: ['Journey map', 'Lesson with transliteration', 'Pronunciation check'],
       teach_title: 'Teachers who feel like friends abroad',
       teach_sub: 'Pick a teacher — and an accent: American or British English, Spanish from Spain or Mexico, and Italian with Giulia from Rome.',
-      langs_title: 'Languages', langs_learn: 'Learn', langs_ui: 'App language', soon: 'Coming soon',
+      langs_title: 'Languages', langs_learn: 'Learn', langs_more: 'And more:', langs_ui: 'App language', soon: 'Coming soon',
       price_title: 'Start free, keep going with Premium',
       plan_free: 'Free', plan_free_desc: 'The first three stops of every language, Bosses included, plus phrasebook and reminders',
       plan_monthly: 'Monthly', plan_yearly: 'Yearly', plan_lifetime: 'Lifetime',
@@ -121,7 +121,7 @@
       shots: ['خريطة الرحلة', 'درس مع النقحرة', 'فحص النطق'],
       teach_title: 'معلمون كأصدقاء من الخارج',
       teach_sub: 'اختاروا معلمًا — واختاروا لهجة: إنجليزية أمريكية أو بريطانية، إسبانية من إسبانيا أو المكسيك، وإيطالية مع جوليا من روما.',
-      langs_title: 'اللغات', langs_learn: 'للتعلم', langs_ui: 'لغة التطبيق', soon: 'قريبًا',
+      langs_title: 'اللغات', langs_learn: 'للتعلم', langs_more: 'وأيضًا:', langs_ui: 'لغة التطبيق', soon: 'قريبًا',
       price_title: 'ابدأوا مجانًا وتابعوا مع Premium',
       plan_free: 'مجاني', plan_free_desc: 'أول ثلاث محطات في كل لغة مع تحديات الزعيم، ودفتر العبارات والتذكيرات',
       plan_monthly: 'شهري', plan_yearly: 'سنوي', plan_lifetime: 'مدى الحياة',
@@ -164,7 +164,7 @@
       shots: ['Карта путешествия', 'Урок с транскрипцией', 'Проверка произношения'],
       teach_title: 'Преподаватели — как друзья из-за границы',
       teach_sub: 'Выберите преподавателя — и акцент: американский или британский английский, испанский из Испании или Мексики, итальянский с Джулией из Рима.',
-      langs_title: 'Языки', langs_learn: 'Изучать', langs_ui: 'Язык приложения', soon: 'Скоро',
+      langs_title: 'Языки', langs_learn: 'Изучать', langs_more: 'А также:', langs_ui: 'Язык приложения', soon: 'Скоро',
       price_title: 'Начните бесплатно, продолжайте с Premium',
       plan_free: 'Бесплатно', plan_free_desc: 'Первые три остановки каждого языка с Боссами, разговорник и напоминания',
       plan_monthly: 'Месяц', plan_yearly: 'Год', plan_lifetime: 'Навсегда',
@@ -209,7 +209,9 @@
     { id: 'mateo', name: 'Mateo', flag: '🇲🇽', hue: 35, city: { he: 'מקסיקו סיטי', en: 'Mexico City', ar: 'مكسيكو سيتي', ru: 'Мехико' } },
     { id: 'giulia', name: 'Giulia', flag: '🇮🇹', hue: 340, city: { he: 'רומא', en: 'Rome', ar: 'روما', ru: 'Рим' } }
   ];
-  const LEARN = [['🇬🇧', 'English', true], ['🇪🇸', 'Español', true], ['🇫🇷', 'Français', false], ['🇮🇹', 'Italiano', true], ['🇩🇪', 'Deutsch', false]];
+  // [flag, name, available, main] — the main five first, the rest listed after them
+  const LEARN = [['🇬🇧', 'English', true, true], ['🇸🇦', 'العربية', false, true], ['🇫🇷', 'Français', false, true], ['🇪🇸', 'Español', true, true], ['🇮🇱', 'עברית', false, true],
+    ['🇮🇹', 'Italiano', true, false], ['🇩🇪', 'Deutsch', false, false]];
 
   // the other Scitedra Labs products (pages on scitedra-labs.web.app)
   const SCT = 'https://scitedra-labs.web.app';
@@ -254,7 +256,9 @@
         <span class="t-ava" style="--h:${tc.hue}"><b>${tc.name[0]}</b>${photos.includes(tc.id + '.webp') ? `<img src="../img/teachers/${tc.id}.webp" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>
         <b>${esc(tc.name)} ${tc.flag}</b><small>📍 ${esc(tc.city[lang])}</small>
       </div>`).join('');
-    $('#learn').innerHTML = LEARN.map(([f, n, ok]) => `<li class="${ok ? '' : 'soon'}">${f} <span dir="ltr">${n}</span>${ok ? '' : ` <small>${esc(t.soon)}</small>`}</li>`).join('');
+    const li = ([f, n, ok]) => `<li class="${ok ? '' : 'soon'}">${f} <span dir="auto">${n}</span>${ok ? '' : ` <small>${esc(t.soon)}</small>`}</li>`;
+    $('#learn').innerHTML = LEARN.filter(x => x[3]).map(li).join('')
+      + `<li class="more">${esc(t.langs_more)}</li>` + LEARN.filter(x => !x[3]).map(li).join('');
     $('#uiLangs').innerHTML = Object.values(LANGS).map(L => `<li>${esc(L.name)}</li>`).join('');
 
     const period = { month: t.per_month, year: t.per_year, once: t.once };

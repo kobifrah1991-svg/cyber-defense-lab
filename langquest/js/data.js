@@ -44,6 +44,7 @@ const STATIONS = [
 const LANGS = {
   en: {
     id: 'en',
+    top: true,
     name: 'אנגלית',
     name_en: 'English',
     name_ar: 'الإنجليزية',
@@ -294,8 +295,12 @@ const LANGS = {
     }
   },
 
+  // Planned languages — shown on the picker as "בקרוב"; fill `stations` to activate.
+  ar: { id: 'ar', name: 'ערבית', name_en: 'Arabic', name_ar: 'العربية', name_ru: 'Арабский', native: 'العربية', flag: '🇸🇦', status: 'soon', top: true, rtl: true, accents: [{ code: 'ar-SA', label: 'ערבית', label_en: 'Arabic', label_ar: 'العربية', label_ru: 'Арабский', flag: '🇸🇦' }], stations: {} },
+  fr: { id: 'fr', name: 'צרפתית', name_en: 'French', name_ar: 'الفرنسية', name_ru: 'Французский', native: 'Français', flag: '🇫🇷', status: 'soon', top: true, accents: [{ code: 'fr-FR', label: 'צרפת', label_en: 'France', label_ar: 'فرنسا', label_ru: 'Франция', flag: '🇫🇷' }, { code: 'fr-CA', label: 'קנדה', label_en: 'Canada', label_ar: 'كندا', label_ru: 'Канада', flag: '🇨🇦' }], stations: {} },
   es: {
     id: 'es',
+    top: true,
     name: 'ספרדית',
     name_en: 'Spanish',
     name_ar: 'الإسبانية',
@@ -552,8 +557,7 @@ const LANGS = {
     }
   },
 
-  // Planned languages — shown on the picker as "בקרוב"; fill `stations` to activate.
-  fr: { id: 'fr', name: 'צרפתית', name_en: 'French', name_ar: 'الفرنسية', name_ru: 'Французский', native: 'Français', flag: '🇫🇷', status: 'soon', accents: [{ code: 'fr-FR', label: 'צרפת', label_en: 'France', label_ar: 'فرنسا', label_ru: 'Франция', flag: '🇫🇷' }, { code: 'fr-CA', label: 'קנדה', label_en: 'Canada', label_ar: 'كندا', label_ru: 'Канада', flag: '🇨🇦' }], stations: {} },
+  he: { id: 'he', name: 'עברית', name_en: 'Hebrew', name_ar: 'العبرية', name_ru: 'Иврит', native: 'עברית', flag: '🇮🇱', status: 'soon', top: true, rtl: true, accents: [{ code: 'he-IL', label: 'ישראל', label_en: 'Israel', label_ar: 'إسرائيل', label_ru: 'Израиль', flag: '🇮🇱' }], stations: {} },
   it: {
     id: 'it',
     name: 'איטלקית',

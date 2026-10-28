@@ -137,16 +137,7 @@
     const T = LANGS[O.target];
     body.innerHTML = `
       <h2>${t('onb.targetQ')}</h2>
-      <div class="lang-grid">
-        ${Object.values(LANGS).map(L => {
-          const isUi = L.id === LQI18n.ui();
-          return `
-          <button class="lang-card ${L.id === O.target ? 'on' : ''}" data-lang="${L.id}" ${L.status === 'ready' && !isUi ? '' : 'disabled'}>
-            <span class="flag big">${L.flag}</span><b>${esc(f(L, 'name'))}</b><small dir="ltr">${esc(L.native)}</small>
-            <small>${isUi ? t('langs.isUi') : L.status === 'ready' ? L.accents.map(a => a.flag).join(' ') : t('common.soon')}</small>
-          </button>`;
-        }).join('')}
-      </div>
+      ${LQUI.langGrid(O.target)}
       ${T ? `<h3 class="sub">${esc(t('onb.levelQ', { lang: f(T, 'name') }))}</h3>`: ''}
       <div class="level-cards">
         ${LEVELS.filter(l => !l.knownOnly).map(l => `

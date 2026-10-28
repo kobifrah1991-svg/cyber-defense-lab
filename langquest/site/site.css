@@ -90,6 +90,7 @@ h2 { font-size: clamp(1.6rem, 1.1rem + 2vw, 2.4rem); text-align: center; }
 .langs ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .langs li { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-weight: 700; }
 .langs li.soon { opacity: .6; }
+.langs li.more { flex-basis: 100%; background: none; border: 0; padding: 4px 0 0; text-align: center; color: var(--muted); font-size: .9rem; }
 
 .plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 32px; align-items: stretch; }
 .plan { position: relative; background: var(--card); border: 2px solid var(--line); border-radius: var(--radius); padding: 28px 20px 22px; display: flex; flex-direction: column; gap: 6px; text-align: center; }
@@ -106,7 +107,7 @@ h2 { font-size: clamp(1.6rem, 1.1rem + 2vw, 2.4rem); text-align: center; }
 .final { text-align: center; padding: clamp(56px, 8vw, 110px) 24px; color: #fff; background: linear-gradient(135deg, #3a18ad, #4361ee 55%, #10a6d8); }
 .final h2 { color: #fff; }
 .foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 22px clamp(16px, 6vw, 96px) max(22px, env(safe-area-inset-bottom)); color: var(--muted); border-top: 1px solid var(--line); }
-.foot nav { display: flex; gap: 18px; }
+.foot nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; }
 
 /* tablets */
 @media (max-width: 1024px) {

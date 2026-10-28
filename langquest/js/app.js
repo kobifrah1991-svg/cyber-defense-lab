@@ -360,18 +360,7 @@
   function openLangPicker() {
     openModal(`
       <h2>${t('langs.title')}</h2>
-      <div class="lang-grid">
-        ${Object.values(LANGS).map(L => {
-          const isUi = L.id === LQI18n.ui();
-          return `
-          <button class="lang-card ${L.id === lang() ? 'on' : ''}" data-lang="${L.id}" ${L.status === 'ready' && !isUi ? '' : 'disabled'}>
-            <span class="flag big">${L.flag}</span>
-            <b>${esc(f(L, 'name'))}</b>
-            <small dir="ltr">${esc(L.native)}</small>
-            <small>${isUi ? t('langs.isUi') : L.status === 'ready' ? L.accents.map(a => a.flag).join(' ') : t('common.soon')}</small>
-          </button>`;
-        }).join('')}
-      </div>`, body => {
+      ${LQUI.langGrid(lang())}`, body => {
       $$('[data-lang]', body).forEach(b => b.onclick = () => {
         const id = b.dataset.lang;
         LQStore.setSetting('lang', id);

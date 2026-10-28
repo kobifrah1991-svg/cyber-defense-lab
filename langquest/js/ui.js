@@ -328,11 +328,27 @@
     return a;
   }
 
+  /* target-language picker: the main languages first, the rest under "More languages" */
+  function langGrid(selected) {
+    const card = L => {
+      const isUi = L.id === LQI18n.ui();
+      return `
+          <button class="lang-card ${L.id === selected ? 'on' : ''}" data-lang="${L.id}" ${L.status === 'ready' && !isUi ? '' : 'disabled'}>
+            <span class="flag big">${L.flag}</span><b>${esc(LQI18n.f(L, 'name'))}</b><small dir="auto">${esc(L.native)}</small>
+            <small>${isUi ? t('langs.isUi') : L.status === 'ready' ? L.accents.map(a => a.flag).join(' ') : t('common.soon')}</small>
+          </button>`;
+    };
+    const all = Object.values(LQData.LANGS);
+    const more = all.filter(L => !L.top);
+    return `<div class="lang-grid">${all.filter(L => L.top).map(card).join('')}</div>`
+      + (more.length ? `<h3 class="sub lang-more">${t('langs.more')}</h3><div class="lang-grid">${more.map(card).join('')}</div>` : '');
+  }
+
   window.LQUI = {
     esc, $, $$, currentAccent,
     sylHtml, heHtml, translitLine,
     karaoke, breakdown, bindBreakdown, voiceCheck,
     showWordPop, closePop, toast, burst, shuffle, micError,
-    portrait, teacherAvatar, npcAvatar, currentTeacher, teacherCards, teacherSays
+    portrait, teacherAvatar, npcAvatar, currentTeacher, teacherCards, teacherSays, langGrid
   };
 })();

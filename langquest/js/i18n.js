@@ -103,7 +103,7 @@
       'review.reveal': '👀 חשוף ושמע', 'review.knew': '✅ ידעתי', 'review.doneTitle': 'סיימתם את החזרה של היום!',
       'review.none': 'אין חזרות להיום', 'review.knewLabel': 'ידעתם',
 
-      'langs.title': 'באיזו שפה נדבר?', 'langs.isUi': 'שפת הממשק',
+      'langs.title': 'באיזו שפה נדבר?', 'langs.isUi': 'שפת הממשק', 'langs.more': 'שפות נוספות',
 
       'set.title': '⚙️ הגדרות', 'set.levelIn': 'רמה ב{lang}', 'set.goal': 'יעד יומי', 'set.changeLevel': '🎚️ שינוי רמה',
       'set.reminders': '⏰ תזכורות ({s})', 'set.profile': '👤 עריכת פרופיל השפות', 'set.voiceTitle': '🔊 קול והגייה',
@@ -277,7 +277,7 @@
       'review.reveal': '👀 Reveal & listen', 'review.knew': '✅ I knew it', 'review.doneTitle': "You've finished today's review!",
       'review.none': 'No reviews today', 'review.knewLabel': 'known',
 
-      'langs.title': 'Which language shall we speak?', 'langs.isUi': 'Your interface language',
+      'langs.title': 'Which language shall we speak?', 'langs.isUi': 'Your interface language', 'langs.more': 'More languages',
 
       'set.title': '⚙️ Settings', 'set.levelIn': 'Level in {lang}', 'set.goal': 'Daily goal', 'set.changeLevel': '🎚️ Change level',
       'set.reminders': '⏰ Reminders ({s})', 'set.profile': '👤 Edit language profile', 'set.voiceTitle': '🔊 Voice & pronunciation',
@@ -453,7 +453,7 @@
       'review.reveal': '👀 اكشف واستمع', 'review.knew': '✅ عرفتها', 'review.doneTitle': 'أنهيتم مراجعة اليوم!',
       'review.none': 'لا مراجعات اليوم', 'review.knewLabel': 'عرفتم',
 
-      'langs.title': 'بأي لغة سنتكلم؟', 'langs.isUi': 'لغة الواجهة',
+      'langs.title': 'بأي لغة سنتكلم؟', 'langs.isUi': 'لغة الواجهة', 'langs.more': 'لغات أخرى',
 
       'set.title': '⚙️ الإعدادات', 'set.levelIn': 'المستوى في {lang}', 'set.goal': 'الهدف اليومي', 'set.changeLevel': '🎚️ تغيير المستوى',
       'set.reminders': '⏰ التذكيرات ({s})', 'set.profile': '👤 تعديل ملف اللغات', 'set.voiceTitle': '🔊 الصوت والنطق',
@@ -627,7 +627,7 @@
       'review.reveal': '👀 Показать и прослушать', 'review.knew': '✅ Я знал(а)', 'review.doneTitle': 'Повторение на сегодня завершено!',
       'review.none': 'Сегодня повторять нечего', 'review.knewLabel': 'знали',
 
-      'langs.title': 'На каком языке будем говорить?', 'langs.isUi': 'Язык интерфейса',
+      'langs.title': 'На каком языке будем говорить?', 'langs.isUi': 'Язык интерфейса', 'langs.more': 'Другие языки',
 
       'set.title': '⚙️ Настройки', 'set.levelIn': 'Уровень: {lang}', 'set.goal': 'Дневная цель', 'set.changeLevel': '🎚️ Изменить уровень',
       'set.reminders': '⏰ Напоминания ({s})', 'set.profile': '👤 Изменить языковой профиль', 'set.voiceTitle': '🔊 Голос и произношение',
