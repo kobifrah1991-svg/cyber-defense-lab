@@ -3959,49 +3959,49 @@ Object.values(LANGS).forEach(L => Object.values(L.stations).forEach(st => {
  */
 const TEACHERS = {
   en: [
-    { id: 'emma', name: 'Emma', accent: 'en-US', gender: 'f', age: 24, hue: 200,
+    { id: 'brooke', name: 'Brooke', accent: 'en-US', gender: 'f', age: 24, hue: 200,
       city: { he: 'ניו יורק', en: 'New York', ar: 'نيويورك', ru: 'Нью-Йорк' },
       bio: { he: 'אוהבת קפה, מוזיקה ואת הסלנג של ניו יורק', en: 'Loves coffee, music and New York slang',
         ar: 'تحب القهوة والموسيقى وعامية نيويورك', ru: 'Любит кофе, музыку и нью-йоркский сленг' } },
-    { id: 'oliver', name: 'Oliver', accent: 'en-GB', gender: 'm', age: 26, hue: 160,
+    { id: 'theo', name: 'Theo', accent: 'en-GB', gender: 'm', age: 26, hue: 160,
       city: { he: 'לונדון', en: 'London', ar: 'لندن', ru: 'Лондон' },
       bio: { he: 'מדריך טיולים בלונדון, מדבר לאט וברור', en: 'London tour guide who speaks slowly and clearly',
         ar: 'مرشد سياحي في لندن يتكلم ببطء ووضوح', ru: 'Гид по Лондону, говорит медленно и чётко' } }
   ],
   es: [
-    { id: 'lucia', name: 'Lucía', accent: 'es-ES', gender: 'f', age: 23, hue: 12,
+    { id: 'alba', name: 'Alba', accent: 'es-ES', gender: 'f', age: 23, hue: 12,
       city: { he: 'מדריד', en: 'Madrid', ar: 'مدريد', ru: 'Мадрид' },
       bio: { he: 'סטודנטית לעיצוב ממדריד ומומחית לטאפאס', en: 'Design student from Madrid and a tapas expert',
         ar: 'طالبة تصميم من مدريد وخبيرة في التاباس', ru: 'Студентка-дизайнер из Мадрида и знаток тапас' } },
-    { id: 'mateo', name: 'Mateo', accent: 'es-MX', gender: 'm', age: 25, hue: 35,
+    { id: 'diego', name: 'Diego', accent: 'es-MX', gender: 'm', age: 25, hue: 35,
       city: { he: 'מקסיקו סיטי', en: 'Mexico City', ar: 'مكسيكو سيتي', ru: 'Мехико' },
       bio: { he: 'שף צעיר ממקסיקו סיטי שאוהב לדבר עם אנשים', en: 'Young chef from Mexico City who loves to chat',
         ar: 'طاهٍ شاب من مكسيكو سيتي يحب الحديث مع الناس', ru: 'Молодой шеф-повар из Мехико, любит поболтать' } }
   ],
   fr: [
-    { id: 'camille', name: 'Camille', accent: 'fr-FR', gender: 'f', age: 25, hue: 225,
+    { id: 'manon', name: 'Manon', accent: 'fr-FR', gender: 'f', age: 25, hue: 225,
       city: { he: 'פריז', en: 'Paris', ar: 'باريس', ru: 'Париж' },
       bio: { he: 'מאיירת מפריז שמכירה כל מאפייה בעיר', en: 'Illustrator from Paris who knows every bakery in town',
         ar: 'رسّامة من باريس تعرف كل مخبز في المدينة', ru: 'Иллюстратор из Парижа, знает каждую пекарню в городе' } },
-    { id: 'louis', name: 'Louis', accent: 'fr-CA', gender: 'm', age: 27, hue: 0,
+    { id: 'felix', name: 'Félix', accent: 'fr-CA', gender: 'm', age: 27, hue: 0,
       city: { he: 'מונטריאול', en: 'Montréal', ar: 'مونتريال', ru: 'Монреаль' },
       bio: { he: 'מדריך סקי ממונטריאול, סבלני ומצחיק', en: 'Ski instructor from Montréal, patient and funny',
         ar: 'مدرّب تزلج من مونتريال، صبور ومرح', ru: 'Инструктор по лыжам из Монреаля, терпеливый и весёлый' } }
   ],
   ar: [
-    { id: 'lina', name: 'Lina', accent: 'ar-JO', gender: 'f', age: 26, hue: 160,
+    { id: 'rana', name: 'Rana', accent: 'ar-JO', gender: 'f', age: 26, hue: 160,
       city: { he: 'נצרת', en: 'Nazareth', ar: 'الناصرة', ru: 'Назарет' },
       bio: { he: 'מורה לערבית מנצרת — מדברת כמו ברחוב, ומראה גם איך כותבים בספרותית', en: 'Arabic teacher from Nazareth — speaks like on the street and shows the Standard form too',
         ar: 'معلمة عربية من الناصرة — تتكلم كما في الشارع وتعرض الفصحى أيضًا', ru: 'Учитель арабского из Назарета — говорит как на улице и показывает литературную форму' } }
   ],
   he: [
-    { id: 'noa', name: 'Noa', accent: 'he-IL', gender: 'f', age: 24, hue: 205,
+    { id: 'tamar', name: 'Tamar', accent: 'he-IL', gender: 'f', age: 24, hue: 205,
       city: { he: 'תל אביב', en: 'Tel Aviv', ar: 'تل أبيب', ru: 'Тель-Авив' },
       bio: { he: 'סטודנטית למוזיקה מתל אביב שאוהבת ים וחומוס', en: 'Music student from Tel Aviv who loves the beach and hummus',
         ar: 'طالبة موسيقى من تل أبيب تحب البحر والحمّص', ru: 'Студентка-музыкант из Тель-Авива, любит море и хумус' } }
   ],
   it: [
-    { id: 'giulia', name: 'Giulia', accent: 'it-IT', gender: 'f', age: 24, hue: 340,
+    { id: 'martina', name: 'Martina', accent: 'it-IT', gender: 'f', age: 24, hue: 340,
       city: { he: 'רומא', en: 'Rome', ar: 'روما', ru: 'Рим' },
       bio: { he: 'מדריכה ברומא שאוהבת ג׳לטו ואנשים', en: 'Rome tour guide who loves gelato and people',
         ar: 'مرشدة سياحية في روما تحب الجيلاتو والناس', ru: 'Гид по Риму, обожает джелато и людей' } }

@@ -7,14 +7,14 @@
 
 | קובץ | מי | מבטא / תפקיד |
 |---|---|---|
-| `img/teachers/emma.webp` | Emma, 24 | אנגלית אמריקאית · ניו יורק |
-| `img/teachers/oliver.webp` | Oliver, 26 | אנגלית בריטית · לונדון |
-| `img/teachers/lina.webp` | Lina, 26 | ערבית מדוברת · נצרת |
-| `img/teachers/noa.webp` | Noa, 24 | עברית · תל אביב |
-| `img/teachers/camille.webp` | Camille, 25 | צרפתית · פריז |
-| `img/teachers/louis.webp` | Louis, 27 | צרפתית קנדית · מונטריאול |
-| `img/teachers/lucia.webp` | Lucía, 23 | ספרדית אירופאית · מדריד |
-| `img/teachers/mateo.webp` | Mateo, 25 | ספרדית מקסיקנית · מקסיקו סיטי |
+| `img/teachers/brooke.webp` | Brooke, 24 | אנגלית אמריקאית · ניו יורק |
+| `img/teachers/theo.webp` | Theo, 26 | אנגלית בריטית · לונדון |
+| `img/teachers/rana.webp` | Rana, 26 | ערבית מדוברת · נצרת |
+| `img/teachers/tamar.webp` | Tamar, 24 | עברית · תל אביב |
+| `img/teachers/manon.webp` | Manon, 25 | צרפתית · פריז |
+| `img/teachers/felix.webp` | Félix, 27 | צרפתית קנדית · מונטריאול |
+| `img/teachers/alba.webp` | Alba, 23 | ספרדית אירופאית · מדריד |
+| `img/teachers/diego.webp` | Diego, 25 | ספרדית מקסיקנית · מקסיקו סיטי |
 | `img/npc/airport.webp` | פקיד/ת גבולות | דמות Boss — שדה תעופה |
 | `img/npc/hotel.webp` | פקידת קבלה | דמות Boss — מלון |
 | `img/npc/restaurant.webp` | מלצר | דמות Boss — מסעדה |
@@ -33,14 +33,14 @@ natural soft daylight, shallow depth of field, softly blurred background, 85mm l
 no text, no watermark, square 1:1
 ```
 
-- **Emma** — `a 24-year-old American woman, friendly language teacher, wavy brown hair, light makeup, casual denim jacket, blurred New York street café behind her`
-- **Oliver** — `a 26-year-old British man, friendly tour guide, short tousled light-brown hair, light stubble, navy knit sweater, blurred London street with red brick behind him`
-- **Lina** — `a 26-year-old Arab woman from Nazareth, friendly Arabic teacher, dark wavy hair, warm smile, simple cardigan, blurred Nazareth old-city street behind her`
-- **Noa** — `a 24-year-old Israeli woman from Tel Aviv, music student, curly dark hair, light summer shirt, warm smile, blurred Tel Aviv beach promenade behind her`
-- **Camille** — `a 25-year-old French woman from Paris, illustrator, short dark bob haircut, striped top and a light trench coat, blurred Paris street with a bakery behind her`
-- **Louis** — `a 27-year-old French-Canadian man from Montréal, ski instructor, short sandy hair, friendly grin, red flannel shirt, blurred snowy Montréal street behind him`
-- **Lucía** — `a 23-year-old Spanish woman from Madrid, design student, long dark hair, small gold earrings, cream linen shirt, blurred sunny Madrid plaza behind her`
-- **Mateo** — `a 25-year-old Mexican man, young chef, short black hair, warm smile, dark apron over a white shirt, blurred colorful Mexico City market behind him`
+- **Brooke** — `a 24-year-old American woman, friendly language teacher, wavy brown hair, light makeup, casual denim jacket, blurred New York street café behind her`
+- **Theo** — `a 26-year-old British man, friendly tour guide, short tousled light-brown hair, light stubble, navy knit sweater, blurred London street with red brick behind him`
+- **Rana** — `a 26-year-old Arab woman from Nazareth, friendly Arabic teacher, dark wavy hair, warm smile, simple cardigan, blurred Nazareth old-city street behind her`
+- **Tamar** — `a 24-year-old Israeli woman from Tel Aviv, music student, curly dark hair, light summer shirt, warm smile, blurred Tel Aviv beach promenade behind her`
+- **Manon** — `a 25-year-old French woman from Paris, illustrator, short dark bob haircut, striped top and a light trench coat, blurred Paris street with a bakery behind her`
+- **Félix** — `a 27-year-old French-Canadian man from Montréal, ski instructor, short sandy hair, friendly grin, red flannel shirt, blurred snowy Montréal street behind him`
+- **Alba** — `a 23-year-old Spanish woman from Madrid, design student, long dark hair, small gold earrings, cream linen shirt, blurred sunny Madrid plaza behind her`
+- **Diego** — `a 25-year-old Mexican man, young chef, short black hair, warm smile, dark apron over a white shirt, blurred colorful Mexico City market behind him`
 - **airport** — `a 35-year-old border control officer in a neat uniform, professional and kind expression, blurred airport hall behind`
 - **hotel** — `a 28-year-old hotel receptionist in an elegant uniform, welcoming smile, blurred modern hotel lobby behind`
 - **restaurant** — `a 30-year-old waiter in a white shirt and black apron, blurred cozy restaurant behind`
