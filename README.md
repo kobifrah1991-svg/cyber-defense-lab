@@ -28,11 +28,24 @@
 | 4 · טריאז׳ התראות SOC | בינוני | הזנת SIEM מדומה — TP / FP / הסלמה + משוב |
 | 5 · מידול איומים | קשה | לוח גרירה: נכסים / איומים / בקרות (נפתח אחרי השלמת האחרים) |
 
+## דף המוצרים
+
+`products.html` מרכז את כל המוצרים, ומכל עמוד יש קישור אליו (בכותרת ובפוטר):
+
+| מוצר | עמוד | סטטוס |
+|------|------|-------|
+| HackerBot Defense Lab | `index.html` | זמין ועובד |
+| MediaDownloader Pro | `media-downloader.html` | דמו ממשק בלבד: אין שרת הורדות ואין APK |
+
+עמוד MediaDownloader משתמש ב־Tailwind ו־Font Awesome מ־CDN, ולכן צריך חיבור לאינטרנט כדי שיוצג כראוי.
+
 ## מבנה קבצים
 
 ```
 cyber-defense-lab/
 ├── index.html          # נקודת כניסה
+├── products.html       # דף המוצרים
+├── media-downloader.html  # MediaDownloader Pro (דמו ממשק)
 ├── css/styles.css      # עיצוב כהה / ניאון
 ├── js/
 │   ├── storage.js      # LocalStorage · XP · רמות

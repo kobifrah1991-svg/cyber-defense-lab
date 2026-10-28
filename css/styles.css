@@ -1799,3 +1799,80 @@ body {
   }
   .bg-layers .bg-orb { animation: none; }
 }
+
+/* ========== HEADER NAV + PRODUCTS PAGE ========== */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.45rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-glass);
+  transition: color var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--neon);
+  border-color: var(--border-bright);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.75rem;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform var(--transition), border-color var(--transition);
+}
+
+.product-card:hover { transform: translateY(-4px); border-color: var(--border-bright); }
+
+.product-head { display: flex; align-items: center; gap: 0.85rem; }
+.product-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; flex-shrink: 0;
+  background: var(--neon-dim); border: 1px solid var(--border-bright);
+}
+.product-icon.purple { background: rgba(192, 132, 252, 0.12); border-color: rgba(192, 132, 252, 0.45); }
+.product-card h2 { font-size: 1.25rem; font-weight: 800; }
+.product-card p { color: var(--text-muted); font-size: 0.92rem; }
+.product-card ul { list-style: none; display: grid; gap: 0.35rem; font-size: 0.88rem; color: var(--text-muted); }
+.product-card li::before { content: '✓ '; color: var(--neon); font-weight: 800; }
+
+.status-badge {
+  display: inline-block; font-size: 0.72rem; font-weight: 700;
+  padding: 0.2rem 0.65rem; border-radius: 999px; border: 1px solid; width: fit-content;
+}
+.status-badge.live { color: var(--neon); border-color: var(--border-bright); background: var(--neon-dim); }
+.status-badge.demo { color: var(--neon-yellow); border-color: rgba(251, 191, 36, 0.45); background: rgba(251, 191, 36, 0.1); }
+
+.product-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: auto; padding-top: 0.5rem; }
+.product-actions .btn { text-decoration: none; }
+
+@media (max-width: 640px) {
+  .header-nav .nav-link { padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+  .products-grid { grid-template-columns: 1fr; }
+  .site-header { flex-wrap: wrap; gap: 0.6rem; }
+}
