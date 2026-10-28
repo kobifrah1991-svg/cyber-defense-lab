@@ -4,6 +4,8 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const t = (k, v) => LQI18n.t(k, v);
+  // writing direction of a target language (Hebrew and Arabic are right-to-left); defaults to the language being learned
+  const tdir = (lang = LQStore.getSettings().lang) => (LQData.LANGS[lang] && LQData.LANGS[lang].rtl ? 'rtl' : 'ltr');
 
   function currentAccent() {
     const s = LQStore.getSettings();
@@ -48,7 +50,7 @@
     pop = document.createElement('div');
     pop.className = 'word-pop';
     pop.innerHTML = `
-      <div class="wp-word" dir="ltr">${sylHtml(word)}</div>
+      <div class="wp-word" dir="${tdir()}">${sylHtml(word)}</div>
       ${LQI18n.showTranslit() && heHtml(word) ? `<div class="wp-he">${heHtml(word)}</div>` : ''}
       <div class="wp-meaning">${esc(LQI18n.f(word, 'meaning'))}</div>
       <div class="wp-actions">
@@ -76,7 +78,7 @@
   function karaoke(container, opts) {
     const tokens = opts.text.split(/\s+/).filter(Boolean);
     const words = opts.words || tokens.map(t => ({ token: t, clean: t.replace(/[¿¡?!.,]/g, ''), syl: [t], he: [], stress: 0 }));
-    container.innerHTML = `<div class="karaoke${opts.big ? ' big' : ''}" dir="ltr">${
+    container.innerHTML = `<div class="karaoke${opts.big ? ' big' : ''}" dir="${tdir(opts.lang)}">${
       tokens.map((t, i) => `<span class="kw" data-i="${i}" tabindex="0" role="button">${esc(t)}</span>`).join(' ')
     }</div>`;
     const spans = $$('.kw', container);
@@ -134,7 +136,7 @@
     if (!list.length) return '';
     return `<div class="breakdown">${list.map(({ w, i }) => `
       <button class="bd-card" data-wi="${i}">
-        <span class="bd-syl" dir="ltr">${sylHtml(w)}</span>
+        <span class="bd-syl" dir="${tdir()}">${sylHtml(w)}</span>
         ${showHe ? `<span class="bd-he">${heHtml(w)}</span>` : ''}
         <span class="bd-mean">${esc(LQI18n.f(w, 'meaning'))}</span>
       </button>`).join('')}</div>`;
@@ -217,7 +219,7 @@
             <div class="ring ${tone}" style="--p:${best.score}"><span>${best.score}%</span></div>
             <div>
               <div class="score-label">${label}</div>
-              <div class="heard">${t('vc.heard')} <span dir="ltr">“${esc(best.transcript)}”</span></div>
+              <div class="heard">${t('vc.heard')} <span dir="${tdir()}">“${esc(best.transcript)}”</span></div>
               ${best.matches.includes(false) ? `<div class="note">${t('vc.tapRed')}</div>` : ''}
             </div>
           </div>`;
@@ -349,6 +351,6 @@
     sylHtml, heHtml, translitLine,
     karaoke, breakdown, bindBreakdown, voiceCheck,
     showWordPop, closePop, toast, burst, shuffle, micError,
-    portrait, teacherAvatar, npcAvatar, currentTeacher, teacherCards, teacherSays, langGrid
+    portrait, teacherAvatar, npcAvatar, currentTeacher, teacherCards, teacherSays, langGrid, tdir
   };
 })();

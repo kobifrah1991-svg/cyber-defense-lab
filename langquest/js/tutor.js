@@ -143,13 +143,13 @@
     if (!row || !correction) return;
     $('.fix-slot', row).innerHTML = `
       <div class="fix"><b>✏️ ${t('chat.correction')}</b> ${esc(correction.note)}
-        <button class="fix-better" dir="ltr">${esc(correction.better)} 🔊</button></div>`;
+        <button class="fix-better" dir="${LQUI.tdir(C.lang)}">${esc(correction.better)} 🔊</button></div>`;
     $('.fix-better', row).onclick = () => LQAudio.speak(correction.better, { accent: C.accent, rate: LQStore.getSettings().slowRate });
   }
 
   function showSuggestions(list) {
     const box = $('.suggest', C.view);
-    box.innerHTML = (list || []).length ? `<span>${t('chat.try')}</span>${list.map(s => `<button class="chip" dir="ltr">${esc(s)}</button>`).join('')}` : '';
+    box.innerHTML = (list || []).length ? `<span>${t('chat.try')}</span>${list.map(s => `<button class="chip" dir="${LQUI.tdir(C.lang)}">${esc(s)}</button>`).join('')}` : '';
     $$('.chip', box).forEach(b => b.onclick = () => {
       $('.chat-input', C.view).value = b.textContent;
       LQAudio.speak(b.textContent, { accent: C.accent, rate: LQStore.getSettings().slowRate });

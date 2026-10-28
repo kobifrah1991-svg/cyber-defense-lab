@@ -191,7 +191,8 @@
   };
 
   function normWord(w, lang) {
-    let s = (w || '').toLowerCase().replace(/[’ʼ]/g, "'").normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9'ñ]/g, '');
+    // accents, Hebrew niqqud and Arabic harakat are ignored; any script's letters count
+    let s = (w || '').toLowerCase().replace(/[’ʼ]/g, "'").normalize('NFD').replace(/[\u0300-\u036f\u0591-\u05c7\u064b-\u065f\u0670]/g, '').replace(/[^\p{L}\p{N}']/gu, '');
     const nums = NUMBERS[(lang || '').slice(0, 2)];
     if (nums && /^\d+$/.test(s) && nums[+s]) s = nums[+s];
     return s;

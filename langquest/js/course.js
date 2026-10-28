@@ -31,12 +31,16 @@
     return obj[ui] || obj.he || obj.en;
   }
 
-  // isolate target-language runs inside Hebrew / Arabic explanations so "¿Dónde está…?" keeps its order
+  // isolate the other script's runs so they keep their order: Latin inside Hebrew / Arabic explanations
+  // ("¿Dónde está…?"), and Hebrew / Arabic inside English / Russian ones ("אני סטודנט.")
   const LATIN_RUN = /[¿¡]?[A-Za-zÀ-ÿ](?:[A-Za-zÀ-ÿ0-9'’ ·\/+\-…?!.,¿¡()=→]*[A-Za-zÀ-ÿ0-9'’?!.)…])?/g;
+  const RTL_RUN = /[\u0590-\u05ff\u0600-\u06ff](?:[\u0590-\u05ff\u0600-\u06ff0-9 '"·\-…?!.,()]*[\u0590-\u05ff\u0600-\u06ff0-9?!.)…])?/g;
   function rich(text) {
+    const rtlUi = LQI18n.UI_LANGS[LQI18n.ui()].dir === 'rtl';
+    const [re, dir] = rtlUi ? [LATIN_RUN, 'ltr'] : [RTL_RUN, 'rtl'];
     let out = '', last = 0;
-    for (const m of text.matchAll(LATIN_RUN)) {
-      out += esc(text.slice(last, m.index)) + `<bdi dir="ltr">${esc(m[0])}</bdi>`;
+    for (const m of text.matchAll(re)) {
+      out += esc(text.slice(last, m.index)) + `<bdi dir="${dir}">${esc(m[0])}</bdi>`;
       last = m.index + m[0].length;
     }
     return out + esc(text.slice(last));
@@ -130,7 +134,7 @@
       <ul class="gr-rules">${local(u.explain).map(b => `<li>${rich(b)}</li>`).join('')}</ul>
       <div class="gr-table-wrap">
         <div class="muted small">${t('gr.table')}</div>
-        <table class="gr-table" dir="ltr">
+        <table class="gr-table" dir="${LQUI.tdir(S.lang)}">
           ${u.table.map(row => `<tr>${row.map(c => `<td data-say="${esc(c)}">${esc(c)}</td>`).join('')}</tr>`).join('')}
         </table>
       </div>`;
@@ -160,13 +164,14 @@
 
   /* ---------- 3. practice: pick the right form ---------- */
   function renderPractice(body) {
-    const [sentence, answer, options] = S.unit.drills[S.di];
+    const [sentence, answer, options, hint] = S.unit.drills[S.di];
     S.tries = 0;
     const [before, after] = sentence.split('___');
     body.innerHTML = `
       <div class="muted small">${t('gr.drillCount', { i: S.di + 1, n: S.unit.drills.length })}</div>
-      <div class="gr-drill" dir="ltr">${esc(before)}<span class="gap">___</span>${esc(after)}</div>
-      <div class="opt-grid" dir="ltr">${shuffle(options.slice()).map(o => `<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+      <div class="gr-drill" dir="${LQUI.tdir(S.lang)}">${esc(before)}<span class="gap">___</span>${esc(after)}</div>
+      ${hint ? `<div class="gr-hint muted">💡 ${esc(local(hint))}</div>` : ''}
+      <div class="opt-grid" dir="${LQUI.tdir(S.lang)}">${shuffle(options.slice()).map(o => `<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>
       <div class="gr-feedback" aria-live="polite"></div>`;
     setNext(false);
     $$('[data-o]', body).forEach(b => b.onclick = () => {

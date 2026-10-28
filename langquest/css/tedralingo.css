@@ -649,6 +649,7 @@ img, svg, video { max-width: 100%; }
 .gr-ex .translation { text-align: start; font-size: .98rem; }
 .gr-ex-ctl { display: flex; gap: 4px; flex: none; }
 .gr-drill { text-align: center; font-size: 1.5rem; font-weight: 700; margin: 12px 0; overflow-wrap: anywhere; }
+.gr-hint { text-align: center; margin: -4px 0 10px; }
 .gr-drill .gap { display: inline-block; min-width: 3ch; margin: 0 4px; color: var(--sun); border-bottom: 3px solid var(--sun); }
 .gr-drill .gap.filled { color: var(--ok); border-color: var(--ok); }
 .note.ok { color: var(--ok); font-weight: 700; }

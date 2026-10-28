@@ -97,7 +97,7 @@
       <div class="boss-fb" aria-live="polite"></div>`;
     $('[data-act=hint]', ctl).onclick = () => {
       B.hinted = true;
-      $('.hint-slot', ctl).innerHTML = `<div class="hint" dir="ltr">${esc(phrase.text)}</div>`;
+      $('.hint-slot', ctl).innerHTML = `<div class="hint" dir="${LQUI.tdir(B.lang)}">${esc(phrase.text)}</div>`;
       LQAudio.speak(phrase.text, { accent: B.accent, rate: LQStore.getSettings().slowRate, weights: phrase.words.map(w => w.syl.length) });
     };
     if (LQAudio.canListen) bindMic(ctl, phrase);
@@ -133,7 +133,7 @@
         LQStore.vaultAdd(LQStore.vaultId(B.lang, B.stationId, B.boss.turns[B.turn].expect));
         return answered(phrase, score, res.matches);
       }
-      fb.innerHTML = t('boss.almost', { s: res.score, heard: `<span dir="ltr">“${esc(res.transcript)}”</span>`, n: MAX_TRIES - B.tries });
+      fb.innerHTML = t('boss.almost', { s: res.score, heard: `<span dir="${LQUI.tdir(B.lang)}">“${esc(res.transcript)}”</span>`, n: MAX_TRIES - B.tries });
     };
   }
 
@@ -142,7 +142,7 @@
     const opts = shuffle(turnPhrases);
     $('.boss-fb', ctl).insertAdjacentHTML('beforebegin', `
       <p class="note">${t('boss.noMic')}</p>
-      <div class="opt-grid one">${opts.map(p => `<button class="opt" dir="ltr" data-t="${esc(p.text)}">${esc(p.text)}</button>`).join('')}</div>`);
+      <div class="opt-grid one">${opts.map(p => `<button class="opt" dir="${LQUI.tdir(B.lang)}" data-t="${esc(p.text)}">${esc(p.text)}</button>`).join('')}</div>`);
     $$('.opt', ctl).forEach(b => b.onclick = () => {
       B.tries++;
       if (b.dataset.t === phrase.text) return answered(phrase, B.tries === 1 && !B.hinted ? 100 : 50, null);

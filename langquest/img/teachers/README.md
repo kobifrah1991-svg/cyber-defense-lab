@@ -9,6 +9,7 @@
 |---|---|---|
 | `img/teachers/emma.webp` | Emma, 24 | אנגלית אמריקאית · ניו יורק |
 | `img/teachers/oliver.webp` | Oliver, 26 | אנגלית בריטית · לונדון |
+| `img/teachers/noa.webp` | Noa, 24 | עברית · תל אביב |
 | `img/teachers/camille.webp` | Camille, 25 | צרפתית · פריז |
 | `img/teachers/louis.webp` | Louis, 27 | צרפתית קנדית · מונטריאול |
 | `img/teachers/lucia.webp` | Lucía, 23 | ספרדית אירופאית · מדריד |
@@ -33,6 +34,7 @@ no text, no watermark, square 1:1
 
 - **Emma** — `a 24-year-old American woman, friendly language teacher, wavy brown hair, light makeup, casual denim jacket, blurred New York street café behind her`
 - **Oliver** — `a 26-year-old British man, friendly tour guide, short tousled light-brown hair, light stubble, navy knit sweater, blurred London street with red brick behind him`
+- **Noa** — `a 24-year-old Israeli woman from Tel Aviv, music student, curly dark hair, light summer shirt, warm smile, blurred Tel Aviv beach promenade behind her`
 - **Camille** — `a 25-year-old French woman from Paris, illustrator, short dark bob haircut, striped top and a light trench coat, blurred Paris street with a bakery behind her`
 - **Louis** — `a 27-year-old French-Canadian man from Montréal, ski instructor, short sandy hair, friendly grin, red flannel shirt, blurred snowy Montréal street behind him`
 - **Lucía** — `a 23-year-old Spanish woman from Madrid, design student, long dark hair, small gold earrings, cream linen shirt, blurred sunny Madrid plaza behind her`

@@ -252,7 +252,7 @@
           <li>
             <span class="v-emoji">${i.phrase.emoji}</span>
             <div class="v-body">
-              <button class="v-text" dir="ltr" data-say="${esc(i.id)}">${esc(i.phrase.text)}</button>
+              <button class="v-text" dir="${LQUI.tdir()}" data-say="${esc(i.id)}">${esc(i.phrase.text)}</button>
               <div class="muted">${esc(tr(i.phrase))} · ${i.station.icon}</div>
             </div>
             <div class="v-meta">

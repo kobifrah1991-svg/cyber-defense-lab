@@ -65,7 +65,7 @@
           ${tc ? LQUI.teacherAvatar(tc, 120) : ''}
           ${tc ? `<div class="scene-name">${esc(tc.name)} <small class="muted">📍 ${esc(city)}</small></div>` : ''}
           <p class="scene-text">${esc(t('story.' + S.stationId, { city }))}</p>
-          <div class="scene-preview" dir="ltr">${S.phrases.map(p => `<span>${p.emoji} ${esc(p.text)}</span>`).join('')}</div>
+          <div class="scene-preview" dir="${LQUI.tdir(S.lang)}">${S.phrases.map(p => `<span>${p.emoji} ${esc(p.text)}</span>`).join('')}</div>
           <button class="btn primary big-cta" data-act="go">${t('story.start')}</button>
         </div>
       </section>`;
@@ -253,7 +253,7 @@
       b.classList.add(ok ? 'ok' : 'bad');
       if (!ok) setTimeout(() => b.classList.remove('bad'), 600);
       gameResult(ok);
-      if (ok) body.insertAdjacentHTML('beforeend', `<div class="reveal" dir="ltr">${esc(phrase.text)}</div><div class="translation">${esc(tr(phrase))}</div>`);
+      if (ok) body.insertAdjacentHTML('beforeend', `<div class="reveal" dir="${LQUI.tdir(S.lang)}">${esc(phrase.text)}</div><div class="translation">${esc(tr(phrase))}</div>`);
     });
   }
 
@@ -275,9 +275,9 @@
       : esc(w.token))).join(' ');
     body.innerHTML = `
       ${playBar(phrase)}
-      <div class="gap-sentence" dir="ltr">${sentence}</div>
+      <div class="gap-sentence" dir="${LQUI.tdir(S.lang)}">${sentence}</div>
       <div class="translation">${esc(tr(phrase))}</div>
-      <div class="opt-grid">${options.map(o => `<button class="opt" dir="ltr" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+      <div class="opt-grid">${options.map(o => `<button class="opt" dir="${LQUI.tdir(S.lang)}" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
     bindPlay(body, phrase);
     $$('.opt', body).forEach(b => b.onclick = () => {
       if (S.canNext) return;
@@ -297,8 +297,8 @@
     body.innerHTML = `
       ${playBar(phrase)}
       <div class="translation">${esc(tr(phrase))}</div>
-      <div class="build-answer" dir="ltr"></div>
-      <div class="build-pool" dir="ltr"></div>
+      <div class="build-answer" dir="${LQUI.tdir(S.lang)}"></div>
+      <div class="build-pool" dir="${LQUI.tdir(S.lang)}"></div>
       <div class="row center"><button class="btn ghost sm" data-act="clear">${t('lesson.clear')}</button></div>`;
     bindPlay(body, phrase);
     const ansEl = $('.build-answer', body);
