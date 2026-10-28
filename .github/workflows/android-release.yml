@@ -1,0 +1,115 @@
+name: Android release (APK + AAB)
+
+# Push a tag like app-v1.0.0 to build a signed release, or run it manually.
+on:
+  push:
+    tags: ['app-v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version name (e.g. 1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MDP_API_BASE: ${{ vars.MDP_API_BASE }}
+      MDP_SITE_URL: ${{ vars.MDP_SITE_URL }}
+      MDP_SUPPORT_URL: ${{ vars.MDP_SUPPORT_URL }}
+      # Google Play requires a higher versionCode for every upload; the run number always grows.
+      MDP_VERSION_CODE: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then v="${GITHUB_REF_NAME#app-v}"; else v="${{ inputs.version }}"; fi
+          echo "MDP_VERSION=$v" >> "$GITHUB_ENV"
+
+      - name: Check configuration
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          missing=""
+          [ -z "$KEYSTORE" ] && missing="$missing ANDROID_KEYSTORE_BASE64 (secret)"
+          [ -z "$MDP_API_BASE" ] && missing="$missing MDP_API_BASE (variable)"
+          if [ -n "$missing" ]; then echo "::error::Missing:$missing — see android-app/README.md"; exit 1; fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: android-app/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build web content and sync Capacitor
+        working-directory: android-app
+        run: |
+          npm ci
+          npm run sync
+
+      - name: Signing key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build APK and AAB
+        working-directory: android-app/android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon assembleRelease bundleRelease
+
+      - name: Collect files
+        run: |
+          mkdir dist
+          cp android-app/android/app/build/outputs/apk/release/app-release.apk "dist/MediaDownloaderPro-$MDP_VERSION.apk"
+          cp android-app/android/app/build/outputs/bundle/release/app-release.aab "dist/MediaDownloaderPro-$MDP_VERSION.aab"
+          cd dist
+          sha=$(sha256sum "MediaDownloaderPro-$MDP_VERSION.apk" | cut -d' ' -f1)
+          size=$(stat -c%s "MediaDownloaderPro-$MDP_VERSION.apk")
+          echo "$sha  MediaDownloaderPro-$MDP_VERSION.apk" > "MediaDownloaderPro-$MDP_VERSION.apk.sha256"
+          url="https://github.com/${{ github.repository }}/releases/download/app-v$MDP_VERSION/MediaDownloaderPro-$MDP_VERSION.apk"
+          {
+            echo "## MediaDownloader Pro $MDP_VERSION (versionCode $MDP_VERSION_CODE)"
+            echo ""
+            echo "- **AAB for Google Play:** download the \`android-bundle\` artifact of this run and upload it in Play Console."
+            echo "- **APK SHA-256:** \`$sha\`"
+            echo ""
+            echo "Update \`app-release.json\` with:"
+            echo '```json'
+            echo "\"version\": \"$MDP_VERSION\","
+            echo "\"apk\": { \"url\": \"$url\", \"sizeBytes\": $size, \"sha256\": \"$sha\" },"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload AAB (for Play Console)
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-bundle
+          path: dist/*.aab
+          retention-days: 30
+
+      - name: Publish APK as a GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-v${{ env.MDP_VERSION }}
+          name: MediaDownloader Pro ${{ env.MDP_VERSION }}
+          files: |
+            dist/*.apk
+            dist/*.apk.sha256
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"

@@ -1,0 +1,30 @@
+name: MediaDownloader server tests
+
+on:
+  push:
+    paths: ['media-downloader/**', 'js/media-downloader.js', '.github/workflows/media-downloader-tests.yml']
+  pull_request:
+    paths: ['media-downloader/**', 'js/media-downloader.js', '.github/workflows/media-downloader-tests.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: media-downloader
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: media-downloader/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Built CSS is up to date
+        run: |
+          npm run build:css
+          git diff --exit-code -- ../css/media-downloader.css || (echo "::error::Run 'npm run build:css' in media-downloader and commit css/media-downloader.css" && exit 1)

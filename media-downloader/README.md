@@ -30,7 +30,7 @@ cd media-downloader
 npm install
 npm start          # http://localhost:8080
 npm run dev        # עם טעינה מחדש בשינוי קוד
-npm test           # 24 בדיקות, עם yt-dlp מדומה (לא צריך רשת)
+npm test           # 30 בדיקות, עם yt-dlp ו־Google Play מדומים (לא צריך רשת)
 ```
 
 בלי ffmpeg השרת עדיין עובד, אבל יציע רק קבצים שלא צריך למזג (לרוב עד 720p) ושמע ב־M4A במקום MP3.
@@ -52,6 +52,20 @@ npm test           # 24 בדיקות, עם yt-dlp מדומה (לא צריך רש
 | `DOWNLOADS_PER_10_MIN` | `15` | הורדות ל־10 דקות לכל IP |
 | `TRUST_PROXY` | `0` | מספר ה־proxies שלפני השרת (למשל `1` מאחורי nginx), כדי שהגבלת הקצב תראה את ה־IP האמיתי |
 | `SITE_ROOT` | שורש המאגר | התיקייה שממנה מוגש האתר |
+| `CORS_ORIGINS` | `https://localhost,capacitor://localhost` | מקורות שמורשים לקרוא ל־API מבחוץ (אפליקציית Android) |
+
+### מנויים (Google Play)
+
+כשמגדירים `GOOGLE_PLAY_PACKAGE`, השרת עובר למודל חינם/Premium. בלי המשתנה הזה הכול חינמי וללא הגבלה, כמו קודם. מדריך מלא ב־[`android-app/README.md`](../android-app/README.md).
+
+| משתנה | ברירת מחדל | מה עושה |
+|-------|------------|---------|
+| `GOOGLE_PLAY_PACKAGE` | — | שם החבילה ב־Play. מפעיל את המנויים |
+| `GOOGLE_SERVICE_ACCOUNT_FILE` / `_JSON` | — | מפתח ה־service account לאימות רכישות |
+| `SUBSCRIPTION_PRODUCT_ID` | `premium` | מזהה המנוי ב־Play Console |
+| `ENTITLEMENT_SECRET` | אקראי בכל הפעלה | מפתח לחתימת אישורי Premium. כדאי לקבוע ערך קבוע |
+| `FREE_DOWNLOADS_PER_DAY` | `3` | הורדות חינם ביום |
+| `FREE_MAX_HEIGHT` | `720` | האיכות המרבית בגרסה החינמית |
 
 ## API
 
@@ -62,6 +76,10 @@ npm test           # 24 בדיקות, עם yt-dlp מדומה (לא צריך רש
 | `POST /api/jobs` `{ url, option }` | פתיחת הורדה (`option` הוא `v2160`/`v1440`/`v1080`/`v720`/`v480`/`v360`/`best`/`audio`) |
 | `GET /api/jobs/:id` | סטטוס, שלב, אחוזים, מהירות וזמן משוער |
 | `GET /api/jobs/:id/file` | הקובץ המוכן, עם שם קובץ מהכותרת |
+| `GET /api/plan` | חינם או Premium, כמה הורדות חינם נשארו היום |
+| `POST /api/billing/verify` `{ purchaseToken, productId }` | אימות רכישה מול Google Play, מחזיר אישור Premium חתום |
+
+בקשה שדורשת Premium מחזירה `402` עם `premium_required` או `quota_exceeded`.
 
 ## אבטחה
 
@@ -78,14 +96,14 @@ npm test           # 24 בדיקות, עם yt-dlp מדומה (לא צריך רש
 
 ```bash
 npm run build:css      # בונה את ../css/media-downloader.css
-npm run vendor:icons   # מעתיק מחדש את Font Awesome (רק אחרי עדכון החבילה)
+npm run vendor:assets  # מעתיק מחדש את Font Awesome ו־Heebo (רק אחרי עדכון החבילות)
 ```
 
 ## מה לא נתמך
 
 - תוכן פרטי, Stories או כל דבר שדורש התחברות — השרת לא שומר ולא מקבל עוגיות או סיסמאות.
 - רשימות השמעה שלמות — רק סרטון אחד בכל פעם.
-- אפליקציית Android — בפיתוח. אין עדיין APK.
+- YouTube באפליקציית Android (מדיניות Google Play). באתר הוא נתמך.
 
 ## שימוש הוגן
 

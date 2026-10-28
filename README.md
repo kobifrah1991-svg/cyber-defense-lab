@@ -35,7 +35,8 @@
 | מוצר | עמוד | סטטוס |
 |------|------|-------|
 | HackerBot Defense Lab | `index.html` | זמין ועובד |
-| MediaDownloader Pro | `media-downloader.html` + שרת ב־`media-downloader/` | Web עובד עם השרת; בלי שרת — מצב דמו. Android בפיתוח |
+| MediaDownloader Pro | `media-downloader.html` + שרת ב־`media-downloader/` | Web עובד עם השרת; בלי שרת — מצב דמו. מותקן גם על מסך הבית באייפון |
+| MediaDownloader Pro לאנדרואיד | `app.html` (דף נחיתה) + `android-app/` | אפליקציה עם מנוי Premium ושבוע ניסיון ב־Google Play |
 
 להפעלת ההורדות האמיתיות ראו [`media-downloader/README.md`](media-downloader/README.md). השרת מגיש גם את האתר כולו, כך שאחרי ההפעלה הכול זמין ב־`http://localhost:8080`.
 
@@ -46,7 +47,11 @@ cyber-defense-lab/
 ├── index.html          # נקודת כניסה
 ├── products.html       # דף המוצרים
 ├── media-downloader.html  # MediaDownloader Pro (ממשק)
-├── media-downloader/   # שרת MediaDownloader: Node.js + yt-dlp, בדיקות, Dockerfile
+├── media-downloader/   # שרת MediaDownloader: Node.js + yt-dlp, מנויים, בדיקות, Dockerfile
+├── android-app/        # אפליקציית Android (Capacitor) + מדריך Google Play
+├── app.html            # דף נחיתה לאפליקציה (קורא את app-release.json)
+├── privacy.html, terms.html  # מדיניות פרטיות ותנאי שימוש
+├── manifest.webmanifest, icons/  # התקנה על מסך הבית (אייפון ואנדרואיד)
 ├── css/styles.css      # עיצוב כהה / ניאון
 ├── css/media-downloader.css  # נבנה מ־Tailwind (npm run build:css)
 ├── css/vendor/fontawesome/   # אייקונים מקומיים, בלי CDN
