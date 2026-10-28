@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Arena Rush</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three.module.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="crosshair"><i></i><i></i><i></i><i></i></div>
+    <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+    <div id="scope" class="hidden"></div>
+    <div id="vignette"></div>
+    <div id="damage-dir"></div>
+    <div id="dmg-numbers"></div>
+
+    <div id="topbar">
+      <div id="timer">5:00</div>
+      <div id="leader"></div>
+    </div>
+    <div id="killfeed"></div>
+    <div id="announce"></div>
+    <div id="center-msg"></div>
+
+    <div id="health"><div id="hp-bar"><div id="hp-fill"></div></div><span id="hp-text">100</span></div>
+    <div id="ammo"><div id="weapon-name">רובה סער</div><div><span id="mag">30</span> <small>/ <span id="mag-max">30</span></small></div><div id="weapon-slots"></div></div>
+    <div id="streak"></div>
+
+    <div id="chat">
+      <div id="chat-log"></div>
+      <div id="quick-menu" class="hidden"></div>
+      <input id="chat-input" class="hidden" maxlength="120" autocomplete="off" placeholder="כתבו הודעה… (Enter לשליחה, Esc לביטול)">
+    </div>
+
+    <div id="scoreboard" class="hidden"><h2>טבלת ניקוד</h2><table><thead><tr><th>שחקן</th><th>הריגות</th><th>מוות</th><th>פינג</th></tr></thead><tbody></tbody></table></div>
+    <div id="death" class="hidden"><div class="big">נפלת!</div><div id="death-by"></div><div id="death-count"></div></div>
+    <div id="pause" class="hidden"><div class="big">לחצו כדי להמשיך</div><div class="keys">WASD תנועה · רווח קפיצה · עכבר ירי/כוונת · 1-4 נשקים · R טעינה · Tab ניקוד · Enter צ'אט · B הודעות מהירות</div></div>
+  </div>
+
+  <!-- Touch controls (mobile) -->
+  <div id="touch" class="hidden">
+    <div id="stick"><div id="stick-knob"></div></div>
+    <button id="t-fire" class="tbtn big">🔫</button>
+    <button id="t-ads" class="tbtn">🎯</button>
+    <button id="t-jump" class="tbtn">⤒</button>
+    <button id="t-reload" class="tbtn">R</button>
+    <button id="t-swap" class="tbtn">⇄</button>
+    <button id="t-chat" class="tbtn">💬</button>
+    <button id="t-quick" class="tbtn">⚡</button>
+    <button id="t-score" class="tbtn">🏆</button>
+  </div>
+
+  <!-- Main menu -->
+  <div id="menu">
+    <div class="menu-card">
+      <h1>ARENA <span>RUSH</span></h1>
+      <p class="tag">יריות בגוף ראשון · כולם נגד כולם · ראשון ל-25 הריגות</p>
+      <div id="profile"></div>
+      <label>שם בזירה <input id="name" maxlength="16" placeholder="הכינוי שלך"></label>
+      <label>רגישות עכבר <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+      <button id="play">שחק!</button>
+      <p id="menu-status"></p>
+      <details>
+        <summary>שליטה</summary>
+        <ul>
+          <li><b>WASD</b> תנועה · <b>רווח</b> קפיצה</li>
+          <li><b>לחיצה שמאלית</b> ירי · <b>ימנית</b> כוונת / סקופ</li>
+          <li><b>1-4</b> או גלגלת: רובה סער, שוטגאן, צלף, אקדח · <b>R</b> טעינה</li>
+          <li><b>Enter</b> צ'אט · <b>B</b> הודעות מהירות · <b>Tab</b> ניקוד</li>
+          <li>פקודות צ'אט: <code>/mute שם</code> · <code>/unmute שם</code> · <code>/report שם סיבה</code></li>
+        </ul>
+      </details>
+      <p class="safe">🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.</p>
+    </div>
+  </div>
+
+  <!-- End of match -->
+  <div id="end" class="hidden">
+    <div class="menu-card">
+      <h2 id="end-title"></h2>
+      <table id="end-board"><thead><tr><th>#</th><th>שחקן</th><th>הריגות</th><th>מוות</th></tr></thead><tbody></tbody></table>
+      <div id="xp-box"><div id="xp-line"></div><div class="xpbar"><div id="xp-fill"></div></div><div id="next-goal"></div></div>
+      <p id="end-next"></p>
+    </div>
+  </div>
+
+  <script type="module" src="client.js"></script>
+</body>
+</html>
