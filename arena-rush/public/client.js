@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { MAP } from './shared/map.js';
 import { WEAPONS, WEAPON_ORDER } from './shared/weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './shared/physics.js';
+import { buildArena, setupLighting, buildCharacter, buildGun, loadSoldier, buildSoldier, soldierReady, animate } from './visuals.js';
+const gunModel = (key, scale) => buildGun(key, WEAPONS[key].color, scale);
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -17,59 +19,34 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isTouch, powerPre
 renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2));
 renderer.autoClear = false;
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0b0c1a);
-scene.fog = new THREE.Fog(0x0b0c1a, 40, 110);
 const camera = new THREE.PerspectiveCamera(78, 1, 0.05, 300);
-scene.add(new THREE.HemisphereLight(0x8fa8ff, 0x201030, 1.2));
-const sun = new THREE.DirectionalLight(0xffffff, 1.4);
-sun.position.set(20, 40, 10);
-scene.add(sun);
-
-const boxMeshes = [];
-for (const b of MAP.boxes) {
-  const size = [b.max[0] - b.min[0], b.max[1] - b.min[1], b.max[2] - b.min[2]];
-  const geo = new THREE.BoxGeometry(...size);
-  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.7, metalness: 0.1 }));
-  mesh.position.set((b.min[0] + b.max[0]) / 2, (b.min[1] + b.max[1]) / 2, (b.min[2] + b.max[2]) / 2);
-  scene.add(mesh);
-  boxMeshes.push(mesh);
-  if (size[0] < 60) { // neon edges (skip the floor)
-    const edge = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: new THREE.Color(b.color).offsetHSL(0, 0, 0.25) }));
-    edge.position.copy(mesh.position);
-    scene.add(edge);
-  }
-}
-const grid = new THREE.GridHelper(64, 32, 0xff2e88, 0x2a2d55);
-grid.position.y = 0.01;
-grid.material.transparent = true;
-grid.material.opacity = 0.45;
-scene.add(grid);
+const shadows = !isTouch; // phones skip shadow maps to keep 60 fps
+setupLighting(scene, renderer, { shadows, mode: store.get('time', 'day') });
+buildArena(scene, MAP.boxes, { shadows });
 
 // Viewmodel: rendered in its own pass so guns never clip into walls
 const vmScene = new THREE.Scene();
 const vmCamera = new THREE.PerspectiveCamera(65, 1, 0.01, 10);
-vmScene.add(new THREE.HemisphereLight(0xffffff, 0x303050, 1.6));
+vmScene.add(new THREE.HemisphereLight(0xdfe6ff, 0x3a2a50, 2.2));
 const vmLight = new THREE.DirectionalLight(0xffffff, 1);
 vmLight.position.set(1, 2, 1);
 vmScene.add(vmLight);
 
-function gunModel(key, scale = 1) {
-  const w = WEAPONS[key];
-  const g = new THREE.Group();
-  const dark = new THREE.MeshStandardMaterial({ color: 0x23263a, roughness: 0.5, metalness: 0.4 });
-  const accent = new THREE.MeshStandardMaterial({ color: w.color, emissive: w.color, emissiveIntensity: 0.5 });
-  const box = (sx, sy, sz, x, y, z, m = dark) => { const mm = new THREE.Mesh(new THREE.BoxGeometry(sx * scale, sy * scale, sz * scale), m); mm.position.set(x * scale, y * scale, z * scale); g.add(mm); return mm; };
-  if (key === 'rifle') { box(0.08, 0.1, 0.55, 0, 0, -0.1); box(0.04, 0.04, 0.3, 0, 0.02, -0.5); box(0.06, 0.14, 0.06, 0, -0.1, -0.05); box(0.085, 0.03, 0.4, 0, 0.065, -0.1, accent); box(0.07, 0.1, 0.18, 0, -0.02, 0.22); }
-  if (key === 'shotgun') { box(0.1, 0.1, 0.5, 0, 0, -0.1); box(0.05, 0.05, 0.35, 0.025, 0.02, -0.5); box(0.05, 0.05, 0.35, -0.025, 0.02, -0.5); box(0.105, 0.04, 0.2, 0, -0.05, -0.35, accent); box(0.08, 0.1, 0.2, 0, -0.03, 0.22); }
-  if (key === 'sniper') { box(0.07, 0.09, 0.7, 0, 0, -0.1); box(0.03, 0.03, 0.45, 0, 0.01, -0.65); box(0.05, 0.05, 0.28, 0, 0.1, -0.1, accent); box(0.07, 0.12, 0.2, 0, -0.03, 0.3); }
-  if (key === 'pistol') { box(0.06, 0.08, 0.26, 0, 0, -0.05); box(0.055, 0.14, 0.06, 0, -0.09, 0.03); box(0.065, 0.02, 0.2, 0, 0.05, -0.05, accent); }
-  return g;
-}
 
 const viewGuns = {};
 const vmRoot = new THREE.Group();
 vmScene.add(vmRoot);
 for (const k of WEAPON_ORDER) { viewGuns[k] = gunModel(k); viewGuns[k].visible = false; vmRoot.add(viewGuns[k]); }
+// Gloved hands and sleeves holding the view-model weapon
+{
+  const glove = new THREE.MeshStandardMaterial({ color: 0x2b2d35, roughness: 0.8 });
+  const sleeve = new THREE.MeshStandardMaterial({ color: 0x3d4a3a, roughness: 0.9 });
+  const add = (geo, mat, x, y, z, rx = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.x = rx; vmRoot.add(m); };
+  add(new THREE.BoxGeometry(0.08, 0.09, 0.1), glove, 0.005, -0.1, 0.06);           // trigger hand
+  add(new THREE.BoxGeometry(0.1, 0.1, 0.4), sleeve, 0.04, -0.16, 0.3, 0.35);       // right forearm
+  add(new THREE.BoxGeometry(0.08, 0.08, 0.1), glove, -0.01, -0.06, -0.3);          // support hand
+  add(new THREE.BoxGeometry(0.1, 0.1, 0.42), sleeve, -0.12, -0.13, -0.1, 0.25);    // left forearm
+}
 const flash = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfff2a0 }));
 flash.visible = false;
 vmScene.add(flash);
@@ -166,27 +143,26 @@ function nameSprite(text, color) {
   return s;
 }
 
+let charSeed = 0;
+// Realistic soldiers replace the procedural fallback as soon as the model has loaded
+loadSoldier(window.ARENA_MODEL_URL || './models/Soldier.glb').then(() => {
+  for (const [id, r] of remotes) {
+    scene.remove(r.group);
+    remotes.set(id, makeRemote({ id, name: r.name, color: r.color, bot: r.bot }));
+  }
+}).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
 function makeRemote(info) {
-  const g = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color: info.color, roughness: 0.5, emissive: info.color, emissiveIntensity: 0.15 });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.4, 0.5), mat);
-  body.position.y = 0.7;
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.5), new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.6 }));
-  head.position.y = 1.62;
-  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.12, 0.05), new THREE.MeshBasicMaterial({ color: 0x111122 }));
-  visor.position.set(0, 1.66, -0.26);
-  const headPivot = new THREE.Group(); headPivot.position.y = 1.4;
-  head.position.y = 0.22; visor.position.y = 0.26; headPivot.add(head, visor);
-  const arm = new THREE.Group(); arm.position.set(0.32, 1.25, -0.2);
+  const c = soldierReady() ? buildSoldier(info.color, charSeed++) : buildCharacter(info.color, charSeed++);
+  const g = c.root;
   const guns = {};
-  for (const k of WEAPON_ORDER) { guns[k] = gunModel(k, 1.1); guns[k].visible = false; arm.add(guns[k]); }
+  for (const k of WEAPON_ORDER) { guns[k] = gunModel(k, 1.3); guns[k].visible = false; c.gunMount.add(guns[k]); }
   const tag = nameSprite(info.name, info.color); tag.position.y = 2.3;
-  const shield = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.18 }));
+  const shield = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.18, depthWrite: false }));
   shield.position.y = 0.9; shield.visible = false;
-  g.add(body, headPivot, arm, tag, shield);
+  g.add(tag, shield);
   g.visible = false;
   scene.add(g);
-  return { id: info.id, name: info.name, color: info.color, bot: info.bot, group: g, headPivot, arm, guns, tag, shield, buf: [], cur: null, weapon: null, lastSeen: 0 };
+  return { id: info.id, name: info.name, color: info.color, bot: info.bot, group: g, char: c, headPivot: c.neck, arm: c.aim, guns, tag, shield, buf: [], cur: null, weapon: null, lastSeen: 0, lastPos: null };
 }
 
 function syncRoster(list) {
@@ -203,7 +179,9 @@ const nameOf = (id) => (id === me.id ? 'את/ה' : roster.find((p) => p.id === i
 const colorOf = (id) => '#' + ((id === me.id ? me.color : roster.find((p) => p.id === id)?.color) ?? 0xffffff).toString(16).padStart(6, '0');
 
 const INTERP = 100; // ms behind the newest snapshot
-function updateRemotes(now) {
+let dtFrame = 0;
+function updateRemotes(now, dt) {
+  dtFrame = dt;
   const t = now - INTERP;
   for (const r of remotes.values()) {
     const b = r.buf;
@@ -216,6 +194,10 @@ function updateRemotes(now) {
     } else s = b[0];
     r.cur = s;
     r.group.visible = true;
+    const speed = r.lastPos && dtFrame > 0 ? Math.hypot(s.p[0] - r.lastPos[0], s.p[2] - r.lastPos[2]) / dtFrame : 0;
+    r.lastPos = s.p;
+    r.speed = (r.speed || 0) + (speed - (r.speed || 0)) * 0.2;
+    animate(r.char, r.speed, now / 1000, dtFrame);
     r.group.position.set(s.p[0], s.p[1], s.p[2]);
     r.group.rotation.y = s.yaw;
     r.headPivot.rotation.x = s.pitch * 0.6;
@@ -410,7 +392,9 @@ function handleChatText(text) {
       if (!target) return addChat({ sys: true, text: 'לא נמצא שחקן בשם הזה.' });
       return net({ t: 'report', name: target.name, reason: rest.join(' ') });
     }
-    return addChat({ sys: true, text: 'פקודות: /mute שם · /unmute שם · /report שם סיבה' });
+    if (cmd === 'invite') return net({ t: 'invite', email: name || '' });
+    if (cmd === 'room') return addChat({ sys: true, text: roomCode ? `קוד החדר: ${roomCode}` : 'אימון מקומי (בלי חדר).' });
+    return addChat({ sys: true, text: 'פקודות: /invite gmail · /room · /mute שם · /unmute שם · /report שם סיבה' });
   }
   net({ t: 'chat', text });
 }
@@ -530,8 +514,9 @@ class LocalSocket {
     this.readyState = 0;
     import('./shared/game.js').then((game) => {
       const toClient = { readyState: 1, send: (s) => setTimeout(() => this.onmessage?.({ data: s }), 0), close() {} };
-      game.start();
-      this.conn = game.connect(toClient);
+      const match = game.createGame();
+      match.start();
+      this.conn = match.connect(toClient);
       this.readyState = 1;
       this.onopen?.();
     });
@@ -541,14 +526,22 @@ class LocalSocket {
 }
 
 let pinger = null;
-function connect(name, offline = window.ARENA_OFFLINE || location.protocol === 'file:') {
+let roomCode = null;
+// action: { t: 'quick' } | { t: 'create' } | { t: 'joinCode', code }
+function connect(name, action = { t: 'quick' }, offline = window.ARENA_OFFLINE || location.protocol === 'file:') {
   let opened = false;
+  lobby = { name, action, offline };
   ws = offline ? new LocalSocket() : new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
   $('menu-status').textContent = offline ? 'מכין זירת אימון…' : 'מתחבר לשרת…';
-  ws.onopen = () => { opened = true; net({ t: 'join', name }); };
+  ws.onopen = () => {
+    opened = true;
+    // Online: sign in (or as a guest), pick a room, then join it. Offline: join the local match directly.
+    if (offline) net({ t: 'join', name });
+    else net({ t: 'auth', credential: googleCredential });
+  };
   ws.onerror = () => {
     // No server reachable: fall back to practice against bots in the browser
-    if (!opened) { $('menu-status').textContent = 'אין שרת, עובר לאימון נגד בוטים…'; connect(name, true); }
+    if (!opened) { $('menu-status').textContent = 'אין שרת, עובר לאימון נגד בוטים…'; connect(name, action, true); }
   };
   ws.onclose = () => {
     if (me.id && !offline) { addChat({ sys: true, text: 'החיבור לשרת נותק. מרענן…' }); setTimeout(() => location.reload(), 2500); }
@@ -561,6 +554,21 @@ function connect(name, offline = window.ARENA_OFFLINE || location.protocol === '
 function onMessage(m) {
   const now = performance.now();
   switch (m.t) {
+    case 'authed':
+      if (m.user) { googleUser = m.user; showAccount(); }
+      net(lobby.action);
+      break;
+    case 'room':
+      roomCode = m.code;
+      $('scoreboard').querySelector('h2').textContent = `טבלת ניקוד · חדר ${m.code}`;
+      net({ t: 'join', name: lobby.name });
+      break;
+    case 'lobbyError':
+      $('menu-status').textContent = m.text;
+      $('play').disabled = false;
+      ws.close();
+      break;
+    case 'invited': showInvite(m.from, m.code); break;
     case 'welcome':
       me.id = m.id; me.color = m.color;
       matchInfo = m.match; killLimit = m.killLimit; quickChat = m.quick;
@@ -811,15 +819,70 @@ if (isTouch) setupTouch();
 $('name').value = store.get('name', '');
 $('sens').value = sens;
 $('sens').addEventListener('input', (e) => { sens = Number(e.target.value); store.set('sens', sens); });
+$('time').value = store.get('time', 'day');
+$('time').addEventListener('change', (e) => { store.set('time', e.target.value); location.reload(); });
 showProfile();
-$('play').addEventListener('click', () => {
+let lobby = null, googleCredential = null, googleUser = null;
+try { googleCredential = sessionStorage.getItem('arena.gcred'); } catch { /* storage blocked */ }
+function startOnline(action) {
   initAudio();
   const name = $('name').value.trim();
   store.set('name', name);
-  $('play').disabled = true;
+  for (const id of ['play', 'create', 'join-code']) $(id).disabled = true;
   if (isTouch) document.documentElement.requestFullscreen?.().catch(() => {});
-  connect(name);
+  connect(name, action);
+}
+$('play').addEventListener('click', () => startOnline({ t: 'quick' }));
+$('create').addEventListener('click', () => startOnline({ t: 'create' }));
+$('join-code').addEventListener('click', () => {
+  const code = $('code').value.trim().toUpperCase();
+  if (code.length !== 5) { $('menu-status').textContent = 'קוד חדר הוא 5 תווים.'; return; }
+  startOnline({ t: 'joinCode', code });
 });
+
+// Invitations from friends (by Gmail) and invite links (?room=CODE)
+function showInvite(from, code) {
+  const box = $('invite');
+  box.querySelector('span').textContent = `${from} מזמין/ה אותך לחדר ${code}`;
+  box.classList.remove('hidden');
+  box.querySelector('.yes').onclick = () => { location.href = location.pathname + '?room=' + code; };
+  box.querySelector('.no').onclick = () => box.classList.add('hidden');
+}
+const roomFromLink = new URLSearchParams(location.search).get('room');
+if (roomFromLink) { $('code').value = roomFromLink.toUpperCase(); $('menu-status').textContent = 'הוזמנת לחדר! לחצו "הצטרף".'; }
+
+// Google sign-in (only when the server has a Google client ID configured)
+function showAccount() {
+  if (!googleUser) return;
+  $('account').textContent = `מחובר/ת כ-${googleUser.name} (${googleUser.email})`;
+  $('gsi').classList.add('hidden');
+  if (!$('name').value) $('name').value = googleUser.name;
+}
+const offlineOnly = window.ARENA_OFFLINE || location.protocol === 'file:';
+if (offlineOnly) {
+  for (const id of ['create', 'join-code', 'code', 'gsi']) $(id).classList.add('hidden');
+  $('play').textContent = 'אימון נגד בוטים';
+} else {
+  fetch('/config').then((r) => r.json()).then((cfg) => {
+    $('online-count').textContent = `${cfg.online} מחוברים כרגע · ${cfg.rooms} חדרים`;
+    if (!cfg.googleClientId) return;
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = () => {
+      google.accounts.id.initialize({
+        client_id: cfg.googleClientId,
+        callback: (resp) => {
+          googleCredential = resp.credential;
+          try { sessionStorage.setItem('arena.gcred', resp.credential); } catch { /* storage blocked */ }
+          // Show the name straight away; the server verifies the token when we connect
+          try { const p = JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); googleUser = { name: p.given_name || p.name, email: p.email }; showAccount(); } catch { /* ignore */ }
+        },
+      });
+      google.accounts.id.renderButton($('gsi'), { theme: 'filled_black', size: 'large', text: 'signin_with', locale: 'he' });
+    };
+    document.head.appendChild(s);
+  }).catch(() => {});
+}
 $('name').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('play').click(); });
 
 // ======================= main loop =======================
@@ -890,7 +953,7 @@ function frame(now) {
   }
   if (reloading) $('mag').textContent = '…';
 
-  updateRemotes(now);
+  updateRemotes(now, dt);
   updateEffects(dt);
   updateDamageNumbers(dt);
 

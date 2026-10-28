@@ -4,20 +4,30 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
-import { config, connect, start } from './shared/game.js';
+import { createGame } from './shared/game.js';
+import { cleanName } from './shared/chatfilter.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 3000;
-if (process.env.BOTS !== undefined) config.bots = Number(process.env.BOTS);
+const BOTS = process.env.BOTS !== undefined ? Number(process.env.BOTS) : 4;
+// Google sign-in: create an OAuth "Web client ID" in Google Cloud Console and pass it here.
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const ROOM_SIZE = 12;
 
 // ---------- static files ----------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.glb': 'model/gltf-binary' };
 const server = http.createServer((req, res) => {
   const url = decodeURIComponent((req.url || '/').split('?')[0]);
   if (url === '/health') { res.writeHead(200); res.end('ok'); return; }
+  if (url === '/config') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID, online: sessions.size, rooms: rooms.size }));
+    return;
+  }
   let base = path.join(ROOT, 'public'), rel = url === '/' ? 'index.html' : url;
   if (url.startsWith('/shared/')) base = ROOT;
-  if (url.startsWith('/vendor/')) { base = path.join(ROOT, 'node_modules', 'three', 'build'); rel = url.slice('/vendor/'.length); }
+  if (url.startsWith('/vendor/addons/')) { base = path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm'); rel = url.slice('/vendor/addons/'.length); }
+  else if (url.startsWith('/vendor/')) { base = path.join(ROOT, 'node_modules', 'three', 'build'); rel = url.slice('/vendor/'.length); }
   const file = path.normalize(path.join(base, rel));
   if (!file.startsWith(base + path.sep)) { res.writeHead(403); res.end(); return; }
   fs.readFile(file, (err, data) => {
@@ -27,13 +37,115 @@ const server = http.createServer((req, res) => {
   });
 });
 
+// ---------- accounts ----------
+// Verifies a Google ID token with Google and returns the verified profile.
+async function verifyGoogle(credential) {
+  if (!GOOGLE_CLIENT_ID || typeof credential !== 'string' || credential.length > 4096) return null;
+  try {
+    const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(credential));
+    if (!r.ok) return null;
+    const t = await r.json();
+    const fresh = Number(t.exp) * 1000 > Date.now();
+    if (t.aud !== GOOGLE_CLIENT_ID || t.email_verified !== 'true' || !fresh) return null;
+    return { email: t.email.toLowerCase(), name: cleanName(t.given_name || t.name || t.email.split('@')[0]), picture: t.picture || '' };
+  } catch {
+    return null;
+  }
+}
+
+// ---------- rooms & matchmaking ----------
+const rooms = new Map();     // code -> { code, isPublic, game, members:Set<session> }
+const sessions = new Set();  // every connected socket's session
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function newRoom(isPublic) {
+  let code;
+  do code = Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
+  while (rooms.has(code));
+  const room = { code, isPublic, game: createGame({ bots: BOTS }), members: new Set() };
+  room.game.start();
+  rooms.set(code, room);
+  return room;
+}
+
+// Quick match: the fullest public room that still has space, so players meet each other
+function quickRoom() {
+  let best = null;
+  for (const r of rooms.values()) if (r.isPublic && r.members.size < ROOM_SIZE && (!best || r.members.size > best.members.size)) best = r;
+  return best || newRoom(true);
+}
+
+function enterRoom(sess, room) {
+  if (sess.room || room.members.size >= ROOM_SIZE) return false;
+  sess.room = room;
+  room.members.add(sess);
+  sess.conn = room.game.connect(sess.ws);
+  sess.send({ t: 'room', code: room.code, isPublic: room.isPublic });
+  return true;
+}
+
+function leaveRoom(sess) {
+  const room = sess.room;
+  if (!room) return;
+  sess.conn?.close();
+  room.members.delete(sess);
+  sess.room = sess.conn = null;
+  if (room.members.size === 0) { room.game.stop(); rooms.delete(room.code); }
+}
+
 // ---------- networking ----------
 const wss = new WebSocketServer({ server, maxPayload: 8 * 1024 });
 wss.on('connection', (ws) => {
-  const conn = connect(ws);
-  ws.on('message', conn.message);
-  ws.on('close', conn.close);
+  const sess = { ws, user: null, room: null, conn: null, invites: [], send: (m) => ws.readyState === 1 && ws.send(JSON.stringify(m)) };
+  sessions.add(sess);
+
+  ws.on('message', async (data) => {
+    let m;
+    try { m = JSON.parse(data); } catch { return; }
+    if (!m || typeof m.t !== 'string') return;
+
+    // Lobby messages; everything else goes to the room's match
+    switch (m.t) {
+      case 'auth': {
+        sess.user = m.credential ? await verifyGoogle(m.credential) : null;
+        sess.send({ t: 'authed', user: sess.user && { name: sess.user.name, picture: sess.user.picture, email: sess.user.email }, googleClientId: GOOGLE_CLIENT_ID });
+        return;
+      }
+      case 'quick': enterRoom(sess, quickRoom()); return;
+      case 'create': enterRoom(sess, newRoom(false)); return;
+      case 'joinCode': {
+        const room = rooms.get(String(m.code || '').toUpperCase().trim());
+        if (!room) sess.send({ t: 'lobbyError', text: 'לא נמצא חדר עם הקוד הזה.' });
+        else if (!enterRoom(sess, room)) sess.send({ t: 'lobbyError', text: 'החדר מלא.' });
+        return;
+      }
+      case 'invite': {
+        // Find a friend by their Gmail address. Only signed-in players can invite or be found,
+        // and the reply never reveals anything about the address beyond online/offline.
+        if (!sess.user) { sess.send({ t: 'chat', sys: true, text: 'כדי להזמן חברים צריך להתחבר עם Google.' }); return; }
+        if (!sess.room) return;
+        const email = String(m.email || '').toLowerCase().trim();
+        if (sess.invites.filter((t) => Date.now() - t < 60000).length >= 5) { sess.send({ t: 'chat', sys: true, text: 'יותר מדי הזמנות. נסו שוב בעוד דקה.' }); return; }
+        sess.invites.push(Date.now());
+        const friend = [...sessions].find((s) => s.user && s.user.email === email && s !== sess);
+        if (friend) friend.send({ t: 'invited', from: sess.user.name, code: sess.room.code });
+        sess.send({ t: 'chat', sys: true, text: friend ? 'ההזמנה נשלחה!' : 'השחקן לא מחובר כרגע. שלחו לו את קוד החדר: ' + sess.room.code });
+        return;
+      }
+      case 'leaveRoom': leaveRoom(sess); return;
+      case 'join':
+        if (sess.user) m.name = sess.user.name; // signed-in players play under their Google first name
+        break;
+    }
+    if (!sess.room) {
+      // Old clients (and offline fallbacks) that skip the lobby go straight to quick match
+      if (m.t !== 'join') return;
+      enterRoom(sess, quickRoom());
+    }
+    sess.conn?.message(JSON.stringify(m));
+  });
+
+  ws.on('close', () => { leaveRoom(sess); sessions.delete(sess); });
 });
 
-start();
-server.listen(PORT, () => console.log(`Arena Rush running on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Arena Rush running on http://localhost:${PORT}` + (GOOGLE_CLIENT_ID ? ' (Google sign-in on)' : ' (guests only: set GOOGLE_CLIENT_ID for Google sign-in)')));
