@@ -32,7 +32,7 @@
   }
 
   // isolate target-language runs inside Hebrew / Arabic explanations so "¿Dónde está…?" keeps its order
-  const LATIN_RUN = /[¿¡]?[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9'’ ·\/+\-…?!.,¿¡()=→]*[A-Za-zÀ-ÿ0-9'’?!.)…]/g;
+  const LATIN_RUN = /[¿¡]?[A-Za-zÀ-ÿ](?:[A-Za-zÀ-ÿ0-9'’ ·\/+\-…?!.,¿¡()=→]*[A-Za-zÀ-ÿ0-9'’?!.)…])?/g;
   function rich(text) {
     let out = '', last = 0;
     for (const m of text.matchAll(LATIN_RUN)) {

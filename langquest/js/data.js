@@ -297,7 +297,260 @@ const LANGS = {
 
   // Planned languages — shown on the picker as "בקרוב"; fill `stations` to activate.
   ar: { id: 'ar', name: 'ערבית', name_en: 'Arabic', name_ar: 'العربية', name_ru: 'Арабский', native: 'العربية', flag: '🇸🇦', status: 'soon', top: true, rtl: true, accents: [{ code: 'ar-SA', label: 'ערבית', label_en: 'Arabic', label_ar: 'العربية', label_ru: 'Арабский', flag: '🇸🇦' }], stations: {} },
-  fr: { id: 'fr', name: 'צרפתית', name_en: 'French', name_ar: 'الفرنسية', name_ru: 'Французский', native: 'Français', flag: '🇫🇷', status: 'soon', top: true, accents: [{ code: 'fr-FR', label: 'צרפת', label_en: 'France', label_ar: 'فرنسا', label_ru: 'Франция', flag: '🇫🇷' }, { code: 'fr-CA', label: 'קנדה', label_en: 'Canada', label_ar: 'كندا', label_ru: 'Канада', flag: '🇨🇦' }], stations: {} },
+  fr: {
+    id: 'fr',
+    top: true,
+    name: 'צרפתית',
+    name_en: 'French',
+    name_ar: 'الفرنسية',
+    name_ru: 'Французский',
+    native: 'Français',
+    flag: '🇫🇷',
+    status: 'ready',
+    accents: [
+      { code: 'fr-FR', label: 'צרפת', label_en: 'France', label_ar: 'فرنسا', label_ru: 'Франция', flag: '🇫🇷' },
+      { code: 'fr-CA', label: 'קנדה', label_en: 'Canada', label_ar: 'كندا', label_ru: 'Канада', flag: '🇨🇦' }
+    ],
+    stations: {
+      airport: {
+        phrases: [
+          P('Voici mon passeport.', 'הנה הדרכון שלי.', '🛂', [
+            'Voici|הנה|voi·ci|ווּאָ·סִי|1', 'mon|שלי|mon|מוֹן', 'passeport.|דרכון|passe·port|פָּס·פּוֹר|1'
+          ]),
+          P("J'ai un vol en correspondance.", 'יש לי טיסת המשך.', '🔁', [
+            "J'ai|יש לי|j'ai|זֶ׳ה", 'un|(אחד)|un|אֶן', 'vol|טיסה|vol|ווֹל', 'en|ב־|en|אָן',
+            'correspondance.|קונקשן / המשך|co·res·pon·dance|קוֹ·רֶס·פּוֹן·דָאנְס|3'
+          ]),
+          P("Où est la porte d'embarquement?", 'איפה שער העלייה למטוס?', '🚪', [
+            'Où|איפה|où|אוּ', 'est|נמצא (הוא)|est|אֶה', 'la|ה־|la|לָה', 'porte|שער / דלת|porte|פּוֹרְט',
+            "d'embarquement?|של העלייה למטוס|d'em·bar·que·ment|דָאן·בָּר·קֶה·מָאן|3"
+          ])
+        ],
+        boss: {
+          title: 'פקיד הגבולות', title_en: 'Border officer', title_ar: 'ضابط الحدود', title_ru: 'Пограничник',
+          intro: ["Bonjour! Passeport, s'il vous plaît.", 'בוקר טוב! דרכון, בבקשה.'],
+          turns: [
+            { expect: 0, reply: ['Merci. Quelle est votre destination finale?', 'תודה. מה היעד הסופי שלך?'] },
+            { expect: 1, reply: ['Très bien. Vous avez des questions?', 'טוב מאוד. יש לך שאלות?'] },
+            { expect: 2, reply: ['Porte douze, à gauche. Bon voyage!', 'שער 12, משמאל. נסיעה טובה!'] }
+          ]
+        }
+      },
+      taxi: {
+        phrases: [
+          P("Vous pouvez m'emmener à cette adresse?", 'אפשר לקחת אותי לכתובת הזאת?', '🚕', [
+            'Vous|אתה (בנימוס)|vous|ווּ', 'pouvez|יכול|pou·vez|פּוּ·וֶה|1', "m'emmener|לקחת אותי|m'em·me·ner|מָאן·מֶה·נֶה|2",
+            'à|אל|à|אָה', 'cette|הזאת|cette|סֶט', 'adresse?|כתובת|a·dresse|אָ·דְרֶס|1'
+          ]),
+          P('Combien de temps ça prend?', 'כמה זמן זה לוקח?', '⏱️', [
+            'Combien|כמה|com·bien|קוֹם·בְּיֶן|1', 'de|של|de|דֶה', 'temps|זמן|temps|טָאן', 'ça|זה|ça|סָה', 'prend?|לוקח|prend|פְּרָאן'
+          ]),
+          P("Arrêtez-vous ici, s'il vous plaît.", 'עצור כאן, בבקשה.', '🛑', [
+            'Arrêtez-vous|עצור (בנימוס)|a·rrê·tez·vous|אָ·רֶה·טֶה·ווּ|2', 'ici,|כאן|i·ci|אִי·סִי|1',
+            "s'il|אם זה|s'il|סִיל", 'vous|לך (בנימוס)|vous|ווּ', 'plaît.|מוצא חן (בבקשה)|plaît|פְּלֶה'
+          ])
+        ],
+        boss: {
+          title: 'נהג המונית', title_en: 'Taxi driver', title_ar: 'سائق التاكسي', title_ru: 'Таксист',
+          intro: ['Bonjour! On va où?', 'שלום! לאן נוסעים?'],
+          turns: [
+            { expect: 0, reply: ['Bien sûr. Attachez votre ceinture.', 'בטח. תחגור חגורה.'] },
+            { expect: 1, reply: ['Environ vingt minutes avec ce trafic.', 'בערך עשרים דקות עם התנועה הזאת.'] },
+            { expect: 2, reply: ["Nous y voilà. C'est quinze euros.", 'הגענו. זה חמישה־עשר יורו.'] }
+          ]
+        }
+      },
+      hotel: {
+        phrases: [
+          P("J'ai une réservation.", 'יש לי הזמנה.', '📋', [
+            "J'ai|יש לי|j'ai|זֶ׳ה", 'une|(אחת)|une|אוּן', 'réservation.|הזמנה|ré·ser·va·tion|רֶה·זֶר·וָה·סְיוֹן|3'
+          ]),
+          P('À quelle heure est le petit-déjeuner?', 'באיזו שעה ארוחת הבוקר?', '🥐', [
+            'À|ב־|à|אָה', 'quelle|איזו|quelle|קֶל', 'heure|שעה|heure|אֶר', 'est|היא|est|אֶה', 'le|ה־|le|לֶה',
+            'petit-déjeuner?|ארוחת בוקר|pe·tit·dé·jeu·ner|פֶּ·טִי·דֶה·זֶ׳ה·נֶה|4'
+          ]),
+          P('Je peux avoir une autre serviette?', 'אפשר לקבל עוד מגבת?', '🧺', [
+            'Je|אני|je|זֶ׳ה', 'peux|יכול|peux|פֶּה', 'avoir|לקבל (שיהיה לי)|a·voir|אָ·ווּאָר|1', 'une|(אחת)|une|אוּן',
+            'autre|עוד (אחרת)|autre|אוֹטְר', 'serviette?|מגבת|ser·viette|סֶר·וְיֶט|1'
+          ])
+        ],
+        boss: {
+          title: 'פקידת הקבלה', title_en: 'Receptionist', title_ar: 'موظفة الاستقبال', title_ru: 'Администратор',
+          intro: ['Bienvenue! Comment puis-je vous aider?', 'ברוך הבא! איך אפשר לעזור?'],
+          turns: [
+            { expect: 0, reply: ['Parfait, voici votre clé. Autre chose?', 'מצוין, הנה המפתח שלך. עוד משהו?'] },
+            { expect: 1, reply: ['De sept heures à dix heures. Autre chose?', 'משבע עד עשר. עוד משהו?'] },
+            { expect: 2, reply: ['Bien sûr, je vous la monte dans la chambre. Bon séjour!', 'כמובן, אעלה לך אותה לחדר. שהייה נעימה!'] }
+          ]
+        }
+      },
+      cafe: {
+        phrases: [
+          P("Un café crème, s'il vous plaît.", 'קפה עם חלב, בבקשה.', '☕', [
+            'Un|(אחד)|un|אֶן', 'café|קפה|ca·fé|קָה·פֶה|1', 'crème,|שמנת (עם חלב)|crème|קְרֶם',
+            "s'il|אם זה|s'il|סִיל", 'vous|לך (בנימוס)|vous|ווּ', 'plaît.|מוצא חן (בבקשה)|plaît|פְּלֶה'
+          ]),
+          P('Il y a le wifi?', 'יש כאן Wi-Fi?', '📶', [
+            'Il|(זה)|il|אִיל', 'y|שם|y|אִי', 'a|יש|a|אָה', 'le|ה־|le|לֶה', 'wifi?|אינטרנט אלחוטי|wi·fi|וִי·פִי|1'
+          ]),
+          P("C'est à emporter.", 'זה לקחת איתי.', '🥡', [
+            "C'est|זה|c'est|סֶה", 'à|ל־|à|אָה', 'emporter.|לקחת איתי|em·por·ter|אָן·פּוֹר·טֶה|2'
+          ])
+        ],
+        boss: {
+          title: 'הבריסטה', title_en: 'Barista', title_ar: 'الباريستا', title_ru: 'Бариста',
+          intro: ["Bonjour! Qu'est-ce que je vous sers?", 'שלום! מה להגיש לך?'],
+          turns: [
+            { expect: 0, reply: ['Tout de suite. Autre chose?', 'מיד. עוד משהו?'] },
+            { expect: 1, reply: ['Oui, le mot de passe est sur le tableau.', 'כן, הסיסמה על הלוח.'] },
+            { expect: 2, reply: ['Bien sûr! Voilà. Bonne journée!', 'בטח! בבקשה. יום טוב!'] }
+          ]
+        }
+      },
+      restaurant: {
+        phrases: [
+          P("Une table pour deux, s'il vous plaît.", 'שולחן לשניים, בבקשה.', '🍽️', [
+            'Une|(אחת)|une|אוּן', 'table|שולחן|table|טָאבְּל', 'pour|עבור / ל־|pour|פּוּר', 'deux,|שניים|deux|דֶה',
+            "s'il|אם זה|s'il|סִיל", 'vous|לך (בנימוס)|vous|ווּ', 'plaît.|מוצא חן (בבקשה)|plaît|פְּלֶה'
+          ]),
+          P('Je peux voir la carte?', 'אפשר לראות את התפריט?', '📜', [
+            'Je|אני|je|זֶ׳ה', 'peux|יכול|peux|פֶּה', 'voir|לראות|voir|ווּאָר', 'la|ה־|la|לָה', 'carte?|תפריט|carte|קָארְט'
+          ]),
+          P("L'addition, s'il vous plaît.", 'החשבון, בבקשה.', '🧾', [
+            "L'addition,|החשבון|l'a·ddi·tion|לָה·דִי·סְיוֹן|2", "s'il|אם זה|s'il|סִיל", 'vous|לך (בנימוס)|vous|ווּ',
+            'plaît.|מוצא חן (בבקשה)|plaît|פְּלֶה'
+          ])
+        ],
+        boss: {
+          title: 'המלצר', title_en: 'Waiter', title_ar: 'النادل', title_ru: 'Официант',
+          intro: ['Bonsoir! Combien de personnes?', 'ערב טוב! כמה אנשים?'],
+          turns: [
+            { expect: 0, reply: ['Par ici, je vous prie. Vous voulez commander?', 'מכאן, בבקשה. תרצו להזמין?'] },
+            { expect: 1, reply: ['Voilà. Tout était bon?', 'בבקשה. איך היה הכול?'] },
+            { expect: 2, reply: ["Voici l'addition. Bonne soirée!", 'הנה החשבון. ערב טוב!'] }
+          ]
+        }
+      },
+      directions: {
+        phrases: [
+          P('Excusez-moi, je suis perdu.', 'סליחה, הלכתי לאיבוד.', '🗺️', [
+            'Excusez-moi,|סליחה (בנימוס)|ex·cu·sez·moi|אֶקְס·קוּ·זֶה·מוּאָ|3', 'je|אני|je|זֶ׳ה', 'suis|אני (הוא)|suis|סְוִוי',
+            'perdu.|אבוד|per·du|פֶּר·דוּ|1'
+          ]),
+          P('Comment je vais à la gare?', 'איך מגיעים לתחנת הרכבת?', '🚉', [
+            'Comment|איך|com·ment|קוֹ·מָאן|1', 'je|אני|je|זֶ׳ה', 'vais|הולך|vais|וֶה', 'à|אל|à|אָה', 'la|ה־|la|לָה',
+            'gare?|תחנת רכבת|gare|גָאר'
+          ]),
+          P("C'est loin d'ici?", 'זה רחוק מכאן?', '📍', [
+            "C'est|זה|c'est|סֶה", 'loin|רחוק|loin|לוּאֶן', "d'ici?|מכאן|d'i·ci|דִי·סִי|1"
+          ])
+        ],
+        boss: {
+          title: 'מקומית שעוזרת', title_en: 'Friendly local', title_ar: 'امرأة من السكان المحليين', title_ru: 'Местная жительница',
+          intro: ["Bonjour! Vous avez l'air un peu perdu.", 'שלום! נראה שאתה קצת אבוד.'],
+          turns: [
+            { expect: 0, reply: ['Pas de souci, je vous aide. Où voulez-vous aller?', 'אל דאגה, אני אעזור. לאן אתה רוצה ללכת?'] },
+            { expect: 1, reply: ['Allez tout droit et tournez à gauche à la banque.', 'לך ישר ופנה שמאלה ליד הבנק.'] },
+            { expect: 2, reply: ["Non, c'est à cinq minutes à pied.", 'לא, זה חמש דקות ברגל.'] }
+          ]
+        }
+      },
+      sights: {
+        phrases: [
+          P("Deux billets, s'il vous plaît.", 'שני כרטיסים, בבקשה.', '🎟️', [
+            'Deux|שניים|deux|דֶה', 'billets,|כרטיסים|bi·llets|בִּי·יֶה|1', "s'il|אם זה|s'il|סִיל", 'vous|לך (בנימוס)|vous|ווּ',
+            'plaît.|מוצא חן (בבקשה)|plaît|פְּלֶה'
+          ]),
+          P('À quelle heure ça ferme?', 'באיזו שעה זה נסגר?', '🕔', [
+            'À|ב־|à|אָה', 'quelle|איזו|quelle|קֶל', 'heure|שעה|heure|אֶר', 'ça|זה|ça|סָה', 'ferme?|נסגר|ferme|פֶרְם'
+          ]),
+          P('Je peux prendre une photo?', 'אפשר לצלם?', '📸', [
+            'Je|אני|je|זֶ׳ה', 'peux|יכול|peux|פֶּה', 'prendre|לקחת / לצלם|prendre|פְּרָאנְדְר', 'une|(אחת)|une|אוּן',
+            'photo?|תמונה|pho·to|פוֹ·טוֹ|1'
+          ])
+        ],
+        boss: {
+          title: 'הקופאי במוזיאון', title_en: 'Ticket clerk', title_ar: 'موظف التذاكر', title_ru: 'Кассир музея',
+          intro: ['Bienvenue au musée!', 'ברוכים הבאים למוזיאון!'],
+          turns: [
+            { expect: 0, reply: ['Ça fait trente euros. Voilà.', 'זה שלושים יורו. בבקשה.'] },
+            { expect: 1, reply: ["Aujourd'hui, nous fermons à six heures.", 'היום אנחנו סוגרים בשש.'] },
+            { expect: 2, reply: ["Oui, mais sans flash, s'il vous plaît.", 'כן, אבל בלי פלאש, בבקשה.'] }
+          ]
+        }
+      },
+      shopping: {
+        phrases: [
+          P("Vous l'avez en taille M?", 'יש לכם את זה במידה M?', '👕', [
+            'Vous|אתם|vous|ווּ', "l'avez|יש לכם אותו|l'a·vez|לָה·וֶה|1", 'en|ב־|en|אָן', 'taille|מידה|taille|טָאי',
+            'M?|מידה בינונית|M|אֶם'
+          ]),
+          P('Combien ça coûte?', 'כמה זה עולה?', '💰', [
+            'Combien|כמה|com·bien|קוֹם·בְּיֶן|1', 'ça|זה|ça|סָה', 'coûte?|עולה|coûte|קוּט'
+          ]),
+          P('Je peux payer par carte?', 'אפשר לשלם בכרטיס?', '💳', [
+            'Je|אני|je|זֶ׳ה', 'peux|יכול|peux|פֶּה', 'payer|לשלם|pa·yer|פֶּה·יֶה|1', 'par|ב־ (באמצעות)|par|פָּאר',
+            'carte?|כרטיס|carte|קָארְט'
+          ])
+        ],
+        boss: {
+          title: 'המוכרת', title_en: 'Shop assistant', title_ar: 'البائعة', title_ru: 'Продавец',
+          intro: ['Bonjour! Vous cherchez quelque chose?', 'שלום! מחפשים משהו?'],
+          turns: [
+            { expect: 0, reply: ['Oui, la voilà.', 'כן, הנה.'] },
+            { expect: 1, reply: ['Vingt euros.', 'עשרים יורו.'] },
+            { expect: 2, reply: ['Bien sûr! Voici votre sac. Merci!', 'בטח! הנה השקית שלך. תודה!'] }
+          ]
+        }
+      },
+      smalltalk: {
+        phrases: [
+          P('Enchanté de te connaître!', 'נעים מאוד להכיר!', '🤝', [
+            'Enchanté|נעים מאוד|en·chan·té|אָן·שָׁאן·טֶה|2', 'de|ל־|de|דֶה', 'te|אותך|te|טֶה',
+            'connaître!|להכיר|con·naître|קוֹ·נֶטְר|1'
+          ]),
+          P("Tu viens d'où?", 'מאיפה אתה?', '🌍', [
+            'Tu|אתה|tu|טוּ', 'viens|בא|viens|וְיֶן', "d'où?|מאיפה|d'où|דוּ"
+          ]),
+          P('À plus tard!', 'נתראה אחר כך!', '👋', [
+            'À|ל־|à|אָה', 'plus|יותר|plus|פְּלוּ', 'tard!|מאוחר|tard|טָאר'
+          ])
+        ],
+        boss: {
+          title: 'חברה חדשה', title_en: 'New friend', title_ar: 'صديقة جديدة', title_ru: 'Новая знакомая',
+          intro: ['Salut! Moi, c\'est Chloé. Bienvenue à la fête!', 'היי! אני קלואה. ברוך הבא למסיבה!'],
+          turns: [
+            { expect: 0, reply: ['Moi aussi!', 'גם לי!'] },
+            { expect: 1, reply: ['Je viens de Lyon. Oh, mes amis m\'appellent!', 'אני מליון. אוי, החברים שלי קוראים לי!'] },
+            { expect: 2, reply: ['Salut! Amuse-toi bien à la fête!', 'ביי! תהנה במסיבה!'] }
+          ]
+        }
+      },
+      emergency: {
+        phrases: [
+          P("J'ai besoin d'un médecin.", 'אני צריך רופא.', '🩺', [
+            "J'ai|יש לי|j'ai|זֶ׳ה", 'besoin|צורך|be·soin|בֶּ·זְוֶן|1', "d'un|של (אחד)|d'un|דֶן", 'médecin.|רופא|méde·cin|מֶד·סֶן|1'
+          ]),
+          P('Appelez une ambulance!', 'תזמינו אמבולנס!', '🚑', [
+            'Appelez|התקשרו / הזמינו|a·ppe·lez|אָ·פֶּ·לֶה|2', 'une|(אחת)|une|אוּן', 'ambulance!|אמבולנס|am·bu·lance|אָן·בּוּ·לָאנְס|2'
+          ]),
+          P('Où est la pharmacie la plus proche?', 'איפה בית המרקחת הקרוב?', '💊', [
+            'Où|איפה|où|אוּ', 'est|נמצא (הוא)|est|אֶה', 'la|ה־|la|לָה', 'pharmacie|בית מרקחת|phar·ma·cie|פָאר·מָה·סִי|2',
+            'la|ה־|la|לָה', 'plus|הכי|plus|פְּלוּ', 'proche?|קרובה|proche|פְּרוֹשׁ'
+          ])
+        ],
+        boss: {
+          title: 'הפרמדיקית', title_en: 'Paramedic', title_ar: 'المسعفة', title_ru: 'Фельдшер',
+          intro: ["Bonjour, qu'est-ce qui se passe?", 'שלום, מה קרה?'],
+          turns: [
+            { expect: 0, reply: ["C'est grave? Vous pouvez respirer?", 'זה חמור? אתה יכול לנשום?'] },
+            { expect: 1, reply: ['Ils arrivent. Autre chose?', 'הם בדרך. עוד משהו?'] },
+            { expect: 2, reply: ['À deux rues, sur la droite. Prenez soin de vous!', 'שני רחובות מכאן, מימין. שמור על עצמך!'] }
+          ]
+        }
+      }
+    }
+  },
   es: {
     id: 'es',
     top: true,
@@ -1960,6 +2213,279 @@ const IT_TRANSLIT = {
   TRANSLIT[ui].it = Object.assign(TRANSLIT[ui].it || {}, IT_TRANSLIT[ui]);
 });
 
+/* ---------- French: translations (most reuse the matching Italian or Spanish line), glosses, transliteration ---------- */
+const FR_EQUIV = {
+  "Voici mon passeport.": "Ecco il mio passaporto.",
+  "J'ai un vol en correspondance.": "Ho un volo in coincidenza.",
+  "Où est la porte d'embarquement?": "¿Dónde está la puerta de embarque?",
+  "Vous pouvez m'emmener à cette adresse?": "Mi può portare a questo indirizzo?",
+  "Combien de temps ça prend?": "Quanto tempo ci vuole?",
+  "Arrêtez-vous ici, s'il vous plaît.": "Si fermi qui, per favore.",
+  "J'ai une réservation.": "Ho una prenotazione.",
+  "À quelle heure est le petit-déjeuner?": "A che ora è la colazione?",
+  "Je peux avoir une autre serviette?": "Posso avere un altro asciugamano?",
+  "Un café crème, s'il vous plaît.": "Un café con leche, por favor.",
+  "Il y a le wifi?": "C'è il wifi?",
+  "C'est à emporter.": "È da portare via.",
+  "Une table pour deux, s'il vous plaît.": "Un tavolo per due, per favore.",
+  "Je peux voir la carte?": "Posso vedere il menù?",
+  "L'addition, s'il vous plaît.": "Il conto, per favore.",
+  "Excusez-moi, je suis perdu.": "Scusi, mi sono perso.",
+  "Comment je vais à la gare?": "Come arrivo alla stazione?",
+  "C'est loin d'ici?": "È lontano da qui?",
+  "Deux billets, s'il vous plaît.": "Due biglietti, per favore.",
+  "À quelle heure ça ferme?": "A che ora chiude?",
+  "Je peux prendre une photo?": "Posso fare una foto?",
+  "Vous l'avez en taille M?": "Ce l'ha in taglia media?",
+  "Combien ça coûte?": "Quanto costa questo?",
+  "Je peux payer par carte?": "Posso pagare con la carta?",
+  "Enchanté de te connaître!": "Piacere di conoscerti!",
+  "Tu viens d'où?": "Di dove sei?",
+  "À plus tard!": "A dopo!",
+  "J'ai besoin d'un médecin.": "Ho bisogno di un medico.",
+  "Appelez une ambulance!": "Chiami un'ambulanza!",
+  "Où est la pharmacie la plus proche?": "Dov'è la farmacia più vicina?",
+  "Bonjour! Passeport, s'il vous plaît.": "Buongiorno! Passaporto, per favore.",
+  "Merci. Quelle est votre destination finale?": "Grazie. Qual è la sua destinazione finale?",
+  "Très bien. Vous avez des questions?": "Va bene. Ha qualche domanda?",
+  "Porte douze, à gauche. Bon voyage!": "Puerta doce, a la izquierda. ¡Buen viaje!",
+  "Bonjour! On va où?": "Buongiorno! Dove andiamo?",
+  "Bien sûr. Attachez votre ceinture.": "Certo. Allacci la cintura.",
+  "Environ vingt minutes avec ce trafic.": "Circa venti minuti con questo traffico.",
+  "Nous y voilà. C'est quinze euros.": "Eccoci. Sono quindici euro.",
+  "Bienvenue! Comment puis-je vous aider?": "Benvenuto! Come posso aiutarla?",
+  "Parfait, voici votre clé. Autre chose?": "Perfetto, ecco la sua chiave. Altro?",
+  "De sept heures à dix heures. Autre chose?": "Dalle sette alle dieci. Altro?",
+  "Bien sûr, je vous la monte dans la chambre. Bon séjour!": "Certo, gliela porto in camera. Buon soggiorno!",
+  "Bonjour! Qu'est-ce que je vous sers?": "Ciao! Cosa le preparo?",
+  "Tout de suite. Autre chose?": "Subito. Altro?",
+  "Oui, le mot de passe est sur le tableau.": "Sì, la password è sulla lavagna.",
+  "Bien sûr! Voilà. Bonne journée!": "Certo! Ecco a lei. Buona giornata!",
+  "Bonsoir! Combien de personnes?": "Buonasera! Quante persone?",
+  "Par ici, je vous prie. Vous voulez commander?": "Prego, da questa parte. Volete ordinare?",
+  "Voilà. Tout était bon?": "Ecco a lei. Com'era tutto?",
+  "Voici l'addition. Bonne soirée!": "Ecco il conto. Buona serata!",
+  "Bonjour! Vous avez l'air un peu perdu.": "Ciao! Sembra un po' perso.",
+  "Pas de souci, je vous aide. Où voulez-vous aller?": "Tranquillo, la aiuto io. Dove vuole andare?",
+  "Allez tout droit et tournez à gauche à la banque.": "Vada dritto e giri a sinistra alla banca.",
+  "Non, c'est à cinq minutes à pied.": "No, sono cinque minuti a piedi.",
+  "Bienvenue au musée!": "Benvenuti al museo!",
+  "Ça fait trente euros. Voilà.": "Sono trenta euro. Ecco a voi.",
+  "Aujourd'hui, nous fermons à six heures.": "Oggi chiudiamo alle sei.",
+  "Oui, mais sans flash, s'il vous plaît.": "Sì, ma senza flash, per favore.",
+  "Bonjour! Vous cherchez quelque chose?": "Ciao! Cerca qualcosa?",
+  "Oui, la voilà.": "Sì, eccola.",
+  "Vingt euros.": "Venti euro.",
+  "Bien sûr! Voici votre sac. Merci!": "Certo! Ecco la sua borsa. Grazie!",
+  "Moi aussi!": "¡Igualmente!",
+  "Salut! Amuse-toi bien à la fête!": "Ciao! Divertiti alla festa!",
+  "Bonjour, qu'est-ce qui se passe?": "Salve, cosa succede?",
+  "C'est grave? Vous pouvez respirer?": "È grave? Riesce a respirare?",
+  "Ils arrivent. Autre chose?": "Stanno arrivando. Altro?",
+  "À deux rues, sur la droite. Prenez soin de vous!": "A due isolati, sulla destra. Si riguardi!"
+};
+const FR_CUSTOM = {
+  en: {
+    "Salut! Moi, c'est Chloé. Bienvenue à la fête!": "Hi! I'm Chloé. Welcome to the party!",
+    "Je viens de Lyon. Oh, mes amis m'appellent!": "I'm from Lyon. Oh, my friends are calling me!"
+  },
+  ar: {
+    "Salut! Moi, c'est Chloé. Bienvenue à la fête!": "مرحبًا! أنا كلوي. أهلًا بك في الحفلة!",
+    "Je viens de Lyon. Oh, mes amis m'appellent!": "أنا من ليون. أوه، أصدقائي ينادونني!"
+  },
+  ru: {
+    "Salut! Moi, c'est Chloé. Bienvenue à la fête!": "Привет! Я Хлоя. Добро пожаловать на вечеринку!",
+    "Je viens de Lyon. Oh, mes amis m'appellent!": "Я из Лиона. Ой, меня зовут друзья!"
+  }
+};
+// word → [English gloss, Arabic gloss, Russian gloss]
+const FR_GLOSS = {
+  "voici": ["here is", "ها هو", "вот"],
+  "mon": ["my", "ـي (لي)", "мой"],
+  "passeport": ["passport", "جواز سفر", "паспорт"],
+  "j'ai": ["I have", "لديّ", "у меня есть"],
+  "un": ["a / one", "واحد", "один"],
+  "vol": ["flight", "رحلة جوية", "рейс"],
+  "en": ["in", "في", "в"],
+  "correspondance": ["connection", "رحلة ربط", "пересадка"],
+  "où": ["where", "أين", "где"],
+  "est": ["is", "هو / يكون", "есть / находится"],
+  "la": ["the", "الـ", "(артикль)"],
+  "porte": ["door / gate", "باب / بوابة", "дверь / выход"],
+  "d'embarquement": ["of boarding", "الصعود (للطائرة)", "посадки"],
+  "vous": ["you (polite)", "حضرتك", "вы"],
+  "pouvez": ["can", "تستطيع", "можете"],
+  "m'emmener": ["take me", "أن تأخذني", "отвезти меня"],
+  "à": ["to / at", "إلى / في", "в / к"],
+  "cette": ["this", "هذه", "этот"],
+  "adresse": ["address", "عنوان", "адрес"],
+  "combien": ["how much / how many", "كم", "сколько"],
+  "de": ["of", "من", "(предлог)"],
+  "temps": ["time", "وقت", "время"],
+  "ça": ["it / that", "ذلك", "это"],
+  "prend": ["takes", "يأخذ", "занимает"],
+  "arrêtez-vous": ["stop (polite)", "توقّف", "остановитесь"],
+  "ici": ["here", "هنا", "здесь"],
+  "s'il": ["if it", "إذا", "если"],
+  "plaît": ["pleases (please)", "يُرضي (من فضلك)", "угодно (пожалуйста)"],
+  "une": ["a / one", "واحدة", "одна"],
+  "réservation": ["reservation", "حجز", "бронь"],
+  "quelle": ["which / what", "أي", "какой"],
+  "heure": ["hour / time", "ساعة", "час"],
+  "le": ["the", "الـ", "(артикль)"],
+  "petit-déjeuner": ["breakfast", "فطور", "завтрак"],
+  "je": ["I", "أنا", "я"],
+  "peux": ["can", "أستطيع", "могу"],
+  "avoir": ["to have", "أن أحصل", "иметь / получить"],
+  "autre": ["another", "أخرى", "другой"],
+  "serviette": ["towel", "منشفة", "полотенце"],
+  "café": ["coffee", "قهوة", "кофе"],
+  "crème": ["cream (with milk)", "كريمة (بالحليب)", "сливки (с молоком)"],
+  "il": ["it / he", "هو", "он / это"],
+  "y": ["there", "هناك", "там"],
+  "a": ["has (there is)", "يوجد", "есть"],
+  "wifi": ["Wi-Fi", "واي فاي", "Wi-Fi"],
+  "c'est": ["it is", "إنه", "это"],
+  "emporter": ["take away", "للأخذ معي", "с собой"],
+  "table": ["table", "طاولة", "стол"],
+  "pour": ["for", "لـ", "для"],
+  "deux": ["two", "اثنان", "два"],
+  "voir": ["to see", "أن أرى", "посмотреть"],
+  "carte": ["menu / card", "قائمة / بطاقة", "меню / карта"],
+  "l'addition": ["the bill", "الحساب", "счёт"],
+  "excusez-moi": ["excuse me", "عفوًا", "извините"],
+  "suis": ["am", "أكون", "(я) есть"],
+  "perdu": ["lost", "تائه", "потерялся"],
+  "comment": ["how", "كيف", "как"],
+  "vais": ["go", "أذهب", "иду"],
+  "gare": ["train station", "محطة القطار", "вокзал"],
+  "loin": ["far", "بعيد", "далеко"],
+  "d'ici": ["from here", "من هنا", "отсюда"],
+  "billets": ["tickets", "تذاكر", "билеты"],
+  "ferme": ["closes", "يُغلق", "закрывается"],
+  "prendre": ["to take", "أن آخذ / ألتقط", "взять / сделать"],
+  "photo": ["photo", "صورة", "фото"],
+  "l'avez": ["have it", "لديكم إياه", "есть у вас"],
+  "taille": ["size", "مقاس", "размер"],
+  "m": ["M (medium)", "M (وسط)", "M (средний)"],
+  "coûte": ["costs", "يكلّف", "стоит"],
+  "payer": ["to pay", "أن أدفع", "заплатить"],
+  "par": ["by", "بـ", "по / картой"],
+  "enchanté": ["delighted", "تشرّفت", "очень приятно"],
+  "te": ["you", "ـك", "тебя"],
+  "connaître": ["to meet / know", "التعرّف", "познакомиться"],
+  "tu": ["you", "أنت", "ты"],
+  "viens": ["come", "تأتي", "приходишь"],
+  "d'où": ["from where", "من أين", "откуда"],
+  "plus": ["more / most", "أكثر", "более / самый"],
+  "tard": ["late", "متأخر", "поздно"],
+  "besoin": ["need", "حاجة", "нужда"],
+  "d'un": ["of a", "إلى", "в (ком-то)"],
+  "médecin": ["doctor", "طبيب", "врач"],
+  "appelez": ["call", "اتصلوا", "вызовите"],
+  "ambulance": ["ambulance", "سيارة إسعاف", "скорая помощь"],
+  "pharmacie": ["pharmacy", "صيدلية", "аптека"],
+  "proche": ["near", "قريبة", "близкий"]
+};
+// word → [English, Arabic, Russian] pronunciation, same syllables as the word
+const FR_TRANSLIT = {
+  "voici": ["vwah·see", "ڤوا·سي", "вуа·си"],
+  "mon": ["mohn", "مون", "мон"],
+  "passeport": ["pahs·por", "پاس·پور", "пас·пор"],
+  "j'ai": ["zheh", "جيه", "жэ"],
+  "un": ["uhn", "أَن", "эн"],
+  "vol": ["vol", "ڤول", "воль"],
+  "en": ["ahn", "آن", "ан"],
+  "correspondance": ["koh·res·pohn·dahns", "كو·ريس·پون·دانس", "ко·рэс·пон·данс"],
+  "où": ["oo", "أو", "у"],
+  "est": ["eh", "إيه", "э"],
+  "la": ["lah", "لا", "ла"],
+  "porte": ["port", "پورت", "порт"],
+  "d'embarquement": ["dahn·bar·kuh·mahn", "دان·بار·كه·مان", "дан·бар·кё·ман"],
+  "vous": ["voo", "ڤو", "ву"],
+  "pouvez": ["poo·veh", "پو·ڤيه", "пу·вэ"],
+  "m'emmener": ["mahn·muh·neh", "مان·مه·نيه", "ман·мё·нэ"],
+  "à": ["ah", "آ", "а"],
+  "cette": ["set", "سيت", "сэт"],
+  "adresse": ["ah·dres", "آ·دريس", "а·дрэс"],
+  "combien": ["kohm·byehn", "كوم·بيان", "ком·бьен"],
+  "de": ["duh", "دُه", "дё"],
+  "temps": ["tahn", "تان", "тан"],
+  "ça": ["sah", "سا", "са"],
+  "prend": ["prahn", "پران", "пран"],
+  "arrêtez-vous": ["ah·reh·teh·voo", "آ·ريه·تيه·ڤو", "а·рэ·тэ·ву"],
+  "ici": ["ee·see", "إي·سي", "и·си"],
+  "s'il": ["seel", "سيل", "силь"],
+  "plaît": ["pleh", "پليه", "плэ"],
+  "une": ["ewn", "يون", "юн"],
+  "réservation": ["reh·zer·vah·syohn", "ري·زير·ڤا·سيون", "рэ·зэр·ва·сьон"],
+  "quelle": ["kel", "كيل", "кэль"],
+  "heure": ["uhr", "أُر", "ёр"],
+  "le": ["luh", "لُه", "лё"],
+  "petit-déjeuner": ["puh·tee·deh·zhuh·neh", "پُه·تي·ديه·جُه·نيه", "пё·ти·дэ·жё·нэ"],
+  "je": ["zhuh", "جُه", "жё"],
+  "peux": ["puh", "پُه", "пё"],
+  "avoir": ["ah·vwahr", "آ·ڤوار", "а·вуар"],
+  "autre": ["ohtr", "أوتر", "отр"],
+  "serviette": ["ser·vyet", "سير·ڤييت", "сэр·вьет"],
+  "café": ["kah·feh", "كا·فيه", "ка·фэ"],
+  "crème": ["krem", "كريم", "крэм"],
+  "il": ["eel", "إيل", "иль"],
+  "y": ["ee", "إي", "и"],
+  "a": ["ah", "آ", "а"],
+  "wifi": ["wee·fee", "وي·في", "ви·фи"],
+  "c'est": ["seh", "سيه", "сэ"],
+  "emporter": ["ahn·por·teh", "آن·پور·تيه", "ан·пор·тэ"],
+  "table": ["tahbl", "تابل", "табль"],
+  "pour": ["poor", "پور", "пур"],
+  "deux": ["duh", "دُه", "дё"],
+  "voir": ["vwahr", "ڤوار", "вуар"],
+  "carte": ["kart", "كارت", "карт"],
+  "l'addition": ["lah·dee·syohn", "لا·دي·سيون", "ла·ди·сьон"],
+  "excusez-moi": ["eks·kew·zeh·mwah", "إكس·كيو·زيه·موا", "экс·кю·зэ·муа"],
+  "suis": ["swee", "سوي", "сюи"],
+  "perdu": ["per·dew", "پير·ديو", "пэр·дю"],
+  "comment": ["koh·mahn", "كو·مان", "ко·ман"],
+  "vais": ["veh", "ڤيه", "вэ"],
+  "gare": ["gar", "غار", "гар"],
+  "loin": ["lwehn", "لوان", "луэн"],
+  "d'ici": ["dee·see", "دي·سي", "ди·си"],
+  "billets": ["bee·yeh", "بي·ييه", "би·йе"],
+  "ferme": ["ferm", "فيرم", "фэрм"],
+  "prendre": ["prahndr", "پراندر", "прандр"],
+  "photo": ["foh·toh", "فو·تو", "фо·то"],
+  "l'avez": ["lah·veh", "لا·ڤيه", "ла·вэ"],
+  "taille": ["tie", "تاي", "тай"],
+  "m": ["em", "إم", "эм"],
+  "coûte": ["koot", "كوت", "кут"],
+  "payer": ["peh·yeh", "پيه·ييه", "пэ·йе"],
+  "par": ["par", "پار", "пар"],
+  "enchanté": ["ahn·shahn·teh", "آن·شان·تيه", "ан·шан·тэ"],
+  "te": ["tuh", "تُه", "тё"],
+  "connaître": ["koh·netr", "كو·نيتر", "ко·нэтр"],
+  "tu": ["tew", "تيو", "тю"],
+  "viens": ["vyehn", "ڤيان", "вьен"],
+  "d'où": ["doo", "دو", "ду"],
+  "plus": ["plew", "پليو", "плю"],
+  "tard": ["tar", "تار", "тар"],
+  "besoin": ["buh·zwehn", "بُه·زوان", "бё·зуэн"],
+  "d'un": ["duhn", "دَن", "дэн"],
+  "médecin": ["med·sehn", "ميد·سان", "мэд·сэн"],
+  "appelez": ["ah·puh·leh", "آ·پُه·ليه", "а·пё·лэ"],
+  "ambulance": ["ahn·bew·lahns", "آن·بيو·لانس", "ан·бю·ланс"],
+  "pharmacie": ["far·mah·see", "فار·ما·سي", "фар·ма·си"],
+  "proche": ["prosh", "پروش", "прош"]
+};
+['en', 'ar', 'ru'].forEach((ui, k) => {
+  const ph = TRANSLATIONS[ui].phrases;
+  Object.entries(FR_EQUIV).forEach(([fr, other]) => { if (ph[other]) ph[fr] = ph[other]; });
+  Object.assign(ph, FR_CUSTOM[ui]);
+  const gl = TRANSLATIONS[ui].words.fr = TRANSLATIONS[ui].words.fr || {};
+  const tl = TRANSLIT[ui].fr = TRANSLIT[ui].fr || {};
+  Object.entries(FR_GLOSS).forEach(([w, g]) => { gl[w] = g[k]; });
+  Object.entries(FR_TRANSLIT).forEach(([w, g]) => { tl[w] = g[k]; });
+});
+
 // attach translations: phrase.tr / line.tr = { he, en, … }, word.meaning_<lang>
 Object.values(LANGS).forEach(L => Object.values(L.stations).forEach(st => {
   const attach = (text, he) => {
@@ -2008,6 +2534,16 @@ const TEACHERS = {
       city: { he: 'מקסיקו סיטי', en: 'Mexico City', ar: 'مكسيكو سيتي', ru: 'Мехико' },
       bio: { he: 'שף צעיר ממקסיקו סיטי שאוהב לדבר עם אנשים', en: 'Young chef from Mexico City who loves to chat',
         ar: 'طاهٍ شاب من مكسيكو سيتي يحب الحديث مع الناس', ru: 'Молодой шеф-повар из Мехико, любит поболтать' } }
+  ],
+  fr: [
+    { id: 'camille', name: 'Camille', accent: 'fr-FR', gender: 'f', age: 25, hue: 225,
+      city: { he: 'פריז', en: 'Paris', ar: 'باريس', ru: 'Париж' },
+      bio: { he: 'מאיירת מפריז שמכירה כל מאפייה בעיר', en: 'Illustrator from Paris who knows every bakery in town',
+        ar: 'رسّامة من باريس تعرف كل مخبز في المدينة', ru: 'Иллюстратор из Парижа, знает каждую пекарню в городе' } },
+    { id: 'louis', name: 'Louis', accent: 'fr-CA', gender: 'm', age: 27, hue: 0,
+      city: { he: 'מונטריאול', en: 'Montréal', ar: 'مونتريال', ru: 'Монреаль' },
+      bio: { he: 'מדריך סקי ממונטריאול, סבלני ומצחיק', en: 'Ski instructor from Montréal, patient and funny',
+        ar: 'مدرّب تزلج من مونتريال، صبور ومرح', ru: 'Инструктор по лыжам из Монреаля, терпеливый и весёлый' } }
   ],
   it: [
     { id: 'giulia', name: 'Giulia', accent: 'it-IT', gender: 'f', age: 24, hue: 340,

@@ -4,7 +4,7 @@
  *  - Reminders: focuses the app when a notification is clicked
  * Bump VERSION on release so old caches are dropped.
  */
-const VERSION = 'lq-v16';
+const VERSION = 'lq-v17';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/tedralingo.css',
   './js/data.js', './js/grammar.js', './js/store.js', './js/i18n.js', './js/audio.js', './js/native.js', './js/ui.js',

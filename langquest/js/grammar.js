@@ -362,6 +362,188 @@
       }
     ],
 
+    fr: [
+      {
+        id: 'etre-avoir', icon: '🧩', level: 'A1',
+        title: { he: 'être ו-avoir — "להיות" ו"שיש לי"', en: 'Être and avoir — "to be" and "to have"', ar: 'être و avoir — «يكون» و«يملك»', ru: 'Être и avoir — «быть» и «иметь»' },
+        explain: {
+          he: ['être (להיות): je suis, tu es, il / elle est, nous sommes, vous êtes, ils sont.', "avoir (שיש לי): j'ai, tu as, il a, nous avons, vous avez, ils ont.", "בצרפתית אומרים \"יש לי\" לגיל, לרעב ולקור: J'ai 25 ans. J'ai faim."],
+          en: ['être (to be): je suis, tu es, il / elle est, nous sommes, vous êtes, ils sont.', "avoir (to have): j'ai, tu as, il a, nous avons, vous avez, ils ont.", "French uses \"have\" for age, hunger and cold: J'ai 25 ans. J'ai faim."],
+          ar: ['être (يكون): je suis, tu es, il / elle est, nous sommes, vous êtes, ils sont.', "avoir (يملك): j'ai, tu as, il a, nous avons, vous avez, ils ont.", "في الفرنسية نقول «لدي» للعمر والجوع والبرد: J'ai 25 ans. J'ai faim."],
+          ru: ['être (быть): je suis, tu es, il / elle est, nous sommes, vous êtes, ils sont.', "avoir (иметь): j'ai, tu as, il a, nous avons, vous avez, ils ont.", "Возраст, голод и холод выражают через «иметь»: J'ai 25 ans. J'ai faim."]
+        },
+        table: [['je', "suis · j'ai"], ['tu', 'es · as'], ['il / elle', 'est · a'], ['nous', 'sommes · avons'], ['vous', 'êtes · avez'], ['ils / elles', 'sont · ont']],
+        ex: [
+          ['Je suis étudiant.', 'אני סטודנט.', 'I am a student.', 'أنا طالب.', 'Я студент.'],
+          ["J'ai faim.", 'אני רעב.', 'I am hungry.', 'أنا جائع.', 'Я голоден.'],
+          ['Le musée est fermé.', 'המוזיאון סגור.', 'The museum is closed.', 'المتحف مغلق.', 'Музей закрыт.'],
+          ['Nous avons une réservation.', 'יש לנו הזמנה.', 'We have a reservation.', 'لدينا حجز.', 'У нас есть бронь.']
+        ],
+        drills: [['Je ___ français.', 'suis', ['suis', 'es', 'ai']], ['Tu ___ faim?', 'as', ['as', 'es', 'a']], ['Nous ___ en vacances.', 'sommes', ['sommes', 'avons', 'sont']], ['Ils ___ deux enfants.', 'ont', ['ont', 'sont', 'a']]]
+      },
+      {
+        id: 'articles', icon: '📰', level: 'A1',
+        title: { he: 'מין ומיליות: le, la, les, un, une, des', en: 'Gender and articles: le, la, les, un, une, des', ar: 'الجنس وأدوات التعريف: le, la, les, un, une, des', ru: 'Род и артикли: le, la, les, un, une, des' },
+        explain: {
+          he: ["לכל שם עצם יש מין. זכר: le (le train), נקבה: la (la gare). לפני תנועה: l' (l'hôtel).", 'ברבים תמיד les: les trains, les gares. ה-s בסוף לא נשמעת.', 'אחד / אחת: un (un billet), une (une table). ברבים: des (des billets).'],
+          en: ["Every noun has a gender. Masculine: le (le train), feminine: la (la gare). Before a vowel: l' (l'hôtel).", 'The plural is always les: les trains, les gares. The final s is silent.', '"A": un (un billet), une (une table). Plural: des (des billets).'],
+          ar: ["لكل اسم جنس. المذكر: le (le train)، المؤنث: la (la gare). قبل حرف علة: l' (l'hôtel).", 'الجمع دائمًا les: les trains, les gares. حرف s في النهاية لا يُنطق.', 'النكرة: un (un billet)، une (une table). الجمع: des (des billets).'],
+          ru: ["У каждого существительного есть род. Мужской: le (le train), женский: la (la gare). Перед гласной: l' (l'hôtel).", 'Во множественном всегда les: les trains, les gares. Конечная s не читается.', 'Неопределённый: un (un billet), une (une table). Множественное: des (des billets).']
+        },
+        table: [['le train', 'les trains'], ['la gare', 'les gares'], ["l'hôtel", 'les hôtels'], ['un billet · une table', 'des billets · des tables']],
+        ex: [
+          ['Le train part à huit heures.', 'הרכבת יוצאת בשמונה.', 'The train leaves at eight.', 'يغادر القطار في الثامنة.', 'Поезд отправляется в восемь.'],
+          ['La plage est près.', 'החוף קרוב.', 'The beach is close.', 'الشاطئ قريب.', 'Пляж рядом.'],
+          ["Je voudrais une bouteille d'eau.", 'הייתי רוצה בקבוק מים.', 'I would like a bottle of water.', 'أريد زجاجة ماء.', 'Я бы хотел бутылку воды.'],
+          ['Les valises sont dans la chambre.', 'המזוודות בחדר.', 'The suitcases are in the room.', 'الحقائب في الغرفة.', 'Чемоданы в номере.']
+        ],
+        drills: [['___ gare est loin.', 'La', ['Le', 'La', 'Les']], ['___ train est en retard.', 'Le', ['Le', 'La', "L'"]], ["J'ai ___ question.", 'une', ['un', 'une', 'des']], ['___ billets sont ici.', 'Les', ['Le', 'La', 'Les']]]
+      },
+      {
+        id: 'er-verbs', icon: '🔁', level: 'A1',
+        title: { he: 'הווה: פעלים ב-er (parler)', en: 'Present tense: -er verbs (parler)', ar: 'المضارع: الأفعال المنتهية بـ er (parler)', ru: 'Настоящее время: глаголы на -er (parler)' },
+        explain: {
+          he: ['פעלים ב-er: מורידים er ומוסיפים סיומת: je parle, tu parles, il parle, nous parlons, vous parlez, ils parlent.', 'ב-parle, parles ו-parlent הסוף לא נשמע — שלושתם נשמעים "פַּארְל".', "לפני תנועה je הופך ל-j': j'aime, j'habite."],
+          en: ['-er verbs: drop -er and add the ending: je parle, tu parles, il parle, nous parlons, vous parlez, ils parlent.', 'parle, parles and parlent all sound the same — "parl".', "Before a vowel je becomes j': j'aime, j'habite."],
+          ar: ['الأفعال المنتهية بـ er: نحذف er ونضيف النهاية: je parle, tu parles, il parle, nous parlons, vous parlez, ils parlent.', 'parle و parles و parlent تُنطق كلها «بارل».', "قبل حرف علة يصبح je ‏j': j'aime, j'habite."],
+          ru: ['Глаголы на -er: отбрасываем -er и добавляем окончание: je parle, tu parles, il parle, nous parlons, vous parlez, ils parlent.', 'parle, parles и parlent звучат одинаково — «парль».', "Перед гласной je становится j': j'aime, j'habite."]
+        },
+        table: [['je', 'parle'], ['tu', 'parles'], ['il / elle', 'parle'], ['nous', 'parlons'], ['vous', 'parlez'], ['ils / elles', 'parlent']],
+        ex: [
+          ['Je parle un peu français.', 'אני מדבר קצת צרפתית.', 'I speak a little French.', 'أتكلم قليلًا من الفرنسية.', 'Я немного говорю по-французски.'],
+          ['Tu habites où?', 'איפה אתה גר?', 'Where do you live?', 'أين تسكن؟', 'Где ты живёшь?'],
+          ["Nous attendons le bus.", 'אנחנו מחכים לאוטובוס.', 'We are waiting for the bus.', 'ننتظر الحافلة.', 'Мы ждём автобус.'],
+          ['Ils mangent au restaurant.', 'הם אוכלים במסעדה.', 'They eat at the restaurant.', 'يأكلون في المطعم.', 'Они едят в ресторане.']
+        ],
+        drills: [['Je ___ dans un hôtel.', 'travaille', ['travaille', 'travailles', 'travaillez']], ['Tu ___ anglais?', 'parles', ['parle', 'parles', 'parlons']], ['Nous ___ un taxi.', 'appelons', ['appelons', 'appellent', 'appelez']], ['Vous ___ ici?', 'habitez', ['habitez', 'habitons', 'habite']]]
+      },
+      {
+        id: 'negation', icon: '🚫', level: 'A1',
+        title: { he: 'שלילה: ne … pas', en: 'Saying no: ne … pas', ar: 'النفي: ne … pas', ru: 'Отрицание: ne … pas' },
+        explain: {
+          he: ['שלילה עוטפת את הפועל: ne לפניו ו-pas אחריו: Je ne parle pas anglais.', "לפני תנועה ne הופך ל-n': Je n'ai pas de billet.", 'בדיבור מהיר הרבה פעמים משמיטים את ne: Je sais pas.'],
+          en: ['The negative wraps the verb: ne before it, pas after it: Je ne parle pas anglais.', "Before a vowel ne becomes n': Je n'ai pas de billet.", 'In fast speech ne is often dropped: Je sais pas.'],
+          ar: ['النفي يحيط بالفعل: ne قبله و pas بعده: Je ne parle pas anglais.', "قبل حرف علة يصبح ne ‏n': Je n'ai pas de billet.", 'في الكلام السريع كثيرًا ما تُحذف ne: Je sais pas.'],
+          ru: ['Отрицание обнимает глагол: ne перед ним, pas после: Je ne parle pas anglais.', "Перед гласной ne становится n': Je n'ai pas de billet.", 'В быстрой речи ne часто опускают: Je sais pas.']
+        },
+        table: [['je parle', 'je ne parle pas'], ["c'est loin", "ce n'est pas loin"], ["j'ai un billet", "je n'ai pas de billet"]],
+        ex: [
+          ['Je ne parle pas anglais.', 'אני לא מדבר אנגלית.', "I don't speak English.", 'لا أتكلم الإنجليزية.', 'Я не говорю по-английски.'],
+          ["Ce n'est pas loin.", 'זה לא רחוק.', "It isn't far.", 'ليس بعيدًا.', 'Это недалеко.'],
+          ["Je n'ai pas de réservation.", 'אין לי הזמנה.', "I don't have a reservation.", 'ليس لدي حجز.', 'У меня нет брони.'],
+          ['Le musée ne ferme pas à midi.', 'המוזיאון לא נסגר בצהריים.', "The museum doesn't close at noon.", 'المتحف لا يُغلق ظهرًا.', 'Музей не закрывается в полдень.']
+        ],
+        drills: [['Je ne parle ___ espagnol.', 'pas', ['pas', 'ne', 'plus']], ['Ce ___ pas cher.', "n'est", ["n'est", 'est', 'ne']], ["Je n'ai pas ___ billet.", 'de', ['de', 'un', 'le']], ['Nous ___ mangeons pas ici.', 'ne', ['ne', 'pas', "n'"]]]
+      },
+      {
+        id: 'irregular', icon: '⚡', level: 'A1',
+        title: { he: 'פעלים חריגים: aller, faire, vouloir, pouvoir', en: 'Irregular verbs: aller, faire, vouloir, pouvoir', ar: 'أفعال شاذة: aller, faire, vouloir, pouvoir', ru: 'Неправильные глаголы: aller, faire, vouloir, pouvoir' },
+        explain: {
+          he: ['aller (ללכת): je vais, tu vas, il va, nous allons, vous allez, ils vont.', 'faire (לעשות): je fais, tu fais, il fait, nous faisons, vous faites, ils font.', "vouloir (לרצות): je veux · pouvoir (יכול): je peux. בנימוס אומרים je voudrais — \"הייתי רוצה\"."],
+          en: ['aller (to go): je vais, tu vas, il va, nous allons, vous allez, ils vont.', 'faire (to do / make): je fais, tu fais, il fait, nous faisons, vous faites, ils font.', 'vouloir (to want): je veux · pouvoir (can): je peux. Politely: je voudrais — "I would like".'],
+          ar: ['aller (يذهب): je vais, tu vas, il va, nous allons, vous allez, ils vont.', 'faire (يفعل): je fais, tu fais, il fait, nous faisons, vous faites, ils font.', 'vouloir (يريد): je veux · pouvoir (يستطيع): je peux. بأدب نقول je voudrais — «أودّ».'],
+          ru: ['aller (идти): je vais, tu vas, il va, nous allons, vous allez, ils vont.', 'faire (делать): je fais, tu fais, il fait, nous faisons, vous faites, ils font.', 'vouloir (хотеть): je veux · pouvoir (мочь): je peux. Вежливо: je voudrais — «я бы хотел».']
+        },
+        table: [['aller', 'vais · vas · va · allons · allez · vont'], ['faire', 'fais · fais · fait · faisons · faites · font'], ['vouloir', 'veux · veux · veut · voulons · voulez · veulent'], ['pouvoir', 'peux · peux · peut · pouvons · pouvez · peuvent']],
+        ex: [
+          ['Je vais à la gare.', 'אני הולך לתחנת הרכבת.', "I'm going to the station.", 'أذهب إلى المحطة.', 'Я иду на вокзал.'],
+          ['Il fait beau aujourd\'hui.', 'מזג האוויר יפה היום.', 'The weather is nice today.', 'الطقس جميل اليوم.', 'Сегодня хорошая погода.'],
+          ['Je voudrais un croissant.', 'הייתי רוצה קרואסון.', 'I would like a croissant.', 'أودّ كرواسون.', 'Я бы хотел круассан.'],
+          ['Vous pouvez répéter, s\'il vous plaît?', 'אפשר לחזור על זה, בבקשה?', 'Could you repeat, please?', 'هل يمكنك أن تكرر من فضلك؟', 'Повторите, пожалуйста.']
+        ],
+        drills: [['Nous ___ au musée.', 'allons', ['allons', 'allez', 'vont']], ['Qu\'est-ce que tu ___ ce soir?', 'fais', ['fais', 'fait', 'faites']], ['Je ___ un café, s\'il vous plaît.', 'voudrais', ['voudrais', 'veut', 'voulons']], ['Ils ___ venir demain.', 'peuvent', ['peut', 'peuvent', 'pouvez']]]
+      },
+      {
+        id: 'questions', icon: '❓', level: 'A1',
+        title: { he: 'שאלות: est-ce que, où, quand, combien', en: 'Questions: est-ce que, où, quand, combien', ar: 'الأسئلة: est-ce que, où, quand, combien', ru: 'Вопросы: est-ce que, où, quand, combien' },
+        explain: {
+          he: ['הדרך הקלה: משפט רגיל עם טון עולה: Vous parlez anglais?', 'או להוסיף est-ce que בהתחלה: Est-ce que vous parlez anglais?', 'où = איפה, quand = מתי, combien = כמה, comment = איך, pourquoi = למה, qui = מי, quoi / qu\'est-ce que = מה.'],
+          en: ['The easy way: a normal sentence with a rising tone: Vous parlez anglais?', 'Or add est-ce que at the start: Est-ce que vous parlez anglais?', "où = where, quand = when, combien = how much, comment = how, pourquoi = why, qui = who, quoi / qu'est-ce que = what."],
+          ar: ['الطريقة السهلة: جملة عادية بنبرة صاعدة: Vous parlez anglais?', 'أو نضيف est-ce que في البداية: Est-ce que vous parlez anglais?', "où = أين، quand = متى، combien = كم، comment = كيف، pourquoi = لماذا، qui = من، quoi / qu'est-ce que = ماذا."],
+          ru: ['Простой способ: обычная фраза с повышением тона: Vous parlez anglais?', 'Или добавить est-ce que в начале: Est-ce que vous parlez anglais?', "où = где, quand = когда, combien = сколько, comment = как, pourquoi = почему, qui = кто, quoi / qu'est-ce que = что."]
+        },
+        table: [['où', 'quand', 'combien'], ['comment', 'pourquoi', 'qui']],
+        ex: [
+          ['Où sont les toilettes?', 'איפה השירותים?', 'Where are the toilets?', 'أين الحمّامات؟', 'Где туалет?'],
+          ['Quand part le train?', 'מתי הרכבת יוצאת?', 'When does the train leave?', 'متى يغادر القطار؟', 'Когда отправляется поезд?'],
+          ['Est-ce que vous parlez anglais?', 'אתה מדבר אנגלית?', 'Do you speak English?', 'هل تتكلم الإنجليزية؟', 'Вы говорите по-английски?'],
+          ["Qu'est-ce que c'est?", 'מה זה?', 'What is it?', 'ما هذا؟', 'Что это?']
+        ],
+        drills: [['___ est la gare?', 'Où', ['Où', 'Quand', 'Qui']], ['___ coûte le billet?', 'Combien', ['Combien', 'Comment', 'Où']], ['___ tu t\'appelles?', 'Comment', ['Comment', 'Pourquoi', 'Combien']], ['___ ferme le musée?', 'Quand', ['Quand', 'Qui', 'Où']]]
+      },
+      {
+        id: 'partitive', icon: '🥖', level: 'A2',
+        title: { he: 'קצת מ…: du, de la, des', en: 'Some: du, de la, des', ar: 'بعض: du, de la, des', ru: 'Немного чего-то: du, de la, des' },
+        explain: {
+          he: ['כשמזמינים "קצת" ממשהו שלא סופרים — אוכל, שתייה: du (זכר), de la (נקבה), de l\' (לפני תנועה).', 'Je voudrais du pain, de la soupe, de l\'eau.', "בשלילה כולם הופכים ל-de: Je ne veux pas de sucre."],
+          en: ["For \"some\" of something you don't count — food, drinks: du (masc.), de la (fem.), de l' (before a vowel).", "Je voudrais du pain, de la soupe, de l'eau.", 'After a negative they all become de: Je ne veux pas de sucre.'],
+          ar: ["لـ«بعض» من شيء لا يُعدّ — طعام أو شراب: du (مذكر)، de la (مؤنث)، de l' (قبل حرف علة).", "Je voudrais du pain, de la soupe, de l'eau.", 'بعد النفي تصبح كلها de: Je ne veux pas de sucre.'],
+          ru: ["Для «немного» того, что не считают, — еды и напитков: du (м. р.), de la (ж. р.), de l' (перед гласной).", "Je voudrais du pain, de la soupe, de l'eau.", 'После отрицания всё становится de: Je ne veux pas de sucre.']
+        },
+        table: [['du pain', 'du café'], ['de la soupe', 'de la salade'], ["de l'eau", 'des frites']],
+        ex: [
+          ['Je voudrais du pain.', 'הייתי רוצה לחם.', 'I would like some bread.', 'أريد بعض الخبز.', 'Я бы хотел хлеба.'],
+          ["Vous avez de l'eau?", 'יש לכם מים?', 'Do you have water?', 'هل لديكم ماء؟', 'У вас есть вода?'],
+          ['Nous prenons de la salade.', 'אנחנו לוקחים סלט.', 'We will have salad.', 'سنأخذ سلطة.', 'Мы возьмём салат.'],
+          ['Je ne mange pas de viande.', 'אני לא אוכל בשר.', "I don't eat meat.", 'لا آكل اللحم.', 'Я не ем мясо.']
+        ],
+        drills: [['Je voudrais ___ café.', 'du', ['du', 'de la', 'des']], ['Vous avez ___ soupe?', 'de la', ['du', 'de la', "de l'"]], ['Vous avez ___ pain?', 'du', ['du', 'de la', 'des']], ['Je ne veux pas ___ sucre.', 'de', ['de', 'du', 'des']]]
+      },
+      {
+        id: 'futur-proche', icon: '⏭️', level: 'A2',
+        title: { he: 'עתיד קרוב: aller + פועל', en: 'Near future: aller + verb', ar: 'المستقبل القريب: aller + فعل', ru: 'Ближайшее будущее: aller + глагол' },
+        explain: {
+          he: ['הדרך הכי נפוצה לדבר על עתיד: aller בהווה + פועל בשם הפועל.', 'Je vais visiter le Louvre — אני הולך לבקר בלובר.', 'שלילה עוטפת את aller: Je ne vais pas prendre le bus.'],
+          en: ['The most common way to talk about the future: aller in the present + the infinitive.', "Je vais visiter le Louvre — I'm going to visit the Louvre.", "The negative wraps aller: Je ne vais pas prendre le bus."],
+          ar: ['أشيع طريقة للحديث عن المستقبل: aller في المضارع + المصدر.', 'Je vais visiter le Louvre — سأزور اللوفر.', 'النفي يحيط بـ aller: Je ne vais pas prendre le bus.'],
+          ru: ['Самый частый способ говорить о будущем: aller в настоящем + инфинитив.', 'Je vais visiter le Louvre — я собираюсь посетить Лувр.', 'Отрицание обнимает aller: Je ne vais pas prendre le bus.']
+        },
+        table: [['je vais', 'visiter'], ['tu vas', 'manger'], ['il / elle va', 'partir'], ['nous allons', 'voyager'], ['vous allez', 'réserver'], ['ils / elles vont', 'arriver']],
+        ex: [
+          ['Je vais visiter le Louvre.', 'אני הולך לבקר בלובר.', "I'm going to visit the Louvre.", 'سأزور اللوفر.', 'Я собираюсь посетить Лувр.'],
+          ['Nous allons prendre un taxi.', 'ניקח מונית.', "We're going to take a taxi.", 'سنأخذ تاكسي.', 'Мы возьмём такси.'],
+          ['Il va pleuvoir demain.', 'מחר ירד גשם.', "It's going to rain tomorrow.", 'ستمطر غدًا.', 'Завтра будет дождь.'],
+          ['Tu vas aimer Paris!', 'אתה תאהב את פריז!', "You're going to love Paris!", 'ستحب باريس!', 'Тебе понравится Париж!']
+        ],
+        drills: [['Je ___ manger au restaurant.', 'vais', ['vais', 'va', 'allons']], ['Nous ___ partir à huit heures.', 'allons', ['allons', 'allez', 'vont']], ['Ils ___ arriver demain.', 'vont', ['va', 'vont', 'vas']], ['Tu ___ prendre le métro?', 'vas', ['vas', 'vais', 'va']]]
+      },
+      {
+        id: 'passe-compose', icon: '⏮️', level: 'A2',
+        title: { he: 'עבר: passé composé', en: 'Past tense: passé composé', ar: 'الماضي: passé composé', ru: 'Прошедшее время: passé composé' },
+        explain: {
+          he: ["עבר = avoir בהווה + צורת עבר של הפועל: j'ai mangé, tu as parlé.", 'פעלים ב-er מקבלים é: manger → mangé. חריגים: fait, pris, vu, eu, été.', 'פעלי תנועה כמו aller, arriver, partir משתמשים ב-être: je suis allé, elle est arrivée.'],
+          en: ["Past = avoir in the present + the past participle: j'ai mangé, tu as parlé.", '-er verbs take é: manger → mangé. Irregular: fait, pris, vu, eu, été.', 'Verbs of movement like aller, arriver, partir use être: je suis allé, elle est arrivée.'],
+          ar: ["الماضي = avoir في المضارع + اسم المفعول: j'ai mangé, tu as parlé.", 'أفعال er تأخذ é: manger ← mangé. الشاذة: fait, pris, vu, eu, été.', 'أفعال الحركة مثل aller و arriver و partir تستخدم être: je suis allé, elle est arrivée.'],
+          ru: ["Прошедшее = avoir в настоящем + причастие: j'ai mangé, tu as parlé.", 'Глаголы на -er получают é: manger → mangé. Неправильные: fait, pris, vu, eu, été.', 'Глаголы движения — aller, arriver, partir — используют être: je suis allé, elle est arrivée.']
+        },
+        table: [["j'ai", 'mangé'], ['tu as', 'visité'], ['il / elle a', 'pris'], ['nous avons', 'fait'], ['je suis', 'allé(e)'], ['elle est', 'arrivée']],
+        ex: [
+          ["J'ai mangé une crêpe.", 'אכלתי קרפ.', 'I ate a crêpe.', 'أكلت كريب.', 'Я съел блин.'],
+          ['Nous avons visité le musée.', 'ביקרנו במוזיאון.', 'We visited the museum.', 'زرنا المتحف.', 'Мы посетили музей.'],
+          ['Tu as pris le train?', 'לקחת את הרכבת?', 'Did you take the train?', 'هل أخذت القطار؟', 'Ты поехал на поезде?'],
+          ['Je suis arrivé hier.', 'הגעתי אתמול.', 'I arrived yesterday.', 'وصلت أمس.', 'Я приехал вчера.']
+        ],
+        drills: [["J'___ mangé au café.", 'ai', ['ai', 'as', 'suis']], ['Nous avons ___ le Louvre.', 'visité', ['visiter', 'visité', 'visitons']], ['Elle ___ arrivée à midi.', 'est', ['est', 'a', 'ai']], ['Tu as ___ des photos?', 'pris', ['pris', 'prendre', 'prends']]]
+      },
+      {
+        id: 'possessives', icon: '🏷️', level: 'A2',
+        title: { he: 'שייכות: mon, ma, mes, ton, votre', en: 'Possessives: mon, ma, mes, ton, votre', ar: 'الملكية: mon, ma, mes, ton, votre', ru: 'Притяжательные: mon, ma, mes, ton, votre' },
+        explain: {
+          he: ['השייכות מתאימה לחפץ, לא לבעלים: mon passeport (זכר), ma valise (נקבה), mes billets (רבים).', 'שלך: ton / ta / tes · שלו או שלה: son / sa / ses · שלנו: notre / nos · שלכם או שלך בנימוס: votre / vos.', 'לפני נקבה שמתחילה בתנועה משתמשים ב-mon: mon adresse.'],
+          en: ['The possessive agrees with the thing, not the owner: mon passeport (masc.), ma valise (fem.), mes billets (plural).', 'your: ton / ta / tes · his or her: son / sa / ses · our: notre / nos · your (plural or polite): votre / vos.', 'Before a feminine word starting with a vowel use mon: mon adresse.'],
+          ar: ['الملكية تتبع الشيء لا المالك: mon passeport (مذكر)، ma valise (مؤنث)، mes billets (جمع).', 'ـك: ton / ta / tes · ـه أو ـها: son / sa / ses · ـنا: notre / nos · ـكم أو بأدب: votre / vos.', 'قبل كلمة مؤنثة تبدأ بحرف علة نستخدم mon: mon adresse.'],
+          ru: ['Притяжательное согласуется с предметом, а не с владельцем: mon passeport (м. р.), ma valise (ж. р.), mes billets (мн. ч.).', 'твой: ton / ta / tes · его или её: son / sa / ses · наш: notre / nos · ваш (или вежливо): votre / vos.', 'Перед словом женского рода на гласную — mon: mon adresse.']
+        },
+        table: [['mon passeport', 'ma valise', 'mes billets'], ['ton', 'ta', 'tes'], ['son', 'sa', 'ses'], ['votre', 'votre', 'vos']],
+        ex: [
+          ["J'ai perdu mon passeport.", 'איבדתי את הדרכון שלי.', 'I lost my passport.', 'فقدت جواز سفري.', 'Я потерял паспорт.'],
+          ['Voici ma clé.', 'הנה המפתח שלי.', 'Here is my key.', 'ها هو مفتاحي.', 'Вот мой ключ.'],
+          ['Où sont vos bagages?', 'איפה המזוודות שלכם?', 'Where is your luggage?', 'أين أمتعتكم؟', 'Где ваш багаж?'],
+          ['Ma mère parle français.', 'אמא שלי מדברת צרפתית.', 'My mother speaks French.', 'أمي تتكلم الفرنسية.', 'Моя мама говорит по-французски.']
+        ],
+        drills: [["J'ai ___ billet ici.", 'mon', ['mon', 'ma', 'mes']], ['Où est ___ valise?', 'ma', ['mon', 'ma', 'mes']], ['Voici ___ passeports.', 'nos', ['notre', 'nos', 'mon']], ['Monsieur, ___ chambre est prête.', 'votre', ['votre', 'vos', 'ton']]]
+      }
+    ],
     it: [
       {
         id: 'essere-avere', icon: '🧩', level: 'A1',

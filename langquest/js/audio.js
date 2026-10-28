@@ -186,11 +186,12 @@
   const NUMBERS = {
     en: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'],
     es: ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce'],
-    it: ['zero', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove', 'dieci', 'undici', 'dodici']
+    it: ['zero', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove', 'dieci', 'undici', 'dodici'],
+    fr: ['zero', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze']
   };
 
   function normWord(w, lang) {
-    let s = (w || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9'ñ]/g, '');
+    let s = (w || '').toLowerCase().replace(/[’ʼ]/g, "'").normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9'ñ]/g, '');
     const nums = NUMBERS[(lang || '').slice(0, 2)];
     if (nums && /^\d+$/.test(s) && nums[+s]) s = nums[+s];
     return s;
@@ -215,8 +216,10 @@
 
   /** Align spoken words to target words (LCS with fuzzy equality). */
   function scoreAgainst(targetTokens, transcript, lang) {
-    const t = targetTokens.map(w => normWord(w, lang));
-    const h = transcript.split(/\s+/).map(w => normWord(w, lang)).filter(Boolean);
+    // hyphenated words (arrêtez-vous, petit-déjeuner) are scored part by part, however the recognizer spells them
+    const owner = [];
+    const t = targetTokens.flatMap((w, k) => String(w).split('-').map(x => { owner.push(k); return normWord(x, lang); }));
+    const h = transcript.replace(/-/g, ' ').split(/\s+/).map(w => normWord(w, lang)).filter(Boolean);
     const dp = Array.from({ length: t.length + 1 }, () => new Array(h.length + 1).fill(0));
     for (let i = 1; i <= t.length; i++) {
       for (let j = 1; j <= h.length; j++) {
@@ -234,7 +237,8 @@
     // extra words the learner added cost a little
     const extra = Math.max(0, h.length - hit);
     const score = t.length ? Math.max(0, Math.round(100 * (hit - extra * 0.25) / t.length)) : 0;
-    return { matches, score, transcript };
+    const byToken = targetTokens.map((_, k) => owner.every((o, n) => o !== k || matches[n]));
+    return { matches: byToken, score, transcript };
   }
 
   function bestScore(targetTokens, alternatives, lang) {
