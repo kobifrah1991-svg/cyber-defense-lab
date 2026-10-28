@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MAP } from './shared/map.js';
 import { WEAPONS, WEAPON_ORDER } from './shared/weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './shared/physics.js';
-import { buildArena, setupLighting, buildCharacter, buildGun, loadSoldier, buildSoldier, soldierReady, animate } from './visuals.js';
+import { buildArena, setupLighting, buildCharacter, buildGun, loadSoldier, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance } from './visuals.js';
 const gunModel = (key, scale) => buildGun(key, WEAPONS[key].color, scale);
 
 const $ = (id) => document.getElementById(id);
@@ -37,17 +37,7 @@ const viewGuns = {};
 const vmRoot = new THREE.Group();
 vmScene.add(vmRoot);
 for (const k of WEAPON_ORDER) { viewGuns[k] = gunModel(k); viewGuns[k].visible = false; vmRoot.add(viewGuns[k]); }
-// Gloved hands and sleeves holding the view-model weapon
-{
-  const glove = new THREE.MeshStandardMaterial({ color: 0x2b2d35, roughness: 0.8 });
-  const sleeve = new THREE.MeshStandardMaterial({ color: 0x3d4a3a, roughness: 0.9 });
-  const add = (geo, mat, x, y, z, rx = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.x = rx; vmRoot.add(m); };
-  add(new THREE.BoxGeometry(0.08, 0.09, 0.1), glove, 0.005, -0.1, 0.06);           // trigger hand
-  add(new THREE.BoxGeometry(0.1, 0.1, 0.4), sleeve, 0.04, -0.16, 0.3, 0.35);       // right forearm
-  add(new THREE.BoxGeometry(0.08, 0.08, 0.1), glove, -0.01, -0.06, -0.3);          // support hand
-  add(new THREE.BoxGeometry(0.1, 0.1, 0.42), sleeve, -0.12, -0.13, -0.1, 0.25);    // left forearm
-}
-const flash = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfff2a0 }));
+const flash = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfff2a0, transparent: true, opacity: 0.85 }));
 flash.visible = false;
 vmScene.add(flash);
 const flashLight = new THREE.PointLight(0xffd27a, 0, 8);
@@ -144,18 +134,29 @@ function nameSprite(text, color) {
 }
 
 let charSeed = 0;
-// Realistic soldiers replace the procedural fallback as soon as the model has loaded
-loadSoldier(window.ARENA_MODEL_URL || './models/Soldier.glb').then(() => {
+// Realistic soldiers and weapon models replace the simple fallbacks as soon as they load
+const modelUrl = (file) => (window.ARENA_MODELS?.[file]) || './models/' + file;
+function rebuildModels() {
   for (const [id, r] of remotes) {
     scene.remove(r.group);
     remotes.set(id, makeRemote({ id, name: r.name, color: r.color, bot: r.bot }));
   }
-}).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
+}
+loadSoldier(modelUrl('Soldier.glb')).then(rebuildModels).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
+loadWeapons((file) => modelUrl('weapons/' + file)).then(() => {
+  for (const k of WEAPON_ORDER) {
+    vmRoot.remove(viewGuns[k]);
+    viewGuns[k] = gunModel(k);
+    viewGuns[k].visible = k === me.weapon;
+    vmRoot.add(viewGuns[k]);
+  }
+  rebuildModels();
+}).catch((e) => console.warn('Weapon models unavailable, using simple guns', e));
 function makeRemote(info) {
   const c = soldierReady() ? buildSoldier(info.color, charSeed++) : buildCharacter(info.color, charSeed++);
   const g = c.root;
   const guns = {};
-  for (const k of WEAPON_ORDER) { guns[k] = gunModel(k, 1.3); guns[k].visible = false; c.gunMount.add(guns[k]); }
+  for (const k of WEAPON_ORDER) { guns[k] = gunModel(k, 1); guns[k].visible = false; c.gunMount.add(guns[k]); }
   const tag = nameSprite(info.name, info.color); tag.position.y = 2.3;
   const shield = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.18, depthWrite: false }));
   shield.position.y = 0.9; shield.visible = false;
@@ -940,7 +941,7 @@ function frame(now) {
   );
   vmRoot.rotation.set(recoil * 0.6 + (reloading ? -0.6 : 0), 0, 0);
   vmRoot.visible = me.alive && !sniperScoped;
-  flash.position.set(vmRoot.position.x, vmRoot.position.y + 0.02, vmRoot.position.z - 0.75);
+  flash.position.set(vmRoot.position.x, vmRoot.position.y + 0.03, vmRoot.position.z - muzzleDistance(me.weapon));
   $('scope').classList.toggle('hidden', !sniperScoped);
   $('crosshair').classList.toggle('hidden', sniperScoped || (me.ads && me.weapon !== 'shotgun'));
   const spreadPx = 5 + (Math.hypot(me.v[0], me.v[2]) > 1 ? 6 : 0) + (me.onGround ? 0 : 8) + recoil * 40;

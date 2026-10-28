@@ -23,7 +23,7 @@ npm start          # http://localhost:3000
 אם אין שרת זמין, המשחק עובר לבד ל"אימון נגד בוטים" שרץ כולו בדפדפן (`shared/game.js` רץ גם בשרת וגם בדפדפן).
 
 ## אפליקציית אנדרואיד (APK)
-הקובץ המוכן: `android/ArenaRush.apk` (אימון נגד בוטים, עובד בלי אינטרנט, עם שליטת מגע).
+הקובץ המוכן: `android/ArenaRush.apk` (גרסה 0.2: אימון נגד בוטים, עובד בלי אינטרנט, שליטת מגע, חיילים ונשקים אמיתיים, יום ולילה).
 
 **התקנה בטלפון:**
 1. מעבירים את `ArenaRush.apk` לטלפון (מייל לעצמך, Google Drive או כבל USB).
@@ -31,3 +31,27 @@ npm start          # http://localhost:3000
 3. לוחצים התקן, ואחר כך פותחים את **Arena Rush**.
 
 **בנייה מחדש** (Linux, אחרי שינוי בקוד): `android/build.sh`.
+
+## גרסת רשת: התחברות עם Gmail ומציאת שחקנים
+- **משחק מהיר:** מצרף אותך לחדר הציבורי הכי מלא שיש בו מקום, כדי שתפגוש שחקנים אחרים.
+- **חדר פרטי:** יוצר קוד בן 5 תווים. חברים מצטרפים עם הקוד, או בקישור `?room=CODE`.
+- **הזמנת חבר לפי Gmail:** בצ'אט במשחק כותבים `/invite friend@gmail.com`. אם החבר מחובר עם Google, הוא מקבל הזמנה עם כפתור "הצטרף". הפקודה `/room` מציגה את קוד החדר.
+- **פרטיות:** כתובות Gmail לא מוצגות לשחקנים אחרים. במשחק מופיע רק השם הפרטי.
+
+### הפעלת התחברות עם Google (פעם אחת)
+1. נכנסים ל-[Google Cloud Console](https://console.cloud.google.com/apis/credentials), ושם בוחרים **Create credentials** ואז **OAuth client ID** מסוג **Web application**.
+2. ב-**Authorized JavaScript origins** מוסיפים את כתובת האתר של המשחק, למשל `https://arena-rush.onrender.com`, וגם `http://localhost:3000` לבדיקות.
+3. מעתיקים את ה-Client ID ומפעילים את השרת איתו:
+   ```bash
+   GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com npm start
+   ```
+בלי `GOOGLE_CLIENT_ID` המשחק עובד כרגיל, עם אורחים, חדרים וקודים, אבל בלי התחברות ובלי הזמנות לפי Gmail.
+
+### העלאה לאינטרנט
+כל שירות שמריץ Node.js ותומך ב-WebSocket מתאים, למשל Render, Railway או Fly.io. ב-Render:
+1. **New** ואז **Web Service**, ובוחרים את המאגר הזה.
+2. **Root Directory:** `arena-rush`, ‏**Build:** `npm install`, ‏**Start:** `npm start`.
+3. ב-Environment מוסיפים `GOOGLE_CLIENT_ID`.
+
+## מודלים
+דמויות ונשקים אמיתיים (קבצי GLB) בתיקייה `public/models`. הרישיונות מפורטים ב-`public/models/CREDITS.md`. אם מודל לא נטען, המשחק חוזר לדמויות ולנשקים הפשוטים.

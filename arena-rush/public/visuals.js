@@ -429,8 +429,52 @@ export function gunMaterials(accent) {
   };
 }
 
+// ---------- real weapon models (glTF) ----------
+// axis/muzzle: where the barrel points in the source file; length in metres;
+// back/up: where the hand grips, as fractions from the stock end and from the top.
+const WEAPON_MODELS = {
+  rifle: { file: 'rifle.glb', axis: 'x', muzzle: 1, length: 0.86, back: 0.38, up: 0.32 },
+  sniper: { file: 'sniper.glb', axis: 'x', muzzle: 1, length: 1.15, back: 0.3, up: 0.3 },
+  shotgun: { file: 'shotgun.glb', axis: 'z', muzzle: -1, length: 0.95, back: 0.3, up: 0.35 },
+  pistol: { file: 'pistol.glb', axis: 'x', muzzle: 1, length: 0.22, back: 0.3, up: 0.25 },
+};
+const weaponTemplates = {};
+
+export async function loadWeapons(base) {
+  const loader = new GLTFLoader();
+  await Promise.all(Object.entries(WEAPON_MODELS).map(async ([key, cfg]) => {
+    const src = (await loader.loadAsync(typeof base === 'function' ? base(cfg.file) : base + cfg.file)).scene;
+    src.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.material.side = THREE.DoubleSide; } });
+    // Turn the barrel to -Z (our forward), scale to real length, put the grip at the origin
+    const turn = new THREE.Group();
+    turn.add(src);
+    if (cfg.axis === 'x') turn.rotation.y = cfg.muzzle > 0 ? Math.PI / 2 : -Math.PI / 2;
+    else if (cfg.muzzle > 0) turn.rotation.y = Math.PI;
+    let box = new THREE.Box3().setFromObject(turn);
+    const size = box.getSize(new THREE.Vector3());
+    turn.scale.setScalar(cfg.length / size.z);
+    box = new THREE.Box3().setFromObject(turn);
+    const len = box.max.z - box.min.z, h = box.max.y - box.min.y;
+    turn.position.set(-(box.min.x + box.max.x) / 2, -(box.max.y - cfg.up * h), -(box.max.z - cfg.back * len));
+    const root = new THREE.Group();
+    root.add(turn);
+    weaponTemplates[key] = root;
+  }));
+}
+// Distance from the grip to the muzzle, for placing the flash
+export function muzzleDistance(key) {
+  const c = WEAPON_MODELS[key];
+  return weaponTemplates[key] ? c.length * (1 - c.back) : 0.75;
+}
+export const weaponsReady = () => Object.keys(weaponTemplates).length === Object.keys(WEAPON_MODELS).length;
+
 // Weapon meshes for the view model and for characters' hands
 export function buildGun(key, color, scale = 1) {
+  if (weaponTemplates[key]) {
+    const g = weaponTemplates[key].clone();
+    g.scale.setScalar(scale);
+    return g;
+  }
   const g = new THREE.Group();
   const { dark, grip, accent } = gunMaterials(color);
   const box = (sx, sy, sz, x, y, z, m = dark) => { const mm = new THREE.Mesh(new THREE.BoxGeometry(sx * scale, sy * scale, sz * scale), m); mm.position.set(x * scale, y * scale, z * scale); mm.castShadow = true; g.add(mm); return mm; };

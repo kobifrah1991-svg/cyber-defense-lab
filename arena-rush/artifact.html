@@ -26,11 +26,22 @@ h1 span { color: var(--cyan); text-shadow: 0 0 18px var(--cyan); }
 .tag { text-align: center; color: var(--muted); margin: 6px 0 18px; }
 label { display: block; margin: 12px 0; color: var(--muted); font-size: 14px; }
 label input:not([type=range]) { display: block; width: 100%; margin-top: 6px; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-size: 18px; }
+label select { display: block; width: 100%; margin-top: 6px; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-size: 16px; }
 label input[type=range] { display: block; width: 100%; margin-top: 6px; accent-color: var(--pink); }
 #play { width: 100%; margin-top: 8px; padding: 16px; font-size: 26px; font-weight: 900; border: 0; border-radius: 14px; color: #fff;
   background: linear-gradient(90deg, var(--pink), #ff6d00); box-shadow: 0 0 24px rgba(255,46,136,.6); transition: transform .1s; }
 #play:hover { transform: scale(1.03); }
 #play:disabled { opacity: .6; }
+#gsi { display: flex; justify-content: center; min-height: 0; margin: 6px 0; }
+#account, #online-count { text-align: center; color: var(--cyan); font-size: 13px; margin: 4px 0; min-height: 1em; }
+.row { display: flex; gap: 8px; margin-top: 8px; }
+.row input { flex: 1; min-width: 0; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-size: 18px; text-transform: uppercase; letter-spacing: 3px; direction: ltr; text-align: center; }
+button.secondary { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--cyan); background: rgba(0,229,255,.12); color: var(--text); font-weight: 700; font-size: 16px; }
+button.secondary:disabled { opacity: .5; }
+#invite { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 30; background: var(--panel); border: 1px solid var(--yellow); border-radius: 12px; padding: 10px 14px; display: flex; gap: 10px; align-items: center; max-width: calc(100% - 32px); flex-wrap: wrap; }
+#invite button { border: 0; border-radius: 8px; padding: 6px 12px; font-weight: 700; }
+#invite .yes { background: var(--yellow); color: #000; }
+#invite .no { background: rgba(255,255,255,.12); color: var(--text); }
 #menu-status { min-height: 1.2em; color: var(--yellow); text-align: center; }
 details { margin-top: 10px; color: var(--muted); font-size: 14px; }
 details ul { padding-inline-start: 18px; line-height: 1.8; }
@@ -171,9 +182,10 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
 }
 </style>
 <script type="importmap">
-  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }
 </script>
 <script>window.ARENA_OFFLINE = true;</script>
+<script src="models.js"></script>
 <div dir="rtl" lang="he">
   <canvas id="game"></canvas>
 
@@ -230,7 +242,18 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
       <div id="profile"></div>
       <label>שם בזירה <input id="name" maxlength="16" placeholder="הכינוי שלך"></label>
       <label>רגישות עכבר <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
-      <button id="play">שחק!</button>
+      <label>זמן ביום <select id="time"><option value="day">יום</option><option value="night">לילה (ניאון)</option></select></label>
+      <div id="gsi"></div>
+      <p id="account"></p>
+      <button id="play">משחק מהיר</button>
+      <div class="row">
+        <button id="create" class="secondary">חדר פרטי חדש</button>
+      </div>
+      <div class="row">
+        <input id="code" maxlength="5" placeholder="קוד חדר" autocomplete="off">
+        <button id="join-code" class="secondary">הצטרף</button>
+      </div>
+      <p id="online-count"></p>
       <p id="menu-status"></p>
       <details>
         <summary>שליטה</summary>
@@ -239,12 +262,16 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
           <li><b>לחיצה שמאלית</b> ירי · <b>ימנית</b> כוונת / סקופ</li>
           <li><b>1-4</b> או גלגלת: רובה סער, שוטגאן, צלף, אקדח · <b>R</b> טעינה</li>
           <li><b>Enter</b> צ'אט · <b>B</b> הודעות מהירות · <b>Tab</b> ניקוד</li>
+          <li>הזמנת חבר: <code>/invite חבר@gmail.com</code> · <code>/room</code> לקוד החדר</li>
           <li>פקודות צ'אט: <code>/mute שם</code> · <code>/unmute שם</code> · <code>/report שם סיבה</code></li>
         </ul>
       </details>
       <p class="safe">🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.</p>
     </div>
   </div>
+
+  <!-- Friend invitation -->
+  <div id="invite" class="hidden"><span></span><button class="yes">הצטרף</button><button class="no">לא עכשיו</button></div>
 
   <!-- End of match -->
   <div id="end" class="hidden">
