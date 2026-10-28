@@ -142,10 +142,19 @@
       </div>
       <div class="kara-slot"></div>
       ${showHe ? `<div class="translit">${translitLine(phrase)}</div>` : ''}
-      <div class="translation">${esc(tr(phrase))}</div>`;
+      <div class="translation">${esc(tr(phrase))}</div>
+      ${phrase.fusha ? `<details class="fusha"><summary>📜 ${t('lesson.fusha')}</summary>
+        <button class="fusha-text" dir="rtl" data-act="fusha">${esc(phrase.fusha)} 🔊</button></details>` : ''}`;
+  }
+
+  // the same phrase in Standard Arabic, read with a Standard Arabic voice
+  function bindFusha(body, phrase) {
+    const b = $('[data-act=fusha]', body);
+    if (b) b.onclick = () => LQAudio.speak(phrase.fusha, { accent: LQData.LANGS[S.lang].fushaAccent || S.accent, rate: LQStore.getSettings().slowRate });
   }
 
   function bindStar(body, pi) {
+    bindFusha(body, S.phrases[pi]);
     const star = $('[data-act=star]', body);
     if (!star) return;
     star.onclick = () => {

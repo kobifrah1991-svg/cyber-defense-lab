@@ -131,7 +131,7 @@
     const row = document.createElement('div');
     row.className = 'msg npc';
     row.innerHTML = `<span class="ava">${C.teacher ? LQUI.teacherAvatar(C.teacher, 36) : '🧑‍🏫'}</span>
-      <div class="bubble"><div class="bk"></div><div class="bhe">${esc(res.translation || '')}</div><button class="replay" title="${t('boss.replay')}">🔊</button></div>`;
+      <div class="bubble"><div class="bk"></div>${LQI18n.showTranslit() && res.pronunciation ? `<div class="btl" dir="auto">${esc(res.pronunciation)}</div>` : ''}<div class="bhe">${esc(res.translation || '')}</div><button class="replay" title="${t('boss.replay')}">🔊</button></div>`;
     log().appendChild(row);
     scroll();
     const k = karaoke($('.bk', row), { text: res.reply, accent: C.accent });
@@ -230,7 +230,7 @@
     const line = lines[C.demoStep % lines.length];
     const next = st.boss.turns[C.demoStep % st.boss.turns.length];
     C.demoStep++;
-    return { ok: true, reply: line.text, translation: LQI18n.tr(line), correction: null, suggestions: [st.phrases[next.expect].text] };
+    return { ok: true, reply: line.text, translation: LQI18n.tr(line), pronunciation: (line.tl || {})[LQI18n.ui()] || '', correction: null, suggestions: [st.phrases[next.expect].text] };
   }
 
   window.LQTutor = { start, stop, SCENARIOS };

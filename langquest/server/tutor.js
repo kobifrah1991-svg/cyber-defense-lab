@@ -1,7 +1,7 @@
 /* TedraLingo AI tutor — free spoken conversation with the learner's teacher (Premium)
  *
  *  POST /tutor  { token, target, base, level, teacher: { name, city, age }, scenario, messages: [{ role, content }] }
- *   → { ok, reply, translation, correction: { note, better } | null, suggestions: [..] }
+ *   → { ok, reply, translation, pronunciation, correction: { note, better } | null, suggestions: [..] }
  *
  *  The license key (see license-worker.js) gates access; an optional KV binding (TUTOR_KV) caps
  *  messages per license per day (TUTOR_DAILY_LIMIT, default 60).
@@ -25,12 +25,21 @@ const LEVELS = [
 export const TutorReply = z.object({
   reply: z.string().describe('The teacher\'s next spoken line, in the target language only'),
   translation: z.string().describe('The same line translated into the learner\'s own language'),
+  pronunciation: z.string().describe('The reply respelled in the learner\'s own script so they can read it aloud'),
   correction: z.object({
     note: z.string().describe('A short, kind explanation in the learner\'s own language'),
     better: z.string().describe('The learner\'s last message rewritten correctly, in the target language')
   }).nullable().describe('null when the learner\'s last message had no real mistake'),
   suggestions: z.array(z.string()).describe('Two short things the learner could say next, in the target language')
 });
+
+// how each learner language writes pronunciation
+const SCRIPT_HINT = {
+  he: 'in Hebrew letters with full niqqud (vowel points)',
+  ar: 'in Arabic letters with harakat (short-vowel marks)',
+  ru: 'in Cyrillic letters',
+  en: 'in a simple English-letter respelling'
+};
 
 export function systemPrompt({ target, base, level, teacher, scenario }) {
   const L = LEVELS[Math.max(0, Math.min(3, level | 0))];
@@ -45,6 +54,7 @@ export function systemPrompt({ target, base, level, teacher, scenario }) {
     `- Stay in character and keep the conversation going: respond naturally, then ask one simple question that moves the scene forward.`,
     `- "reply" is in ${tl} only: one or two short sentences, using ${L.guide}. It will be read aloud, so write it the way people actually speak, without emoji or lists.`,
     `- "translation" is that same reply in ${bl}.`,
+    `- "pronunciation" is that same reply respelled so a ${bl} speaker can read it aloud: ${SCRIPT_HINT[base] || 'in their own alphabet'}. Write the sounds of the ${tl} words, not a translation.`,
     `- If the learner's last message has a real mistake (vocabulary, grammar, word order), set "correction" with a short, encouraging note in ${bl} and the corrected sentence in ${tl}. Their messages come from speech recognition, so ignore missing punctuation, capitalisation and accents. Otherwise "correction" is null.`,
     `- If the learner writes in ${bl} or seems stuck, give the ${tl} way to say it in your reply, kindly, and carry on.`,
     `- "suggestions": two short, different things the learner could say next, in ${tl}, at their level.`,
@@ -103,7 +113,7 @@ export async function tutorTurn(client, input) {
     if (!out) return { status: 502, body: { ok: false, error: 'bad_output' } };
     return {
       status: 200,
-      body: { ok: true, reply: out.reply, translation: out.translation, correction: out.correction, suggestions: out.suggestions.slice(0, 2) }
+      body: { ok: true, reply: out.reply, translation: out.translation, pronunciation: out.pronunciation || '', correction: out.correction, suggestions: out.suggestions.slice(0, 2) }
     };
   } catch (e) {
     if (e instanceof Anthropic.RateLimitError) return { status: 503, body: { ok: false, error: 'busy' } };

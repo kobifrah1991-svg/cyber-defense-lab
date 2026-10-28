@@ -52,7 +52,7 @@
 
   function asPhrase(text) {
     const tokens = text.split(/\s+/).filter(Boolean);
-    return { text, words: tokens.map(tk => ({ token: tk, clean: tk.replace(/[¿¡?!.,]/g, ''), syl: [tk], he: [], stress: 0 })) };
+    return { text, words: tokens.map(tk => ({ token: tk, clean: tk.replace(/[¿¡?!.,؟،؛]/g, ''), syl: [tk], he: [], stress: 0 })) };
   }
 
   function start(root, lang, unitId, onExit) {

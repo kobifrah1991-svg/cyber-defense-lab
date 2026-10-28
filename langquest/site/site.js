@@ -34,7 +34,7 @@
       shots_title: 'ככה זה נראה',
       shots: ['מפת המסע', 'שיעור עם תעתיק', 'בדיקת הגייה'],
       teach_title: 'מורים שמרגישים כמו חברים מחו״ל',
-      teach_sub: 'בוחרים מורה — ובוחרים מבטא: אמריקאי או בריטי, עברית עם Noa מתל אביב, צרפתית מפריז או ממונטריאול, ספרדית מספרד או ממקסיקו, ואיטלקית עם Giulia מרומא.',
+      teach_sub: 'בוחרים מורה — ובוחרים מבטא: אמריקאי או בריטי, ערבית מדוברת עם Lina מנצרת (וגם בספרותית), עברית עם Noa מתל אביב, צרפתית מפריז או ממונטריאול, ספרדית מספרד או ממקסיקו, ואיטלקית עם Giulia מרומא.',
       langs_title: 'שפות', langs_learn: 'ללמוד', langs_more: 'ועוד:', langs_ui: 'שפת הלומדה', soon: 'בקרוב',
       price_title: 'מתחילים בחינם, ממשיכים עם Premium',
       plan_free: 'חינם', plan_free_desc: 'שלוש התחנות הראשונות בכל שפה, כולל ה-Boss, אוסף ביטויים ותזכורות',
@@ -77,7 +77,7 @@
       shots_title: 'See it in action',
       shots: ['Journey map', 'Lesson with transliteration', 'Pronunciation check'],
       teach_title: 'Teachers who feel like friends abroad',
-      teach_sub: 'Pick a teacher — and an accent: American or British English, Hebrew with Noa from Tel Aviv, French from Paris or Montréal, Spanish from Spain or Mexico, and Italian with Giulia from Rome.',
+      teach_sub: 'Pick a teacher — and an accent: American or British English, spoken Arabic with Lina from Nazareth (plus Standard Arabic), Hebrew with Noa from Tel Aviv, French from Paris or Montréal, Spanish from Spain or Mexico, and Italian with Giulia from Rome.',
       langs_title: 'Languages', langs_learn: 'Learn', langs_more: 'And more:', langs_ui: 'App language', soon: 'Coming soon',
       price_title: 'Start free, keep going with Premium',
       plan_free: 'Free', plan_free_desc: 'The first three stops of every language, Bosses included, plus phrasebook and reminders',
@@ -120,7 +120,7 @@
       shots_title: 'هكذا يبدو',
       shots: ['خريطة الرحلة', 'درس مع النقحرة', 'فحص النطق'],
       teach_title: 'معلمون كأصدقاء من الخارج',
-      teach_sub: 'اختاروا معلمًا — واختاروا لهجة: إنجليزية أمريكية أو بريطانية، عبرية مع نوعا من تل أبيب، فرنسية من باريس أو مونتريال، إسبانية من إسبانيا أو المكسيك، وإيطالية مع جوليا من روما.',
+      teach_sub: 'اختاروا معلمًا — واختاروا لهجة: إنجليزية أمريكية أو بريطانية، عربية محكية مع لينا من الناصرة (والفصحى أيضًا)، عبرية مع نوعا من تل أبيب، فرنسية من باريس أو مونتريال، إسبانية من إسبانيا أو المكسيك، وإيطالية مع جوليا من روما.',
       langs_title: 'اللغات', langs_learn: 'للتعلم', langs_more: 'وأيضًا:', langs_ui: 'لغة التطبيق', soon: 'قريبًا',
       price_title: 'ابدأوا مجانًا وتابعوا مع Premium',
       plan_free: 'مجاني', plan_free_desc: 'أول ثلاث محطات في كل لغة مع تحديات الزعيم، ودفتر العبارات والتذكيرات',
@@ -163,7 +163,7 @@
       shots_title: 'Как это выглядит',
       shots: ['Карта путешествия', 'Урок с транскрипцией', 'Проверка произношения'],
       teach_title: 'Преподаватели — как друзья из-за границы',
-      teach_sub: 'Выберите преподавателя — и акцент: американский или британский английский, иврит с Ноа из Тель-Авива, французский из Парижа или Монреаля, испанский из Испании или Мексики, итальянский с Джулией из Рима.',
+      teach_sub: 'Выберите преподавателя — и акцент: американский или британский английский, разговорный арабский с Линой из Назарета (и литературный), иврит с Ноа из Тель-Авива, французский из Парижа или Монреаля, испанский из Испании или Мексики, итальянский с Джулией из Рима.',
       langs_title: 'Языки', langs_learn: 'Изучать', langs_more: 'А также:', langs_ui: 'Язык приложения', soon: 'Скоро',
       price_title: 'Начните бесплатно, продолжайте с Premium',
       plan_free: 'Бесплатно', plan_free_desc: 'Первые три остановки каждого языка с Боссами, разговорник и напоминания',
@@ -205,6 +205,7 @@
   const TEACHERS = [
     { id: 'emma', name: 'Emma', flag: '🇺🇸', hue: 200, city: { he: 'ניו יורק', en: 'New York', ar: 'نيويورك', ru: 'Нью-Йорк' } },
     { id: 'oliver', name: 'Oliver', flag: '🇬🇧', hue: 160, city: { he: 'לונדון', en: 'London', ar: 'لندن', ru: 'Лондон' } },
+    { id: 'lina', name: 'Lina', flag: '🇸🇦', hue: 160, city: { he: 'נצרת', en: 'Nazareth', ar: 'الناصرة', ru: 'Назарет' } },
     { id: 'noa', name: 'Noa', flag: '🇮🇱', hue: 205, city: { he: 'תל אביב', en: 'Tel Aviv', ar: 'تل أبيب', ru: 'Тель-Авив' } },
     { id: 'camille', name: 'Camille', flag: '🇫🇷', hue: 225, city: { he: 'פריז', en: 'Paris', ar: 'باريس', ru: 'Париж' } },
     { id: 'louis', name: 'Louis', flag: '🇨🇦', hue: 0, city: { he: 'מונטריאול', en: 'Montréal', ar: 'مونتريال', ru: 'Монреаль' } },
@@ -213,7 +214,7 @@
     { id: 'giulia', name: 'Giulia', flag: '🇮🇹', hue: 340, city: { he: 'רומא', en: 'Rome', ar: 'روما', ru: 'Рим' } }
   ];
   // [flag, name, available, main] — the main five first, the rest listed after them
-  const LEARN = [['🇬🇧', 'English', true, true], ['🇸🇦', 'العربية', false, true], ['🇫🇷', 'Français', true, true], ['🇪🇸', 'Español', true, true], ['🇮🇱', 'עברית', true, true],
+  const LEARN = [['🇬🇧', 'English', true, true], ['🇸🇦', 'العربية', true, true], ['🇫🇷', 'Français', true, true], ['🇪🇸', 'Español', true, true], ['🇮🇱', 'עברית', true, true],
     ['🇮🇹', 'Italiano', true, false], ['🇩🇪', 'Deutsch', false, false]];
 
   // the other Scitedra Labs products (pages on scitedra-labs.web.app)

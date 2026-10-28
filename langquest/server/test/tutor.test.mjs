@@ -19,7 +19,7 @@ function fakeClient(result) {
 const ok = {
   stop_reason: 'end_turn',
   parsed_output: {
-    reply: '¡Hola! ¿Qué quieres tomar?', translation: 'שלום! מה תרצה לשתות?',
+    reply: '¡Hola! ¿Qué quieres tomar?', translation: 'שלום! מה תרצה לשתות?', pronunciation: 'אוֹלָה! קֶה קְיֶרֶס טוֹמָאר?',
     correction: null, suggestions: ['Un café, por favor.', 'Agua, por favor.', 'extra']
   }
 };
@@ -40,6 +40,7 @@ test('a valid license gets a tutor reply; request uses the current model, low ef
   assert.equal(body.ok, true);
   assert.equal(body.reply, ok.parsed_output.reply);
   assert.equal(body.suggestions.length, 2);
+  assert.equal(body.pronunciation, ok.parsed_output.pronunciation, 'pronunciation in the learner\'s script is passed through');
   const p = client.calls[0];
   assert.equal(p.model, MODEL);
   assert.equal(p.model, 'claude-opus-5-5');
@@ -51,6 +52,7 @@ test('a valid license gets a tutor reply; request uses the current model, low ef
   assert.match(p.system, /Lucía/);
   assert.match(p.system, /learning Spanish/);
   assert.match(p.system, /own language is Hebrew/);
+  assert.match(p.system, /Hebrew letters with full niqqud/, 'Hebrew speakers get a niqqud respelling');
   assert.deepEqual(p.messages, [{ role: 'user', content: 'hola quiero un cafe' }]);
 });
 

@@ -308,6 +308,8 @@ h1, h2, h3, h4 { margin: 0 0 .4em; line-height: 1.2; }
 .bubble .karaoke { font-size: 1.15rem; margin: 0; text-align: start; line-height: 1.7; }
 .bubble .kw { padding: 0 3px; }
 .bhe { color: var(--muted); font-size: .9rem; }
+.btl { color: var(--sun); font-size: .95rem; margin: 2px 0; }
+.btl.translit { font-size: .9rem; }
 .replay { border: 0; background: transparent; cursor: pointer; position: absolute; top: 4px; inset-inline-start: -30px; }
 .boss-controls { padding: 14px 18px 18px; border-top: 1px solid var(--line); }
 .task { text-align: center; font-size: 1.15rem; }
@@ -672,3 +674,9 @@ img, svg, video { max-width: 100%; }
 .cloud-cta h3 { margin: 0 0 6px; }
 .family-line { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--sea); font-weight: 700; text-decoration: none; font-size: .9rem; }
 .family-line img { border-radius: 6px; }
+
+/* Standard Arabic form of a spoken-Arabic phrase */
+.fusha { margin: 8px auto 0; max-width: 520px; text-align: center; }
+.fusha summary { cursor: pointer; color: var(--muted); font-size: .9rem; font-weight: 700; list-style: none; }
+.fusha summary::-webkit-details-marker { display: none; }
+.fusha-text { margin-top: 6px; padding: 8px 14px; border-radius: 12px; border: 1px dashed var(--line); background: var(--bg-2); font-size: 1.15rem; cursor: pointer; }

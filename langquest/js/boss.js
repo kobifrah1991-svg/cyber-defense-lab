@@ -56,7 +56,7 @@
     const my = B;
     const row = document.createElement('div');
     row.className = 'msg npc';
-    row.innerHTML = `<span class="ava">${LQUI.npcAvatar(B.meta, 36)}</span><div class="bubble"><div class="bk"></div><div class="bhe">${esc(tr(line))}</div><button class="replay" title="${t('boss.replay')}">🔊</button></div>`;
+    row.innerHTML = `<span class="ava">${LQUI.npcAvatar(B.meta, 36)}</span><div class="bubble"><div class="bk"></div>${lineTl(line)}<div class="bhe">${esc(tr(line))}</div><button class="replay" title="${t('boss.replay')}">🔊</button></div>`;
     chat().appendChild(row);
     scrollChat();
     const k = karaoke($('.bk', row), { text, accent: B.accent, gender: B.meta.npcGender });
@@ -64,10 +64,19 @@
     return k.play(1).then(() => new Promise(r => setTimeout(r, 250))).then(() => { if (B !== my) throw new Error('left'); });
   }
 
+  // how the line sounds, in the learner's own script (when "show pronunciation" is on)
+  function lineTl(line) {
+    const tl = LQI18n.showTranslit() && line.tl && line.tl[LQI18n.ui()];
+    return tl ? `<div class="btl" dir="auto">${esc(tl)}</div>` : '';
+  }
+  function phraseTl(phrase) {
+    return LQI18n.showTranslit() ? `<div class="btl translit">${LQUI.translitLine(phrase)}</div>` : '';
+  }
+
   function userSay(phrase, matches) {
     const row = document.createElement('div');
     row.className = 'msg me';
-    row.innerHTML = '<div class="bubble"><div class="bk"></div></div><span class="ava">🙂</span>';
+    row.innerHTML = `<div class="bubble"><div class="bk"></div>${phraseTl(phrase)}</div><span class="ava">🙂</span>`;
     chat().appendChild(row);
     const k = karaoke($('.bk', row), { text: phrase.text, words: phrase.words, accent: B.accent });
     if (matches) k.mark(matches);
@@ -97,7 +106,7 @@
       <div class="boss-fb" aria-live="polite"></div>`;
     $('[data-act=hint]', ctl).onclick = () => {
       B.hinted = true;
-      $('.hint-slot', ctl).innerHTML = `<div class="hint" dir="${LQUI.tdir(B.lang)}">${esc(phrase.text)}</div>`;
+      $('.hint-slot', ctl).innerHTML = `<div class="hint" dir="${LQUI.tdir(B.lang)}">${esc(phrase.text)}</div>${phraseTl(phrase)}`;
       LQAudio.speak(phrase.text, { accent: B.accent, rate: LQStore.getSettings().slowRate, weights: phrase.words.map(w => w.syl.length) });
     };
     if (LQAudio.canListen) bindMic(ctl, phrase);

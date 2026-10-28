@@ -13,7 +13,7 @@
   const Recognition = nativeStt ? null : window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
   const NATURAL_HINTS = ['natural', 'neural', 'premium', 'enhanced', 'online', 'google', 'siri', 'wavenet'];
-  const ACCENT_FALLBACKS = { 'es-MX': ['es-US', 'es-419'], 'en-GB': ['en-IE', 'en-AU'], 'fr-CA': [] };
+  const ACCENT_FALLBACKS = { 'es-MX': ['es-US', 'es-419'], 'en-GB': ['en-IE', 'en-AU'], 'fr-CA': [], 'ar-JO': ['ar-PS', 'ar-LB', 'ar-SY', 'ar-IL', 'ar-SA', 'ar-EG', 'ar-XA'] };
 
   let voices = [];
   const voiceListeners = [];
@@ -192,7 +192,9 @@
 
   function normWord(w, lang) {
     // accents, Hebrew niqqud and Arabic harakat are ignored; any script's letters count
-    let s = (w || '').toLowerCase().replace(/[’ʼ]/g, "'").normalize('NFD').replace(/[\u0300-\u036f\u0591-\u05c7\u064b-\u065f\u0670]/g, '').replace(/[^\p{L}\p{N}']/gu, '');
+    let s = (w || '').toLowerCase().replace(/[’ʼ]/g, "'").normalize('NFD').replace(/[\u0300-\u036f\u0591-\u05c7\u064b-\u065f\u0670]/g, '').replace(/[^\p{L}\p{N}']/gu, '')
+      // Arabic spelling variants the recognizer mixes up: hamza seats, alif maqsura, taa marbuta
+      .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
     const nums = NUMBERS[(lang || '').slice(0, 2)];
     if (nums && /^\d+$/.test(s) && nums[+s]) s = nums[+s];
     return s;

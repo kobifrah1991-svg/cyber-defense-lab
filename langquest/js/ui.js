@@ -77,7 +77,7 @@
    */
   function karaoke(container, opts) {
     const tokens = opts.text.split(/\s+/).filter(Boolean);
-    const words = opts.words || tokens.map(t => ({ token: t, clean: t.replace(/[¿¡?!.,]/g, ''), syl: [t], he: [], stress: 0 }));
+    const words = opts.words || tokens.map(t => ({ token: t, clean: t.replace(/[¿¡?!.,؟،؛]/g, ''), syl: [t], he: [], stress: 0 }));
     container.innerHTML = `<div class="karaoke${opts.big ? ' big' : ''}" dir="${tdir(opts.lang)}">${
       tokens.map((t, i) => `<span class="kw" data-i="${i}" tabindex="0" role="button">${esc(t)}</span>`).join(' ')
     }</div>`;
