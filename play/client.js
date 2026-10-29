@@ -165,13 +165,14 @@ registerCharacters(CHARACTERS);
 const animsLoad = loadAnimations(CHARACTERS, modelUrl).catch((e) => { console.warn('Animations unavailable', e); throw e; });
 // Load a character's model when it is needed; players and the preview switch to it as soon as it arrives
 const charRequested = new Set(), charFailed = new Set();
+let charError = ''; // last load error, shown under the message to help diagnose
 function ensureCharacter(id) {
   id = characterById(id).id;
   if (charRequested.has(id)) return;
   charRequested.add(id);
   Promise.all([animsLoad, loadCharacter(id, modelUrl)])
     .then(() => { rebuildModels(); refreshPreview(); fpKey = ''; })
-    .catch((e) => { console.warn('Character model unavailable', id, e); charRequested.delete(id); charFailed.add(id); refreshPreview(); });
+    .catch((e) => { console.warn('Character model unavailable', id, e); charRequested.delete(id); charFailed.add(id); charError = String(e?.message || e).slice(0, 120); refreshPreview(); });
 }
 let viewCamo = null;
 function setViewCamo(camo) {
@@ -1451,6 +1452,7 @@ function refreshPreview() {
   const failed = !ready && charFailed.has(def.id);
   if (!ready && !failed) ensureCharacter(def.id);
   $('char-loading').textContent = t(failed ? 'menu.charFailed' : 'menu.loadingChar');
+  if (failed && charError) { const d = document.createElement('small'); d.className = 'err'; d.textContent = charError; $('char-loading').append(d); }
   $('char-loading').classList.toggle('hidden', ready);
   $('char-name').textContent = t('char.' + def.id);
   $('char-role').textContent = t('char.' + def.id + '.role');

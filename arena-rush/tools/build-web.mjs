@@ -1,12 +1,12 @@
 // Builds a static copy of the game (no game server needed) into ../play at the repository root,
 // for GitHub Pages or any static host. It offers practice against bots and online rooms with friends
-// (WebRTC, see public/p2p.js). Run: node tools/build-web.mjs
+// (WebRTC, see public/p2p.js). Run: node tools/build-web.mjs [output folder]  (default: ../play)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const OUT = path.join(ROOT, '..', 'play');
+const OUT = path.resolve(process.argv[2] || path.join(ROOT, '..', 'play'));
 const copy = (from, to) => { fs.mkdirSync(path.dirname(to), { recursive: true }); fs.copyFileSync(from, to); };
 const copyDir = (from, to, filter = () => true) => {
   for (const e of fs.readdirSync(from, { withFileTypes: true })) {

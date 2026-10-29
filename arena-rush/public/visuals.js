@@ -459,9 +459,8 @@ const weaponTemplates = {};
 const muzzles = {};
 
 export async function loadWeapons(base) {
-  const loader = new GLTFLoader();
   await Promise.all(Object.entries(WEAPON_MODELS).map(async ([key, cfg]) => {
-    const src = (await loader.loadAsync(typeof base === 'function' ? base(cfg.file) : base + cfg.file)).scene;
+    const src = (await loadGLB(typeof base === 'function' ? base(cfg.file) : base + cfg.file)).scene;
     src.traverse((o) => { if (o.isMesh) o.castShadow = true; });
     const box = new THREE.Box3().setFromObject(src);
     muzzles[key] = -box.min.z;
@@ -514,14 +513,25 @@ const charDefs = new Map();
 const animSets = new Map(); // anims file key -> { Idle, Walk, Run } clips
 // Characters load one by one, on demand (the chosen one and those in the match), so a phone never
 // holds all ten models at once and one failed download can't take the others down with it.
-const loader = new GLTFLoader();
+// Models embedded as data: URLs are decoded here instead of fetched: some hosts (the claude.ai app)
+// block fetch() of data: and blob: URLs. Embedded textures then load through <img> rather than fetch.
+function loadGLB(url) {
+  const loader = new GLTFLoader();
+  if (!url.startsWith('data:')) return loader.loadAsync(url);
+  const bin = atob(url.slice(url.indexOf(',') + 1));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const saved = window.createImageBitmap;
+  window.createImageBitmap = undefined; // GLTFLoader picks TextureLoader (<img>) when ImageBitmap is unavailable
+  try { return loader.parseAsync(bytes.buffer, ''); } finally { window.createImageBitmap = saved; }
+}
 const charLoads = new Map(); // file -> promise
 export function registerCharacters(list) { for (const c of list) charDefs.set(c.id, c); }
 export function loadCharacter(id, urlFor) {
   const def = charDefs.get(id);
   if (!def) return Promise.reject(new Error('unknown character ' + id));
   if (!charLoads.has(def.file)) {
-    charLoads.set(def.file, loader.loadAsync(urlFor(def.file)).then((gltf) => {
+    charLoads.set(def.file, loadGLB(urlFor(def.file)).then((gltf) => {
       const box = new THREE.Box3().setFromObject(gltf.scene);
       const scale = (def.height || 1.8) / (box.max.y - box.min.y);
       charTemplates.set(def.file, { scene: gltf.scene, animations: gltf.animations, scale, footY: -box.min.y * scale });
@@ -536,7 +546,7 @@ export async function loadAnimations(list, urlFor) {
   await Promise.all([...sets.entries()].map(async ([key, anims]) => {
     const out = {};
     await Promise.all(Object.entries(anims).map(async ([name, file]) => {
-      const clip = (await loader.loadAsync(urlFor(file))).animations[0];
+      const clip = (await loadGLB(urlFor(file))).animations[0];
       if (!clip) return;
       clip.name = name;
       // Keep the clip in place: lock the root's horizontal travel, keep its vertical bob.
