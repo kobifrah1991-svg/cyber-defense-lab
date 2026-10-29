@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-29 (0.8.0)
+- Hands hold the weapon properly: shooting stance (torso turned, stock at the shoulder), right hand on the grip, left hand under the handguard, fingers closed around the grip, separate holds for pistol and knife; head and spine follow the aim.
+- First-person arms: your own character's sleeves and hands hold the weapon at eye height.
+- 10 characters: 3 soldiers and 7 civilians (5 women, 5 men in total), all Rocketbox (MIT).
+- Online rooms with friends without a game server (WebRTC via the free PeerJS broker): open a room, share the 5-letter code or link, friends join from the browser, the APK or the desktop app.
+- Push-to-talk voice chat (V / 🎙), device to device; works in friend rooms and on servers. /mute also mutes voice.
+- New start screen: top bar, large character preview with a 10-character grid, tabs for Play / With friends / Servers.
+- Static web build (`play/`, `node tools/build-web.mjs`) for GitHub Pages. APK 0.8 (internet and microphone permissions).
+
 ## 2026-10-29 (0.7.0)
 - Reconnect: a player who drops can return within 30 s to the same seat, keeping kills and team.
 - Economy and cosmetic shop: server-side accounts (credits, XP, level, inventory), idempotent purchases, rewards from server match results, Owner `givemoney`.

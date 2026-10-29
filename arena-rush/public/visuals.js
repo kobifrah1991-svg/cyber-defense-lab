@@ -514,11 +514,11 @@ const charDefs = new Map();
 const animSets = new Map(); // anims file key -> { Idle, Walk, Run } clips
 export async function loadCharacters(list, urlFor) {
   const loader = new GLTFLoader();
-  const files = [...new Set(list.map((c) => c.file))];
-  await Promise.all(files.map(async (file) => {
+  const files = [...new Map(list.map((c) => [c.file, c.height || 1.8])).entries()];
+  await Promise.all(files.map(async ([file, height]) => {
     const gltf = await loader.loadAsync(urlFor(file));
     const box = new THREE.Box3().setFromObject(gltf.scene);
-    const scale = 1.8 / (box.max.y - box.min.y);
+    const scale = height / (box.max.y - box.min.y);
     charTemplates.set(file, { scene: gltf.scene, animations: gltf.animations, scale, footY: -box.min.y * scale });
   }));
   // Separate animation files (e.g. Rocketbox idle/walk/run), shared by characters with the same skeleton
@@ -543,7 +543,7 @@ export async function loadCharacters(list, urlFor) {
   }));
   for (const c of list) charDefs.set(c.id, c);
 }
-export const soldierReady = () => charTemplates.size > 0;
+export const soldierReady = () => charDefs.size > 0; // set once models and clips have all loaded
 
 const _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
 
@@ -614,8 +614,20 @@ export function buildSoldier(color, seed, characterId, cosmetics = {}) {
   const bones = {
     rArm: bone('RightArm'), rFore: bone('RightForeArm'), rHand: bone('RightHand'),
     lArm: bone('LeftArm'), lFore: bone('LeftForeArm'), lHand: bone('LeftHand'),
-    spine: bone('Spine2'), neck: bone('Neck'), head: bone('Head'),
+    spine1: bone('Spine1'), spine2: bone('Spine2'), head: bone('Head'),
   };
+  // Finger bones: middle-finger root and thumb root orient the hand; the rest curl around the grip
+  const fingers = (hand) => {
+    const f = { mid: null, thumb: null, joints: [] };
+    hand?.traverse((o) => {
+      if (o === hand || !o.isBone) return;
+      if (/finger2$/i.test(o.name)) f.mid = o;
+      else if (/finger0$/i.test(o.name)) f.thumb = o;
+      if (/finger[1-4]\d?$/i.test(o.name)) f.joints.push({ bone: o, root: /finger[1-4]$/i.test(o.name) });
+    });
+    return f;
+  };
+  bones.rFingers = fingers(bones.rHand); bones.lFingers = fingers(bones.lHand);
   // Team-coloured glowing armband so players are easy to tell apart
   const band = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.014, 6, 16), new THREE.MeshBasicMaterial({ color }));
   if (bones.lArm) {
@@ -642,17 +654,57 @@ export function buildSoldier(color, seed, characterId, cosmetics = {}) {
   actions.Idle?.setEffectiveWeight(1);
   mixer.setTime(seed * 0.37); // desync idle cycles
 
-  // Aim pivot at chest height carries the weapon; hands are solved onto it every frame
-  // Stock at the right shoulder, right hand on the pistol grip, left hand on the handguard —
-  // all within reach of a ~0.55 m arm
-  const aim = new THREE.Group(); aim.position.set(0, 1.4, 0); root.add(aim);
-  const gunMount = new THREE.Group(); gunMount.position.set(0.09, -0.16, -0.18); aim.add(gunMount);
-  const grip = new THREE.Object3D(); grip.position.set(0.09, -0.21, -0.18); aim.add(grip);
-  const fore = new THREE.Object3D(); fore.position.set(0.05, -0.12, -0.45); aim.add(fore);
-  const rPole = new THREE.Object3D(); rPole.position.set(0.6, -0.6, 0.3); aim.add(rPole);
-  const lPole = new THREE.Object3D(); lPole.position.set(-0.6, -0.7, -0.2); aim.add(lPole);
+  // Aim pivot at shoulder height carries the weapon; pitch rotates it. Hands are solved onto it every frame.
+  const aim = new THREE.Group(); aim.position.set(0, 1.42 * (def.height || 1.8) / 1.8, 0); root.add(aim);
+  const gunMount = new THREE.Group(); aim.add(gunMount);
+  const grip = new THREE.Object3D(); aim.add(grip);
+  const fore = new THREE.Object3D(); aim.add(fore);
+  const rPole = new THREE.Object3D(); rPole.position.set(0.7, -0.7, 0.3); aim.add(rPole);
+  const lPole = new THREE.Object3D(); lPole.position.set(-0.6, -0.8, -0.1); aim.add(lPole);
+  const c = { root, aim, gunMount, neck: new THREE.Group(), mixer, actions, bones, grip, fore, rPole, lPole, soldier: true, hold: null };
+  setHold(c, 'rifle');
+  return c;
+}
 
-  return { root, aim, gunMount, neck: new THREE.Group(), mixer, actions, bones, grip, fore, rPole, lPole, soldier: true };
+// How each weapon is held, in aim-pivot space (metres; -Z forward, +X the character's right).
+// gun: where the weapon's grip sits. r / l: wrist targets (the palm is ~7 cm past the wrist).
+// rDir / lDir: where the hand points (wrist to knuckles); rThumb / lThumb: where the thumb points.
+// blade: torso twist so the left shoulder comes forward, like a real shooting stance.
+// l: null leaves the left arm to the animation.
+const LONG = {
+  // right hand: a handshake grip on the pistol grip (thumb up, back of the hand outward);
+  // left hand: palm up under the handguard, thumb over its left side
+  gun: [0.14, -0.08, -0.27], r: [0.15, -0.07, -0.2], rDir: [0, -0.3, -1], rThumb: [0, 1, -0.35],
+  l: [0.12, -0.11, -0.44], lDir: [0.35, 0.15, -0.95], lThumb: [-0.7, 0.7, -0.2], blade: -0.5, curl: 1.15,
+};
+const HOLDS = {
+  rifle: LONG,
+  shotgun: LONG,
+  sniper: { ...LONG, gun: [0.14, -0.06, -0.25], r: [0.15, -0.05, -0.18] },
+  pistol: {
+    gun: [0.05, -0.08, -0.46], r: [0.06, -0.08, -0.39], rDir: [0, -0.35, -1], rThumb: [0, 1, -0.4],
+    l: [-0.01, -0.12, -0.4], lDir: [0.35, -0.3, -0.9], lThumb: [0, 1, -0.4], blade: -0.18, curl: 1.15,
+  },
+  knife: { gun: [0.2, -0.3, -0.34], r: [0.2, -0.28, -0.27], rDir: [0, -0.2, -1], rThumb: [0, 1, -0.2], l: null, blade: -0.1, curl: 1.3 },
+};
+export function setHold(c, key) {
+  if (!c.soldier) return;
+  const h = HOLDS[key] || LONG;
+  c.hold = h;
+  c.gunMount.position.fromArray(h.gun);
+  c.grip.position.fromArray(h.r);
+  if (h.l) c.fore.position.fromArray(h.l);
+}
+
+const _qa = new THREE.Quaternion(), _qp = new THREE.Quaternion(), _qw = new THREE.Quaternion();
+// Rotate a bone about a world-space axis, keeping the rest of its pose
+function turnBone(bone, axis, angle) {
+  if (!bone || !angle) return;
+  _qa.setFromAxisAngle(axis, angle);
+  bone.getWorldQuaternion(_qw).premultiply(_qa);
+  bone.parent.getWorldQuaternion(_qp);
+  bone.quaternion.copy(_qp.invert().multiply(_qw));
+  bone.updateMatrixWorld(true);
 }
 
 function updateSoldier(c, speed, dt) {
@@ -666,16 +718,92 @@ function updateSoldier(c, speed, dt) {
   if (c.actions.Run) c.actions.Run.timeScale = Math.max(0.7, speed / 6);
   if (c.actions.Walk) c.actions.Walk.timeScale = Math.max(0.7, speed / 2.5);
   c.mixer.update(dt);
+  if (c.fp && c.bones.head) c.bones.head.scale.setScalar(0.001);
   c.root.updateMatrixWorld(true);
   const b = c.bones, wp = (o) => o.getWorldPosition(new THREE.Vector3());
-  // Models without Mixamo arm bones keep their own pose
+  // Models without arm bones keep their own pose
   if (!b.rArm || !b.rFore || !b.rHand || !b.lArm || !b.lFore || !b.lHand) return;
+  const h = c.hold;
+  // Shooting stance: twist the torso (left shoulder forward), bend the spine with the aim, keep the head on target
+  const up = new THREE.Vector3(0, 1, 0);
+  const right = new THREE.Vector3(1, 0, 0).applyQuaternion(c.root.getWorldQuaternion(new THREE.Quaternion()));
+  const pitch = c.fp ? 0 : c.aim.rotation.x; // first person: the camera pitches, the body stays upright
+  const blade = c.fp && h.l ? c.fpBlade : h.blade;
+  turnBone(b.spine1, up, blade * 0.5); turnBone(b.spine2, up, blade * 0.5);
+  turnBone(b.spine1, right, pitch * 0.2); turnBone(b.spine2, right, pitch * 0.25);
+  turnBone(b.head, up, -blade * 0.85); turnBone(b.head, right, pitch * 0.45);
+  const aimQ = c.aim.getWorldQuaternion(new THREE.Quaternion());
   solveArm(b.rArm, b.rFore, b.rHand, wp(c.grip), wp(c.rPole));
-  solveArm(b.lArm, b.lFore, b.lHand, wp(c.fore), wp(c.lPole));
+  gripHand(b.rHand, b.rFingers, h.rDir, h.rThumb, aimQ, h.curl);
+  if (h.l) {
+    solveArm(b.lArm, b.lFore, b.lHand, wp(c.fore), wp(c.lPole));
+    gripHand(b.lHand, b.lFingers, h.lDir, h.lThumb, aimQ, h.curl);
+  }
+}
+
+// Turn the hand so its knuckles point along `dir` and its thumb along `thumb` (aim space),
+// then curl the fingers around the grip
+const _m1 = new THREE.Matrix4(), _m2 = new THREE.Matrix4(), _x = new THREE.Vector3(), _y = new THREE.Vector3(), _z = new THREE.Vector3();
+function frame(m, a, b) {
+  _x.copy(a).normalize();
+  _z.crossVectors(_x, b).normalize();
+  _y.crossVectors(_z, _x);
+  return m.makeBasis(_x, _y, _z);
+}
+function gripHand(hand, f, dir, thumb, aimQ, curl) {
+  if (!f.mid || !f.thumb) return;
+  const hp = hand.getWorldPosition(new THREE.Vector3());
+  const a = f.mid.getWorldPosition(new THREE.Vector3()).sub(hp);
+  const t = f.thumb.getWorldPosition(new THREE.Vector3()).sub(hp);
+  const A = new THREE.Vector3().fromArray(dir).applyQuaternion(aimQ);
+  const T = new THREE.Vector3().fromArray(thumb).applyQuaternion(aimQ);
+  frame(_m1, a, t); frame(_m2, A, T);
+  const rot = new THREE.Quaternion().setFromRotationMatrix(_m2.multiply(_m1.transpose()));
+  hand.getWorldQuaternion(_qw).premultiply(rot);
+  hand.parent.getWorldQuaternion(_qp);
+  hand.quaternion.copy(_qp.invert().multiply(_qw));
+  hand.updateMatrixWorld(true);
+  // Biped fingers bend about their local Z axis
+  for (const j of f.joints) j.bone.rotation.z = curl * (j.root ? 0.8 : 1);
+  hand.updateMatrixWorld(true);
 }
 
 const _animateProcedural = animateCharacter;
 export function animate(c, speed, t, dt) {
   if (c.soldier) updateSoldier(c, speed, dt);
   else _animateProcedural(c, speed, t, dt);
+}
+
+// First-person body: the player's own character, placed so its eyes sit at the view-model camera,
+// head hidden, arms solved onto the view-model weapon. What you see are your character's real sleeves and hands.
+export function buildFirstPerson(characterId, cosmetics = {}, color = 0xffffff) {
+  const c = buildSoldier(color, 0, characterId, cosmetics);
+  c.root.traverse((o) => { if (o.isMesh) o.castShadow = false; });
+  c.root.updateMatrixWorld(true);
+  const headY = c.bones.head ? c.bones.head.getWorldPosition(new THREE.Vector3()).y : 1.65;
+  if (c.bones.head) c.bones.head.scale.setScalar(0.001); // hides the head and helmet from the inside
+  // Face, hair and lashes off; anything closer than 24 cm to the eye (collar, hood, shoulders) is clipped away,
+  // so only the arms reaching for the weapon are drawn. Needs renderer.localClippingEnabled.
+  const near = new THREE.Plane(new THREE.Vector3(0, 0, -1), -0.24);
+  c.root.traverse((o) => {
+    if (!o.isMesh) return;
+    if (/head|opacity|hair/i.test(o.material.name)) o.visible = false;
+    o.material.clippingPlanes = [near];
+  });
+  c.eye = headY + 0.06;
+  c.root.position.set(0, -c.eye - 0.09, -0.2); // shoulders ahead of and below the eye: hands reach the grip, chest stays out of view
+  c.fpBlade = -0.7;
+  c.fp = true;
+  c.weapon = null;
+  return c;
+}
+
+const _hold = new THREE.Vector3();
+// Keep the arms on the view-model gun: the aim pivot follows the weapon root (grip at its origin)
+export function updateFirstPerson(c, vmRoot, weapon, speed, dt) {
+  if (weapon !== c.weapon) { setHold(c, weapon); c.weapon = weapon; }
+  c.aim.quaternion.copy(vmRoot.quaternion);
+  _hold.fromArray(c.hold.gun).applyQuaternion(vmRoot.quaternion);
+  c.aim.position.copy(vmRoot.position).sub(c.root.position).sub(_hold);
+  updateSoldier(c, speed, dt);
 }

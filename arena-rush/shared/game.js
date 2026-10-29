@@ -480,6 +480,16 @@ export function createGame(opts = {}) {
         case 'quick':
           if (Number.isInteger(m.i) && QUICK_CHAT[m.i]) onChat(me, '', true, m.i);
           break;
+        case 'rtc': {
+          // Voice chat handshake (WebRTC offer/answer/ICE) relayed between two humans; the audio itself goes device to device
+          const to = players.get(m.to);
+          const now = Date.now();
+          if (now - (me.rtcWindow || 0) > 1000) { me.rtcWindow = now; me.rtcCount = 0; }
+          if (!to || to.bot || to === me || !m.data || typeof m.data !== 'object' || ++me.rtcCount > 40) break;
+          if (JSON.stringify(m.data).length > 12000) break;
+          send(to, { t: 'rtc', from: me.id, data: m.data });
+          break;
+        }
         case 'report': {
           const target = [...players.values()].find((p) => p.name === String(m.name || ''));
           console.log(`[REPORT] ${me.name} reported ${target ? target.name : m.name}: ${String(m.reason || '').slice(0, 100)}`);

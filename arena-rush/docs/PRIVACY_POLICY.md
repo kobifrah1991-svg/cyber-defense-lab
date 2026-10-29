@@ -16,9 +16,11 @@ Arena Rush ("the game") is operated by **[OPERATOR NAME]**, [COUNTRY]. Contact: 
 | Gameplay statistics (kills, deaths, level, credits, purchased in-game items) | While you play online | To run the game and keep your progress. In-game credits have no real-money value. |
 | IP address | When you connect | To run the connection, and to enforce bans for abuse or cheating. |
 | Chat messages | When you chat | Delivered to players in the same room and filtered automatically. Messages are not stored, except when a player reports one or a moderator acts on it (kept in the moderation log). |
+| Voice (push-to-talk) | Only while you hold the talk button | Sent directly to the other players in your room. We do not record or store voice. |
+| IP address shared with other players | In rooms with friends and in voice chat | These connect devices directly (WebRTC), so other players' devices can see your IP address, as with most peer-to-peer games. A connection broker (PeerJS) sees it briefly to introduce the devices. |
 | Moderation records | When a moderator or admin acts | An audit log of admin actions and bans, to prevent abuse. |
 
-Offline practice mode (the Android app and the web demo without a server) sends no data to us.
+Offline practice mode sends no data to us. Rooms with friends run on the host player's device; we do not receive their game data.
 
 ## What we do not do
 - We do not sell personal data, and we do not show ads.

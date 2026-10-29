@@ -2,10 +2,12 @@ import * as THREE from 'three';
 import { MAP } from './shared/map.js';
 import { WEAPONS, WEAPON_ORDER } from './shared/weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './shared/physics.js';
-import { buildArena, setupLighting, buildCharacter, buildGun, loadCharacters, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance } from './visuals.js';
+import { buildArena, setupLighting, buildCharacter, buildGun, loadCharacters, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance, setHold, buildFirstPerson, updateFirstPerson } from './visuals.js';
 import { CHARACTERS, characterById } from './shared/characters.js';
 import { t, LANGS, getLang, setLang, detectLang } from './shared/i18n.js';
 import { SHOP, SLOTS } from './shared/shop.js';
+import { P2PHostSocket, P2PGuestSocket, p2pErrorKey, validCode } from './p2p.js';
+import { createVoice } from './voice.js';
 const gunModel = (key, scale, camo) => buildGun(key, WEAPONS[key].color, scale, camo);
 
 const $ = (id) => document.getElementById(id);
@@ -21,6 +23,7 @@ const canvas = $('game');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isTouch, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2));
 renderer.autoClear = false;
+renderer.localClippingEnabled = true; // first-person body: only the arms are drawn
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(78, 1, 0.05, 300);
 const shadows = !isTouch; // phones skip shadow maps to keep 60 fps
@@ -146,6 +149,18 @@ function rebuildModels() {
     remotes.set(id, makeRemote({ id, name: r.name, color: r.color, bot: r.bot, character: r.character, cosmetics: r.cosmetics }));
   }
 }
+// First-person arms: your own character's sleeves and hands on the view-model weapon
+let fpBody = null, fpKey = '';
+function refreshFirstPerson() {
+  if (!soldierReady()) return;
+  const eq = myProfile?.equipped || {};
+  const key = selectedChar + JSON.stringify(eq) + me.color;
+  if (key === fpKey) return;
+  fpKey = key;
+  if (fpBody) vmScene.remove(fpBody.root);
+  fpBody = buildFirstPerson(selectedChar, eq, me.color ?? 0xffffff);
+  vmScene.add(fpBody.root);
+}
 loadCharacters(CHARACTERS, modelUrl).then(() => { rebuildModels(); refreshPreview(); }).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
 let viewCamo = null;
 function setViewCamo(camo) {
@@ -216,13 +231,13 @@ function updateRemotes(now, dt) {
     const speed = r.lastPos && dtFrame > 0 ? Math.hypot(s.p[0] - r.lastPos[0], s.p[2] - r.lastPos[2]) / dtFrame : 0;
     r.lastPos = s.p;
     r.speed = (r.speed || 0) + (speed - (r.speed || 0)) * 0.2;
-    animate(r.char, r.speed, now / 1000, dtFrame);
     r.group.position.set(s.p[0], s.p[1], s.p[2]);
     r.group.rotation.y = s.yaw;
     r.headPivot.rotation.x = s.pitch * 0.6;
     r.arm.rotation.x = s.pitch;
     const w = b[b.length - 1].w;
-    if (w !== r.weapon) { for (const k in r.guns) r.guns[k].visible = k === w; r.weapon = w; }
+    if (w !== r.weapon) { for (const k in r.guns) r.guns[k].visible = k === w; r.weapon = w; setHold(r.char, w); }
+    animate(r.char, r.speed, now / 1000, dtFrame);
     r.shield.visible = !!b[b.length - 1].sp;
   }
 }
@@ -418,6 +433,7 @@ function handleChatText(text) {
     if (cmd === 'mute' || cmd === 'unmute') {
       if (!target) return addChat({ sys: true, key: 'sys.noSuchPlayer' });
       cmd === 'mute' ? muted.add(target.id) : muted.delete(target.id);
+      voice.setMuted(target.id, cmd === 'mute');
       updateScoreboard();
       return addChat({ sys: true, key: cmd === 'mute' ? 'sys.youMuted' : 'sys.youUnmuted', p: { name: target.name } });
     }
@@ -551,6 +567,49 @@ function muzzleWorld() {
   return [me.p[0] + fwd[0] * 0.8 + right[0] * 0.2, me.p[1] + PLAYER.eye - 0.18 + fwd[1] * 0.8, me.p[2] + fwd[2] * 0.8 + right[2] * 0.2];
 }
 
+// ======================= voice chat =======================
+const voice = createVoice((to, data) => net({ t: 'rtc', to, data }));
+let voiceOn = store.get('voice', true), talking = false;
+$('voice-on').checked = voiceOn;
+$('voice-on').addEventListener('change', (e) => { voiceOn = e.target.checked; store.set('voice', voiceOn); voice.setEnabled(voiceOn); syncVoice(); });
+voice.setEnabled(voiceOn);
+// Voice needs another human in the room; offline practice has only bots
+function syncVoice() {
+  const humans = voiceOn && !lobby?.offline ? roster.filter((p) => !p.bot && !muted.has(p.id)).map((p) => p.id) : [];
+  voice.sync(me.id, humans);
+  updateVoiceHud();
+}
+function updateVoiceHud() {
+  const others = roster.filter((p) => !p.bot && p.id !== me.id).length;
+  const show = voiceOn && !lobby?.offline && others > 0;
+  $('voice-hud').classList.toggle('hidden', !show);
+  $('voice-hud').classList.toggle('talking', talking);
+  $('voice-text').textContent = (talking ? t('voice.talking') : t(isTouch ? 'voice.holdTouch' : 'voice.holdKey')) + ' · 🔊 ' + voice.connected() + '/' + others;
+}
+setInterval(() => { if (me.id) updateVoiceHud(); }, 1000);
+if (new URLSearchParams(location.search).has('debug')) window.arenaDebug = { voice };
+async function setTalking(on) {
+  if (on === talking || !me.id || lobby?.offline || !voiceOn) return;
+  talking = on;
+  $('t-voice').classList.toggle('on', on);
+  updateVoiceHud();
+  if (!(await voice.talk(on)) && on) { talking = false; $('t-voice').classList.remove('on'); updateVoiceHud(); addChat({ sys: true, key: 'voice.noMic' }); }
+}
+// Friend rooms: the code (tap to copy an invite link) stays on screen
+function showRoomCode(code) {
+  roomCode = code;
+  const el = $('room-code');
+  el.textContent = t('p2p.codeHud', { code });
+  el.classList.remove('hidden');
+  el.onclick = () => {
+    const link = location.href.split('?')[0].split('#')[0] + '?join=' + code;
+    const text = t('p2p.shareText', { code }) + (location.protocol.startsWith('http') ? ' ' + link : '');
+    if (navigator.share && isTouch) navigator.share({ text }).catch(() => {});
+    else navigator.clipboard?.writeText(text).then(() => addChat({ sys: true, key: 'p2p.copied' })).catch(() => {});
+  };
+  addChat({ sys: true, key: 'p2p.codeChat', p: { code } });
+}
+
 // ======================= networking =======================
 function net(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
 let rtt = 80;
@@ -583,23 +642,38 @@ let roomCode = null;
 let myRole = 'Player', kickedNotice = null;
 const ROLE_RANK = { Player: 0, Moderator: 1, Admin: 2, Owner: 3 };
 // action: { t: 'quickMatch' } | { t: 'create' } | { t: 'joinCode', code }
+// action: { t: 'p2pHost', mode } | { t: 'p2pJoin', code } play with friends device to device (see p2p.js)
 function connect(name, action = { t: 'quickMatch' }, offline = offlineOnly || !!selectedServer()?.offline) {
   let opened = false;
-  lobby = { name, action, offline };
-  ws = offline ? new LocalSocket() : new WebSocket(wsUrl(selectedServer()));
-  $('menu-status').textContent = t(offline ? 'menu.preparing' : 'menu.connecting');
+  const p2p = action.t === 'p2pHost' || action.t === 'p2pJoin';
+  if (p2p) offline = false;
+  lobby = { name, action, offline, p2p };
+  ws = p2p ? (action.t === 'p2pHost' ? new P2PHostSocket({ mode: action.mode }) : new P2PGuestSocket(action.code))
+    : offline ? new LocalSocket() : new WebSocket(wsUrl(selectedServer()));
+  $('menu-status').textContent = t(p2p ? (action.t === 'p2pHost' ? 'p2p.opening' : 'p2p.joining') : offline ? 'menu.preparing' : 'menu.connecting');
   ws.onopen = () => {
     opened = true;
-    // Online: sign in (or as a guest), pick a room, then join it. Offline: join the local match directly.
-    if (offline) net({ t: 'join', name, character: selectedChar });
+    // Online: sign in (or as a guest), pick a room, then join it. Offline and P2P: join the match directly.
+    if (offline || p2p) net({ t: 'join', name, character: selectedChar });
     else net({ t: 'auth', credential: googleCredential, guestToken: guestToken() });
+    if (action.t === 'p2pHost') showRoomCode(ws.code);
+    if (action.t === 'p2pJoin') showRoomCode(action.code);
   };
-  ws.onerror = () => {
+  ws.onerror = (e) => {
+    if (p2p) {
+      if (!opened) { $('menu-status').textContent = t(p2pErrorKey(e)); enableMenuButtons(); }
+      return;
+    }
     // No server reachable: fall back to practice against bots in the browser
     if (!opened && action.t === 'rejoin') return; // onclose retries
     if (!opened) { $('menu-status').textContent = t('menu.noServer'); connect(name, action, true); }
   };
   ws.onclose = () => {
+    if (p2p) {
+      if (me.id) { addChat({ sys: true, key: 'p2p.hostLeft' }); setTimeout(() => location.reload(), 3000); }
+      else if (!opened) enableMenuButtons();
+      return;
+    }
     if (kickedNotice) { setTimeout(() => { try { sessionStorage.setItem('arena.notice', kickedNotice); } catch { /* ignore */ } location.reload(); }, 2500); return; }
     // Unexpected drop mid-game: try to get back into the same room with the same score
     if (me.id && !offline && roomCode) { tryReconnect(); return; }
@@ -630,6 +704,7 @@ function onMessage(m) {
       ws.close();
       break;
     case 'invited': showInvite(m.from, m.code); break;
+    case 'rtc': if (m.from && m.data && !muted.has(m.from)) voice.onSignal(m.from, m.data); break;
     case 'swing': sfx.swing(); break;
     case 'profile': myProfile = m.profile; showProfile(); renderShop(); break;
     case 'shopError': $('shop-status').textContent = t(m.key); break;
@@ -667,6 +742,7 @@ function onMessage(m) {
       break;
     case 'roster':
       syncRoster(m.players);
+      syncVoice();
       teamScore = m.teamScore;
       $('team-score').classList.toggle('hidden', !teamScore);
       if (teamScore) { $('ts-a').textContent = teamScore.A; $('ts-b').textContent = teamScore.B; }
@@ -778,7 +854,7 @@ function onMatch(m) {
     const tb = $('end-board').querySelector('tbody');
     tb.innerHTML = '';
     m.board.forEach((p, i) => tb.appendChild(boardRow(p, [p.kills, p.deaths], i + 1)));
-    if (lobby?.offline) awardXp(won); else { $('xp-line').textContent = ''; $('next-goal').textContent = ''; }
+    if (lobby?.offline || lobby?.p2p) awardXp(won); else { $('xp-line').textContent = ''; $('next-goal').textContent = ''; }
     $('end').classList.remove('hidden');
     const tick = () => {
       const s = Math.max(0, Math.ceil((m.next - Date.now()) / 1000));
@@ -912,6 +988,7 @@ document.addEventListener('keydown', (e) => {
   if (e.code === 'Enter' || e.code === 'KeyT') { e.preventDefault(); openChat(); return; }
   if (e.code === 'F2') { e.preventDefault(); toggleAdminPanel(); return; }
   if (e.code === 'KeyB') { toggleQuick(); return; }
+  if (e.code === 'KeyV') { if (!e.repeat) setTalking(true); return; }
   if (quickOpen && /^Digit[1-6]$/.test(e.code)) { sendQuick(Number(e.code.slice(5)) - 1); return; }
   if (e.code === 'Escape' && quickOpen) { toggleQuick(); return; }
   const slot = WEAPON_ORDER.find((k) => 'Digit' + WEAPONS[k].key === e.code);
@@ -923,8 +1000,9 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
   keys.delete(e.code);
   if (e.code === 'Tab') $('scoreboard').classList.add('hidden');
+  if (e.code === 'KeyV') setTalking(false);
 });
-addEventListener('blur', () => { keys.clear(); mouseDown = false; });
+addEventListener('blur', () => { keys.clear(); mouseDown = false; setTalking(false); });
 
 // ---- touch ----
 function setupTouch() {
@@ -976,6 +1054,7 @@ function setupTouch() {
   hold('t-chat', () => (chatOpen ? closeChat(true) : openChat()));
   hold('t-quick', toggleQuick);
   hold('t-score', () => $('scoreboard').classList.toggle('hidden'));
+  hold('t-voice', () => setTalking(true), () => setTalking(false)); // hold to talk
 }
 if (isTouch) setupTouch();
 
@@ -1160,11 +1239,29 @@ function startOnline(action) {
   initAudio();
   const name = $('name').value.trim();
   store.set('name', name);
-  for (const id of ['play', 'create', 'join-code']) $(id).disabled = true;
+  for (const id of ['play', 'create', 'join-code', 'p2p-host', 'p2p-join']) $(id).disabled = true;
   if (isTouch) document.documentElement.requestFullscreen?.().catch(() => {});
   connect(name, action);
 }
+function enableMenuButtons() { for (const id of ['play', 'create', 'join-code', 'p2p-host', 'p2p-join']) $(id).disabled = false; }
 $('play').addEventListener('click', () => startOnline({ t: 'quickMatch' }));
+$('p2p-host').addEventListener('click', () => startOnline({ t: 'p2pHost', mode: $('p2p-mode').value }));
+$('p2p-join').addEventListener('click', () => {
+  const code = $('p2p-code').value.trim().toUpperCase();
+  if (!validCode(code)) { $('menu-status').textContent = t('menu.codeLength'); return; }
+  startOnline({ t: 'p2pJoin', code });
+});
+$('p2p-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('p2p-join').click(); });
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+  document.querySelectorAll('.tab-page').forEach((p) => p.classList.toggle('hidden', p.dataset.page !== name));
+  store.set('tab', name);
+}
+document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+showTab(store.get('tab', 'play'));
+// Invite links for friend rooms: ?join=CODE
+const p2pFromLink = (new URLSearchParams(location.search).get('join') || '').toUpperCase();
+if (validCode(p2pFromLink)) { showTab('friends'); $('p2p-code').value = p2pFromLink; $('menu-status').textContent = t('p2p.invitedLink'); }
 $('create').addEventListener('click', () => startOnline({ t: 'create', mode: $('mode').value }));
 $('join-code').addEventListener('click', () => {
   const code = $('code').value.trim().toUpperCase();
@@ -1260,6 +1357,7 @@ function renderServers() {
   const online = !current.offline;
   document.querySelectorAll('.online-only').forEach((el) => el.classList.toggle('hidden', !online));
   $('play').textContent = t(online ? 'menu.quickPlay' : 'menu.startPractice');
+  $('play-hint').textContent = t(online ? 'menu.hintOnline' : 'menu.hintPractice');
   const st = serverState.get(current.id);
   $('online-count').textContent = online && st && !st.down ? t('srv.counts', { online: st.online, rooms: st.rooms }) : '';
   if (online && st && !st.down) setupGoogle(st.googleClientId);
@@ -1335,6 +1433,8 @@ function refreshPreview() {
   const def = characterById(selectedChar);
   $('char-name').textContent = t('char.' + def.id);
   $('char-role').textContent = t('char.' + def.id + '.role');
+  $('char-kind').textContent = t(def.civ ? 'char.kindCivilian' : 'char.kindSoldier');
+  $('char-kind').classList.toggle('civ', !!def.civ);
   document.querySelectorAll('.char-card').forEach((el) => el.setAttribute('aria-checked', String(el.dataset.id === selectedChar)));
 }
 
@@ -1354,8 +1454,11 @@ for (const def of CHARACTERS) {
   b.className = 'char-card';
   b.dataset.id = def.id;
   b.setAttribute('role', 'radio');
-  b.dataset.i18n = 'char.' + def.id;
-  b.textContent = t('char.' + def.id);
+  if (def.civ) b.classList.add('civ');
+  const av = document.createElement('i'); av.className = 'av'; av.setAttribute('aria-hidden', 'true');
+  const label = document.createElement('span'); label.dataset.i18n = 'char.' + def.id; label.textContent = t('char.' + def.id);
+  av.textContent = (def.female ? '♀' : '♂');
+  b.append(av, label);
   b.addEventListener('click', () => chooseChar(def.id));
   $('char-list').appendChild(b);
 }
@@ -1439,6 +1542,11 @@ function frame(now) {
   const sw = Math.max(0, 1 - (now - swingAt) / 250); // knife slash: quick arc across the screen
   vmRoot.rotation.set(recoil * 0.6 + (reloading ? -0.6 : 0) - Math.sin(sw * Math.PI) * 0.5, Math.sin(sw * Math.PI) * 0.9, -Math.sin(sw * Math.PI) * 0.4);
   vmRoot.visible = me.alive && !sniperScoped;
+  refreshFirstPerson();
+  if (fpBody) {
+    fpBody.root.visible = vmRoot.visible;
+    if (vmRoot.visible) updateFirstPerson(fpBody, vmRoot, me.weapon, Math.hypot(me.v[0], me.v[2]), dt);
+  }
   flash.position.set(vmRoot.position.x, vmRoot.position.y + 0.03, vmRoot.position.z - muzzleDistance(me.weapon));
   $('scope').classList.toggle('hidden', !sniperScoped);
   $('crosshair').classList.toggle('hidden', sniperScoped); // stays visible while aiming; the scope has its own reticle

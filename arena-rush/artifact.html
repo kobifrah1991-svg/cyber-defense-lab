@@ -50,24 +50,68 @@ code { direction: rtl; unicode-bidi: plaintext; background: rgba(255,255,255,.08
 #profile { text-align: center; color: var(--cyan); font-weight: 700; }
 
 /* ---------- start screen ---------- */
-#menu { place-items: start center; overflow-y: auto; }
-.menu-shell { width: min(1040px, 100%); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin: auto; padding-block: 12px; }
-.menu-head { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.menu-head h1 { text-align: start; }
-.panel { background: var(--panel); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 18px; backdrop-filter: blur(8px); min-width: 0; }
-.panel h2 { margin: 0 0 10px; font-size: 15px; letter-spacing: 1px; color: var(--muted); font-weight: 600; }
-.preview-wrap { position: relative; border-radius: 14px; overflow: hidden; background: radial-gradient(circle at 50% 35%, rgba(0,229,255,.18), transparent 60%), linear-gradient(180deg, #1b2348, #0d1024); }
-#char-preview { display: block; width: 100%; height: auto; aspect-ratio: 480 / 560; max-height: 52vh; object-fit: contain; cursor: grab; touch-action: none; }
-.arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); background: rgba(10,12,30,.6); color: #fff; font-size: 26px; line-height: 1; }
-#char-prev { right: 10px; }
-#char-next { left: 10px; }
-.arrow:focus-visible, .char-card:focus-visible, .server:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
-.char-name { margin-top: 12px; font-size: 24px; font-weight: 900; }
+#menu { place-items: start center; overflow-y: auto; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px) 0 0 / 44px 44px,
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0 / 44px 44px,
+    radial-gradient(1200px 600px at 15% -10%, rgba(255,46,136,.28), transparent 60%),
+    radial-gradient(900px 600px at 110% 110%, rgba(0,229,255,.22), transparent 60%),
+    #070814; }
+.menu-shell { width: min(1120px, 100%); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; margin: auto; padding-block: 8px 16px; }
+.topnav { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; border-radius: 16px; background: rgba(10,12,30,.7); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
+.brand { display: flex; align-items: baseline; gap: 8px; direction: ltr; }
+.topnav h1 { font-size: 30px; letter-spacing: 2px; text-align: start; }
+.ver { color: var(--muted); font-size: 12px; }
+.nav-side { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); color: var(--text); font-size: 14px; font-weight: 700; }
+.chip:empty { display: none; }
+.chip-btn:hover { border-color: var(--yellow); }
+.chip select { margin: 0; padding: 0; border: 0; background: transparent; color: var(--text); font: inherit; width: auto; display: inline; }
+.chip select option { background: #111428; }
+#profile { color: var(--cyan); }
+
+.panel { background: rgba(12,14,34,.78); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; padding: 16px; backdrop-filter: blur(10px); min-width: 0; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.panel h2.sub { margin: 14px 0 8px; font-size: 13px; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+.preview-wrap { position: relative; border-radius: 16px; overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, rgba(0,229,255,.2), transparent 55%), linear-gradient(180deg, #1c2550, #0b0e22 75%); }
+#char-preview { display: block; width: 100%; height: auto; aspect-ratio: 480 / 500; max-height: 56vh; object-fit: contain; cursor: grab; touch-action: none; }
+.arrow { position: absolute; top: 45%; transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); background: rgba(10,12,30,.6); color: #fff; font-size: 26px; line-height: 1; backdrop-filter: blur(6px); }
+.arrow:hover { border-color: var(--cyan); }
+#char-prev { right: 12px; }
+#char-next { left: 12px; }
+.char-caption { position: absolute; inset-inline: 0; bottom: 0; padding: 40px 18px 14px; background: linear-gradient(transparent, rgba(5,6,16,.92)); pointer-events: none; }
+.kind { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; background: rgba(255,46,136,.2); color: #ff8cbf; border: 1px solid rgba(255,46,136,.5); }
+.kind.civ { background: rgba(0,229,255,.15); color: #8ff3ff; border-color: rgba(0,229,255,.5); }
+.char-name { margin-top: 6px; font-size: 28px; font-weight: 900; }
 .char-role { color: var(--muted); font-size: 14px; min-height: 1.3em; }
-.char-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
-.char-card { border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.3); color: var(--text); border-radius: 12px; padding: 10px 6px; font-size: 13px; font-weight: 700; }
-.char-card[aria-checked="true"] { border-color: var(--pink); background: rgba(255,46,136,.18); box-shadow: 0 0 14px rgba(255,46,136,.35); }
-.server-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px; }
+.drag-hint { position: absolute; top: 10px; inset-inline-start: 12px; font-size: 12px; color: var(--muted); background: rgba(0,0,0,.35); padding: 3px 8px; border-radius: 999px; }
+.char-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.char-card { display: flex; flex-direction: column; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); border-radius: 12px; padding: 8px 4px; font-size: 12px; font-weight: 700; min-width: 0; transition: border-color .15s, transform .1s; }
+.char-card:hover { border-color: rgba(255,255,255,.35); transform: translateY(-1px); }
+.char-card .av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; font-weight: 900; background: linear-gradient(135deg, var(--pink), #7c2bff); }
+.char-card.civ .av { background: linear-gradient(135deg, #00b8d4, #2962ff); }
+.char-card span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.char-card[aria-checked="true"] { border-color: var(--pink); background: rgba(255,46,136,.16); box-shadow: 0 0 16px rgba(255,46,136,.35); }
+.arrow:focus-visible, .char-card:focus-visible, .server:focus-visible, .tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+.play-panel { display: flex; flex-direction: column; }
+.name-field { margin-top: 0; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; margin: 6px 0 12px; border-radius: 14px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.08); }
+.tab { border: 0; border-radius: 10px; padding: 10px 6px; background: transparent; color: var(--muted); font-weight: 800; font-size: 14px; }
+.tab[aria-selected="true"] { background: linear-gradient(90deg, rgba(255,46,136,.35), rgba(0,229,255,.25)); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+.tab-page { min-height: 150px; }
+.hint { margin: 0 0 10px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.field-row { display: flex; gap: 8px; margin-top: 8px; }
+.field-row select { flex: 1; min-width: 0; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font: inherit; font-size: 15px; }
+.field-row select option { background: #111428; }
+.code-input { flex: 1; min-width: 0; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 6px; direction: ltr; text-align: center; }
+button.primary { flex: 1.2; padding: 12px; border-radius: 12px; border: 0; color: #fff; font-weight: 900; font-size: 16px; background: linear-gradient(90deg, var(--pink), #ff6d00); box-shadow: 0 0 18px rgba(255,46,136,.45); }
+button.primary:disabled { opacity: .55; }
+.divider { display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; color: var(--muted); font-size: 12px; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.12); }
+.server-head { display: flex; justify-content: space-between; align-items: baseline; }
+.server-head h2.sub { margin-top: 0; }
 button.link { background: none; border: 0; color: var(--cyan); font-size: 13px; padding: 4px; }
 .servers { display: flex; flex-direction: column; gap: 8px; }
 .server { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; text-align: start; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.3); color: var(--text); border-radius: 12px; padding: 10px 12px; }
@@ -80,11 +124,40 @@ button.link { background: none; border: 0; color: var(--cyan); font-size: 13px; 
 .server small { color: var(--muted); font-size: 12px; }
 .server .meta { text-align: end; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; direction: ltr; }
 .server .meta strong { display: block; color: var(--text); font-size: 14px; }
-.play-panel #play { margin-top: 14px; }
-@media (max-width: 860px) {
+.play-panel #play { margin-top: 4px; }
+label.check { display: flex; align-items: center; gap: 8px; }
+label.check input { width: 18px; height: 18px; accent-color: var(--pink); }
+@media (max-width: 900px) {
   .menu-shell { grid-template-columns: minmax(0, 1fr); }
-  #char-preview { max-height: 38vh; }
+  #char-preview { max-height: 40vh; }
+  .topnav h1 { font-size: 24px; }
 }
+@media (max-width: 520px) {
+  .topnav { gap: 8px; padding: 8px 12px; }
+  .nav-side { gap: 6px; }
+  .chip { padding: 6px 10px; font-size: 13px; }
+}
+@media (max-width: 420px) {
+  .char-list { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+  .char-card { font-size: 10px; padding: 6px 2px; }
+  .char-card .av { width: 28px; height: 28px; font-size: 13px; }
+}
+/* phones in landscape: preview and play side by side, compact */
+@media (max-height: 500px) and (orientation: landscape) {
+  .menu-shell { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  #char-preview { max-height: 46vh; }
+  .char-caption { padding: 20px 12px 8px; }
+  .char-name { font-size: 20px; }
+  .topnav { padding: 6px 12px; }
+  .topnav h1 { font-size: 20px; }
+}
+
+/* voice chat + room code HUD */
+#voice-hud { position: absolute; top: calc(70px + env(safe-area-inset-top, 0px)); inset-inline-start: 16px; padding: 6px 12px; border-radius: 999px; background: rgba(10,12,30,.7); border: 1px solid rgba(255,255,255,.15); font-size: 13px; }
+#voice-hud.talking { border-color: #00e676; box-shadow: 0 0 14px rgba(0,230,118,.5); }
+#voice-hud.talking .mic { filter: drop-shadow(0 0 4px #00e676); }
+#room-code { position: absolute; top: calc(66px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 6px 12px; border-radius: 12px; background: rgba(10,12,30,.75); border: 1px solid var(--yellow); font-size: 13px; color: var(--yellow); direction: ltr; pointer-events: auto; cursor: pointer; }
+#t-voice.on { background: rgba(0,230,118,.45); }
 
 /* shop */
 .shop-btn { flex: 0 0 auto; padding: 8px 14px; font-size: 14px; }
@@ -263,6 +336,7 @@ tr.me td { color: var(--yellow); font-weight: 700; }
 #t-chat { left: 14px; top: 12px; width: 44px; height: 44px; font-size: 18px; }
 #t-quick { left: 64px; top: 12px; width: 44px; height: 44px; font-size: 18px; }
 #t-score { left: 114px; top: 12px; width: 44px; height: 44px; font-size: 18px; }
+#t-voice { left: 164px; top: 12px; width: 44px; height: 44px; font-size: 18px; }
 /* Phone layout: status top-right, social top-left, thumbs own the bottom corners */
 body.touch #health { bottom: auto; top: 12px; right: 14px; }
 body.touch #hp-bar { width: 120px; }
@@ -300,8 +374,9 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
 <script type="importmap">
   { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }
 </script>
-<script>window.ARENA_OFFLINE = true;</script>
+<script>window.ARENA_OFFLINE = true; window.ARENA_PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';</script>
 <script src="models-characters.js"></script>
+<script src="models-civilians.js"></script>
 <script src="models-anims.js"></script>
 <script src="models-weapons.js"></script>
 <div>
@@ -328,6 +403,8 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     <div id="health"><div id="hp-bar"><div id="hp-fill"></div></div><span id="hp-text">100</span></div>
     <div id="ammo"><div id="weapon-name"></div><div><span id="mag">30</span> <small>/ <span id="mag-max">30</span></small></div><div id="weapon-slots"></div></div>
     <div id="streak"></div>
+    <div id="voice-hud" class="hidden"><span class="mic">🎙</span> <span id="voice-text"></span></div>
+    <div id="room-code" class="hidden"></div>
 
     <div id="chat">
       <div id="chat-log"></div>
@@ -393,63 +470,98 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     <button id="t-chat" class="tbtn">💬</button>
     <button id="t-quick" class="tbtn">⚡</button>
     <button id="t-score" class="tbtn">🏆</button>
+    <button id="t-voice" class="tbtn">🎙</button>
   </div>
 
   <!-- Main menu -->
   <div id="menu">
     <div class="menu-shell">
-      <header class="menu-head">
-        <h1>ARENA <span>RUSH</span></h1>
-        <div class="head-side">
-          <button id="shop-btn" class="secondary shop-btn" type="button">🛒 <span data-i18n="shop.open"></span></button>
-          <label class="lang-pick"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang"></select></label>
-          <div id="profile"></div>
+      <header class="topnav">
+        <div class="brand"><h1>ARENA <span>RUSH</span></h1><small class="ver">v0.8</small></div>
+        <div class="nav-side">
+          <div id="profile" class="chip"></div>
+          <button id="shop-btn" class="chip chip-btn" type="button">🛒 <span data-i18n="shop.open"></span></button>
+          <label class="chip lang-pick"><span aria-hidden="true">🌐</span> <select class="lang-select" id="lang" data-i18n-aria="menu.language"></select></label>
         </div>
       </header>
 
       <section class="panel char-panel" data-i18n-aria="menu.charSelect">
-        <h2 data-i18n="menu.charSelect"></h2>
         <div class="preview-wrap">
           <canvas id="char-preview" width="480" height="560"></canvas>
-          <button id="char-prev" class="arrow" data-i18n-aria="menu.prevChar">›</button>
-          <button id="char-next" class="arrow" data-i18n-aria="menu.nextChar">‹</button>
+          <button id="char-prev" class="arrow" type="button" data-i18n-aria="menu.prevChar">›</button>
+          <button id="char-next" class="arrow" type="button" data-i18n-aria="menu.nextChar">‹</button>
+          <div class="char-caption">
+            <span id="char-kind" class="kind"></span>
+            <div id="char-name" class="char-name"></div>
+            <div id="char-role" class="char-role"></div>
+          </div>
+          <span class="drag-hint" data-i18n="menu.dragHint"></span>
         </div>
-        <div id="char-name" class="char-name"></div>
-        <div id="char-role" class="char-role"></div>
-        <div id="char-list" class="char-list"></div>
+        <h2 class="sub" data-i18n="menu.charSelect"></h2>
+        <div id="char-list" class="char-list" role="radiogroup"></div>
       </section>
 
       <section class="panel play-panel" data-i18n-aria="menu.gameSettings">
-        <label><span data-i18n="menu.playerName"></span> <input id="name" maxlength="16" data-i18n-ph="menu.namePh" autocomplete="nickname"></label>
+        <label class="name-field"><span data-i18n="menu.playerName"></span> <input id="name" maxlength="16" data-i18n-ph="menu.namePh" autocomplete="nickname"></label>
 
-        <div class="server-head">
-          <h2 data-i18n="menu.server"></h2>
-          <button id="servers-refresh" class="link" type="button" data-i18n="menu.refresh"></button>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" type="button" data-tab="play" aria-selected="true" data-i18n="menu.tabPlay"></button>
+          <button class="tab" role="tab" type="button" data-tab="friends" aria-selected="false" data-i18n="menu.tabFriends"></button>
+          <button class="tab" role="tab" type="button" data-tab="servers" aria-selected="false" data-i18n="menu.tabServers"></button>
         </div>
-        <div id="servers" class="servers" role="radiogroup" data-i18n-aria="menu.serverList"></div>
 
-        <div id="gsi"></div>
-        <p id="account"></p>
-        <button id="play" data-i18n="menu.quickPlay"></button>
-        <div class="row online-only">
-          <select id="mode" data-i18n-aria="menu.mode">
-            <option value="ffa" data-i18n="mode.ffa"></option>
-            <option value="duel" data-i18n="mode.duel"></option>
-            <option value="team2" data-i18n="mode.team2"></option>
-          </select>
-          <button id="create" class="secondary" data-i18n="menu.createRoom"></button>
+        <div class="tab-page" data-page="play">
+          <p class="hint" id="play-hint"></p>
+          <button id="play" type="button" data-i18n="menu.quickPlay"></button>
         </div>
-        <div class="row online-only">
-          <input id="code" maxlength="5" data-i18n-ph="menu.roomCodePh" autocomplete="off">
-          <button id="join-code" class="secondary" data-i18n="menu.join"></button>
+
+        <div class="tab-page hidden" data-page="friends">
+          <p class="hint" data-i18n="p2p.explain"></p>
+          <div class="field-row">
+            <select id="p2p-mode" data-i18n-aria="menu.mode">
+              <option value="ffa" data-i18n="mode.ffa"></option>
+              <option value="duel" data-i18n="mode.duel"></option>
+              <option value="team2" data-i18n="mode.team2"></option>
+            </select>
+            <button id="p2p-host" class="primary" type="button" data-i18n="p2p.host"></button>
+          </div>
+          <div class="divider"><span data-i18n="p2p.or"></span></div>
+          <div class="field-row">
+            <input id="p2p-code" class="code-input" maxlength="5" data-i18n-ph="menu.roomCodePh" autocomplete="off" inputmode="latin">
+            <button id="p2p-join" class="secondary" type="button" data-i18n="menu.join"></button>
+          </div>
         </div>
-        <p id="online-count"></p>
-        <p id="menu-status"></p>
+
+        <div class="tab-page hidden" data-page="servers">
+          <div class="server-head">
+            <h2 class="sub" data-i18n="menu.server"></h2>
+            <button id="servers-refresh" class="link" type="button" data-i18n="menu.refresh"></button>
+          </div>
+          <div id="servers" class="servers" role="radiogroup" data-i18n-aria="menu.serverList"></div>
+          <div id="gsi"></div>
+          <p id="account"></p>
+          <div class="field-row online-only">
+            <select id="mode" data-i18n-aria="menu.mode">
+              <option value="ffa" data-i18n="mode.ffa"></option>
+              <option value="duel" data-i18n="mode.duel"></option>
+              <option value="team2" data-i18n="mode.team2"></option>
+            </select>
+            <button id="create" class="secondary" type="button" data-i18n="menu.createRoom"></button>
+          </div>
+          <div class="field-row online-only">
+            <input id="code" class="code-input" maxlength="5" data-i18n-ph="menu.roomCodePh" autocomplete="off">
+            <button id="join-code" class="secondary" type="button" data-i18n="menu.join"></button>
+          </div>
+          <p id="online-count"></p>
+        </div>
+
+        <p id="menu-status" role="status"></p>
 
         <details>
           <summary data-i18n="menu.settings"></summary>
           <label><span data-i18n="menu.sensitivity"></span> <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
           <label><span data-i18n="menu.timeOfDay"></span> <select id="time"><option value="day" data-i18n="menu.day"></option><option value="night" data-i18n="menu.night"></option></select></label>
+          <label class="check"><input id="voice-on" type="checkbox" checked> <span data-i18n="voice.setting"></span></label>
         </details>
         <details>
           <summary data-i18n="menu.controls"></summary>
@@ -458,6 +570,7 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
             <li data-i18n="menu.ctrlFire"></li>
             <li data-i18n="menu.ctrlWeapons"></li>
             <li data-i18n="menu.ctrlChat"></li>
+            <li data-i18n="voice.ctrl"></li>
             <li data-i18n="menu.ctrlInvite"></li>
             <li data-i18n="menu.ctrlCmds"></li>
           </ul>
@@ -480,5 +593,6 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     </div>
   </div>
 
-  <script type="module" src="client.js"></script>
+  
 </div>
+<script type="module" src="client.js"></script>

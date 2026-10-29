@@ -29,7 +29,8 @@ const server = http.createServer((req, res) => {
   }
   let base = path.join(ROOT, 'public'), rel = url === '/' ? 'index.html' : url;
   if (url.startsWith('/shared/')) base = ROOT;
-  if (url.startsWith('/vendor/addons/')) { base = path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm'); rel = url.slice('/vendor/addons/'.length); }
+  if (url === '/vendor/peerjs.min.js') { base = path.join(ROOT, 'node_modules', 'peerjs', 'dist'); rel = 'peerjs.min.js'; }
+  else if (url.startsWith('/vendor/addons/')) { base = path.join(ROOT, 'node_modules', 'three', 'examples', 'jsm'); rel = url.slice('/vendor/addons/'.length); }
   else if (url.startsWith('/vendor/')) { base = path.join(ROOT, 'node_modules', 'three', 'build'); rel = url.slice('/vendor/'.length); }
   const file = path.normalize(path.join(base, rel));
   if (!file.startsWith(base + path.sep)) { res.writeHead(403); res.end(); return; }

@@ -1,7 +1,7 @@
 {
   "name": "arena-rush-desktop",
   "productName": "Arena Rush",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Arena Rush desktop build (Windows) for Steam and direct download",
   "main": "main.js",
   "private": true,

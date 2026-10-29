@@ -33,6 +33,8 @@
     <div id="health"><div id="hp-bar"><div id="hp-fill"></div></div><span id="hp-text">100</span></div>
     <div id="ammo"><div id="weapon-name"></div><div><span id="mag">30</span> <small>/ <span id="mag-max">30</span></small></div><div id="weapon-slots"></div></div>
     <div id="streak"></div>
+    <div id="voice-hud" class="hidden"><span class="mic">🎙</span> <span id="voice-text"></span></div>
+    <div id="room-code" class="hidden"></div>
 
     <div id="chat">
       <div id="chat-log"></div>
@@ -98,63 +100,98 @@
     <button id="t-chat" class="tbtn">💬</button>
     <button id="t-quick" class="tbtn">⚡</button>
     <button id="t-score" class="tbtn">🏆</button>
+    <button id="t-voice" class="tbtn">🎙</button>
   </div>
 
   <!-- Main menu -->
   <div id="menu">
     <div class="menu-shell">
-      <header class="menu-head">
-        <h1>ARENA <span>RUSH</span></h1>
-        <div class="head-side">
-          <button id="shop-btn" class="secondary shop-btn" type="button">🛒 <span data-i18n="shop.open"></span></button>
-          <label class="lang-pick"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang"></select></label>
-          <div id="profile"></div>
+      <header class="topnav">
+        <div class="brand"><h1>ARENA <span>RUSH</span></h1><small class="ver">v0.8</small></div>
+        <div class="nav-side">
+          <div id="profile" class="chip"></div>
+          <button id="shop-btn" class="chip chip-btn" type="button">🛒 <span data-i18n="shop.open"></span></button>
+          <label class="chip lang-pick"><span aria-hidden="true">🌐</span> <select class="lang-select" id="lang" data-i18n-aria="menu.language"></select></label>
         </div>
       </header>
 
       <section class="panel char-panel" data-i18n-aria="menu.charSelect">
-        <h2 data-i18n="menu.charSelect"></h2>
         <div class="preview-wrap">
           <canvas id="char-preview" width="480" height="560"></canvas>
-          <button id="char-prev" class="arrow" data-i18n-aria="menu.prevChar">›</button>
-          <button id="char-next" class="arrow" data-i18n-aria="menu.nextChar">‹</button>
+          <button id="char-prev" class="arrow" type="button" data-i18n-aria="menu.prevChar">›</button>
+          <button id="char-next" class="arrow" type="button" data-i18n-aria="menu.nextChar">‹</button>
+          <div class="char-caption">
+            <span id="char-kind" class="kind"></span>
+            <div id="char-name" class="char-name"></div>
+            <div id="char-role" class="char-role"></div>
+          </div>
+          <span class="drag-hint" data-i18n="menu.dragHint"></span>
         </div>
-        <div id="char-name" class="char-name"></div>
-        <div id="char-role" class="char-role"></div>
-        <div id="char-list" class="char-list"></div>
+        <h2 class="sub" data-i18n="menu.charSelect"></h2>
+        <div id="char-list" class="char-list" role="radiogroup"></div>
       </section>
 
       <section class="panel play-panel" data-i18n-aria="menu.gameSettings">
-        <label><span data-i18n="menu.playerName"></span> <input id="name" maxlength="16" data-i18n-ph="menu.namePh" autocomplete="nickname"></label>
+        <label class="name-field"><span data-i18n="menu.playerName"></span> <input id="name" maxlength="16" data-i18n-ph="menu.namePh" autocomplete="nickname"></label>
 
-        <div class="server-head">
-          <h2 data-i18n="menu.server"></h2>
-          <button id="servers-refresh" class="link" type="button" data-i18n="menu.refresh"></button>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" type="button" data-tab="play" aria-selected="true" data-i18n="menu.tabPlay"></button>
+          <button class="tab" role="tab" type="button" data-tab="friends" aria-selected="false" data-i18n="menu.tabFriends"></button>
+          <button class="tab" role="tab" type="button" data-tab="servers" aria-selected="false" data-i18n="menu.tabServers"></button>
         </div>
-        <div id="servers" class="servers" role="radiogroup" data-i18n-aria="menu.serverList"></div>
 
-        <div id="gsi"></div>
-        <p id="account"></p>
-        <button id="play" data-i18n="menu.quickPlay"></button>
-        <div class="row online-only">
-          <select id="mode" data-i18n-aria="menu.mode">
-            <option value="ffa" data-i18n="mode.ffa"></option>
-            <option value="duel" data-i18n="mode.duel"></option>
-            <option value="team2" data-i18n="mode.team2"></option>
-          </select>
-          <button id="create" class="secondary" data-i18n="menu.createRoom"></button>
+        <div class="tab-page" data-page="play">
+          <p class="hint" id="play-hint"></p>
+          <button id="play" type="button" data-i18n="menu.quickPlay"></button>
         </div>
-        <div class="row online-only">
-          <input id="code" maxlength="5" data-i18n-ph="menu.roomCodePh" autocomplete="off">
-          <button id="join-code" class="secondary" data-i18n="menu.join"></button>
+
+        <div class="tab-page hidden" data-page="friends">
+          <p class="hint" data-i18n="p2p.explain"></p>
+          <div class="field-row">
+            <select id="p2p-mode" data-i18n-aria="menu.mode">
+              <option value="ffa" data-i18n="mode.ffa"></option>
+              <option value="duel" data-i18n="mode.duel"></option>
+              <option value="team2" data-i18n="mode.team2"></option>
+            </select>
+            <button id="p2p-host" class="primary" type="button" data-i18n="p2p.host"></button>
+          </div>
+          <div class="divider"><span data-i18n="p2p.or"></span></div>
+          <div class="field-row">
+            <input id="p2p-code" class="code-input" maxlength="5" data-i18n-ph="menu.roomCodePh" autocomplete="off" inputmode="latin">
+            <button id="p2p-join" class="secondary" type="button" data-i18n="menu.join"></button>
+          </div>
         </div>
-        <p id="online-count"></p>
-        <p id="menu-status"></p>
+
+        <div class="tab-page hidden" data-page="servers">
+          <div class="server-head">
+            <h2 class="sub" data-i18n="menu.server"></h2>
+            <button id="servers-refresh" class="link" type="button" data-i18n="menu.refresh"></button>
+          </div>
+          <div id="servers" class="servers" role="radiogroup" data-i18n-aria="menu.serverList"></div>
+          <div id="gsi"></div>
+          <p id="account"></p>
+          <div class="field-row online-only">
+            <select id="mode" data-i18n-aria="menu.mode">
+              <option value="ffa" data-i18n="mode.ffa"></option>
+              <option value="duel" data-i18n="mode.duel"></option>
+              <option value="team2" data-i18n="mode.team2"></option>
+            </select>
+            <button id="create" class="secondary" type="button" data-i18n="menu.createRoom"></button>
+          </div>
+          <div class="field-row online-only">
+            <input id="code" class="code-input" maxlength="5" data-i18n-ph="menu.roomCodePh" autocomplete="off">
+            <button id="join-code" class="secondary" type="button" data-i18n="menu.join"></button>
+          </div>
+          <p id="online-count"></p>
+        </div>
+
+        <p id="menu-status" role="status"></p>
 
         <details>
           <summary data-i18n="menu.settings"></summary>
           <label><span data-i18n="menu.sensitivity"></span> <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
           <label><span data-i18n="menu.timeOfDay"></span> <select id="time"><option value="day" data-i18n="menu.day"></option><option value="night" data-i18n="menu.night"></option></select></label>
+          <label class="check"><input id="voice-on" type="checkbox" checked> <span data-i18n="voice.setting"></span></label>
         </details>
         <details>
           <summary data-i18n="menu.controls"></summary>
@@ -163,6 +200,7 @@
             <li data-i18n="menu.ctrlFire"></li>
             <li data-i18n="menu.ctrlWeapons"></li>
             <li data-i18n="menu.ctrlChat"></li>
+            <li data-i18n="voice.ctrl"></li>
             <li data-i18n="menu.ctrlInvite"></li>
             <li data-i18n="menu.ctrlCmds"></li>
           </ul>

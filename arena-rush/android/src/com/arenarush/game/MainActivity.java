@@ -1,18 +1,23 @@
 package com.arenarush.game;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-// Full-screen WebView hosting the offline practice build from assets/www.
+// Full-screen WebView hosting the game from assets/www (offline practice, online rooms with friends, voice chat).
 public class MainActivity extends Activity {
     private WebView web;
+    private PermissionRequest pendingMic; // page asked for the microphone while Android permission was pending
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +34,20 @@ public class MainActivity extends Activity {
         s.setAllowFileAccessFromFileURLs(true);
         s.setCacheMode(WebSettings.LOAD_NO_CACHE);
         web.setWebViewClient(new WebViewClient());
-        web.setWebChromeClient(new WebChromeClient());
+        web.setWebChromeClient(new WebChromeClient() {
+            // Push-to-talk: the page asks for the microphone; grant it once Android allows RECORD_AUDIO
+            @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                runOnUiThread(new Runnable() { @Override public void run() {
+                    if (Build.VERSION.SDK_INT < 23 || checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        request.grant(request.getResources());
+                    } else {
+                        pendingMic = request;
+                        requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO }, 1);
+                    }
+                } });
+            }
+        });
         web.setBackgroundColor(0xFF0B0C1A);
         setContentView(web);
         hideSystemBars();
@@ -40,6 +58,14 @@ public class MainActivity extends Activity {
         web.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
+        if (pendingMic == null) return;
+        if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) pendingMic.grant(pendingMic.getResources());
+        else pendingMic.deny();
+        pendingMic = null;
     }
 
     @Override

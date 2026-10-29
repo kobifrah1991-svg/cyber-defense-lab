@@ -20,6 +20,7 @@ s = s.replace('<script type="module" src="client.js"></script>', '<script src="g
 open('build/assets/www/index.html', 'w', encoding='utf-8').write(s)
 PY
 cp ../public/style.css "$OUT/assets/www/"
+mkdir -p "$OUT/assets/www/vendor" && cp ../node_modules/peerjs/dist/peerjs.min.js "$OUT/assets/www/vendor/"  # friend rooms (WebRTC)
 
 # 2. Resources + manifest, Java, dex
 aapt package -f -m -M AndroidManifest.xml -S res -I "$ANDROID_JAR" -J "$OUT/gen" -A "$OUT/assets" -F "$OUT/unsigned.apk"

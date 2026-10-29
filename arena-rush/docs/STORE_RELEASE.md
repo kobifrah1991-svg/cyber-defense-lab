@@ -97,7 +97,7 @@ Bubblewrap/TWA is an alternative only if the game is hosted as a PWA on the owne
 1. 🛑 **Owner creates the developer account**: $25, identity verification, and a personal or organization account choice. Organization accounts (they need a D-U-N-S number) are exempt from the 12-tester rule.
 2. Create the app and fill in **App content**:
    - Privacy policy URL.
-   - **Data safety** form: email and name from Google sign-in, IP for abuse bans, chat messages and reports, device guest ID, gameplay stats; data is not sold; deletion on request.
+   - **Data safety** form: microphone audio for push-to-talk (sent to other players, not stored), IP shared with other players in peer-to-peer rooms, email and name from Google sign-in, IP for abuse bans, chat messages and reports, device guest ID, gameplay stats; data is not sold; deletion on request.
    - **Content rating** (IARC questionnaire): realistic violence and user chat.
    - Target audience: choose 13+ or 16+ honestly. If under-13s are included, the **Families policy** applies and chat must be restricted, so avoid that unless the owner decides otherwise.
    - Ads: none.
