@@ -1,0 +1,185 @@
+// Interface languages. The server never sends display text: it sends message keys plus
+// neutral parameters, and every client renders them in its own player's language.
+// Player names and free chat are never translated.
+export const LANGS = {
+  he: { name: 'עברית', dir: 'rtl' },
+  en: { name: 'English', dir: 'ltr' },
+  ru: { name: 'Русский', dir: 'ltr' },
+  ar: { name: 'العربية', dir: 'rtl' },
+};
+
+const S = {
+  // ---- start screen ----
+  'menu.charSelect': { he: 'בחירת דמות', en: 'Choose character', ru: 'Выбор персонажа', ar: 'اختيار الشخصية' },
+  'menu.prevChar': { he: 'דמות קודמת', en: 'Previous character', ru: 'Предыдущий персонаж', ar: 'الشخصية السابقة' },
+  'menu.nextChar': { he: 'דמות הבאה', en: 'Next character', ru: 'Следующий персонаж', ar: 'الشخصية التالية' },
+  'menu.gameSettings': { he: 'הגדרות משחק', en: 'Game settings', ru: 'Настройки игры', ar: 'إعدادات اللعبة' },
+  'menu.playerName': { he: 'שם שחקן', en: 'Player name', ru: 'Имя игрока', ar: 'اسم اللاعب' },
+  'menu.namePh': { he: 'הכינוי שלך', en: 'Your nickname', ru: 'Ваш ник', ar: 'لقبك' },
+  'menu.language': { he: 'שפה', en: 'Language', ru: 'Язык', ar: 'اللغة' },
+  'menu.server': { he: 'שרת', en: 'Server', ru: 'Сервер', ar: 'الخادم' },
+  'menu.refresh': { he: 'רענון', en: 'Refresh', ru: 'Обновить', ar: 'تحديث' },
+  'menu.serverList': { he: 'בחירת שרת', en: 'Server list', ru: 'Список серверов', ar: 'قائمة الخوادم' },
+  'menu.quickPlay': { he: 'משחק מהיר', en: 'Quick play', ru: 'Быстрая игра', ar: 'لعب سريع' },
+  'menu.startPractice': { he: 'התחל אימון', en: 'Start practice', ru: 'Начать тренировку', ar: 'ابدأ التدريب' },
+  'menu.createRoom': { he: 'חדר פרטי חדש', en: 'New private room', ru: 'Новая приватная комната', ar: 'غرفة خاصة جديدة' },
+  'menu.roomCodePh': { he: 'קוד חדר', en: 'Room code', ru: 'Код комнаты', ar: 'رمز الغرفة' },
+  'menu.join': { he: 'הצטרף', en: 'Join', ru: 'Войти', ar: 'انضمام' },
+  'menu.settings': { he: 'הגדרות', en: 'Settings', ru: 'Настройки', ar: 'الإعدادات' },
+  'menu.sensitivity': { he: 'רגישות עכבר', en: 'Mouse sensitivity', ru: 'Чувствительность мыши', ar: 'حساسية الفأرة' },
+  'menu.timeOfDay': { he: 'זמן ביום', en: 'Time of day', ru: 'Время суток', ar: 'وقت اليوم' },
+  'menu.day': { he: 'יום', en: 'Day', ru: 'День', ar: 'نهار' },
+  'menu.night': { he: 'לילה (ניאון)', en: 'Night (neon)', ru: 'Ночь (неон)', ar: 'ليل (نيون)' },
+  'menu.controls': { he: 'שליטה', en: 'Controls', ru: 'Управление', ar: 'التحكم' },
+  'menu.ctrlMove': { he: 'WASD תנועה · רווח קפיצה', en: 'WASD move · Space jump', ru: 'WASD — движение · Пробел — прыжок', ar: 'WASD للحركة · المسافة للقفز' },
+  'menu.ctrlFire': { he: 'לחיצה שמאלית ירי · ימנית כוונת / סקופ', en: 'Left click fire · Right click aim / scope', ru: 'ЛКМ — огонь · ПКМ — прицел', ar: 'الزر الأيسر للإطلاق · الأيمن للتصويب' },
+  'menu.ctrlWeapons': { he: '1-4 או גלגלת להחלפת נשק · R טעינה', en: '1-4 or wheel to switch weapon · R reload', ru: '1-4 или колесо — смена оружия · R — перезарядка', ar: '1-4 أو العجلة لتبديل السلاح · R لإعادة التعبئة' },
+  'menu.ctrlChat': { he: "Enter צ'אט · B הודעות מהירות · Tab ניקוד", en: 'Enter chat · B quick messages · Tab scores', ru: 'Enter — чат · B — быстрые фразы · Tab — счёт', ar: 'Enter للدردشة · B رسائل سريعة · Tab النتائج' },
+  'menu.ctrlInvite': { he: 'הזמנת חבר: /invite חבר@gmail.com · /room לקוד החדר', en: 'Invite a friend: /invite friend@gmail.com · /room shows the room code', ru: 'Пригласить друга: /invite friend@gmail.com · /room — код комнаты', ar: 'دعوة صديق: /invite friend@gmail.com · ‏/room لرمز الغرفة' },
+  'menu.ctrlCmds': { he: "פקודות צ'אט: /mute שם · /unmute שם · /report שם סיבה", en: 'Chat commands: /mute name · /unmute name · /report name reason', ru: 'Команды чата: /mute имя · /unmute имя · /report имя причина', ar: 'أوامر الدردشة: ‎/mute الاسم · ‎/unmute الاسم · ‎/report الاسم السبب' },
+  'menu.safe': { he: "🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.", en: '🛡️ Chat is filtered: no swearing, links or personal info. Never share your phone number or address.', ru: '🛡️ Чат фильтруется: без мата, ссылок и личных данных. Никогда не сообщайте свой телефон или адрес.', ar: '🛡️ الدردشة مُرشّحة: بلا شتائم أو روابط أو معلومات شخصية. لا تشارك رقم هاتفك أو عنوانك أبدًا.' },
+  'menu.level': { he: 'רמה {level} · {xp} XP', en: 'Level {level} · {xp} XP', ru: 'Уровень {level} · {xp} XP', ar: 'المستوى {level} · {xp} XP' },
+  'menu.signedIn': { he: 'מחובר/ת כ-{name} ({email})', en: 'Signed in as {name} ({email})', ru: 'Вы вошли как {name} ({email})', ar: 'تم تسجيل الدخول باسم {name} ({email})' },
+  'menu.preparing': { he: 'מכין זירת אימון…', en: 'Preparing practice arena…', ru: 'Готовим тренировочную арену…', ar: 'جارٍ تجهيز ساحة التدريب…' },
+  'menu.connecting': { he: 'מתחבר לשרת…', en: 'Connecting to server…', ru: 'Подключение к серверу…', ar: 'جارٍ الاتصال بالخادم…' },
+  'menu.noServer': { he: 'אין שרת, עובר לאימון נגד בוטים…', en: 'No server found, switching to practice vs bots…', ru: 'Сервер недоступен, запускаем тренировку с ботами…', ar: 'لا يوجد خادم، التحويل إلى التدريب ضد الروبوتات…' },
+  'menu.full': { he: 'הזירה מלאה. נסו שוב בעוד רגע.', en: 'The arena is full. Try again in a moment.', ru: 'Арена заполнена. Попробуйте чуть позже.', ar: 'الساحة ممتلئة. حاول مجددًا بعد قليل.' },
+  'menu.codeLength': { he: 'קוד חדר הוא 5 תווים.', en: 'A room code has 5 characters.', ru: 'Код комнаты состоит из 5 символов.', ar: 'رمز الغرفة مكوّن من 5 خانات.' },
+  'menu.invitedLink': { he: 'הוזמנת לחדר! לחצו "הצטרף".', en: 'You were invited to a room! Press "Join".', ru: 'Вас пригласили в комнату! Нажмите «Войти».', ar: 'تمت دعوتك إلى غرفة! اضغط "انضمام".' },
+  'srv.device': { he: 'אימון במכשיר', en: 'On-device practice', ru: 'Тренировка на устройстве', ar: 'تدريب على الجهاز' },
+  'srv.deviceRegion': { he: 'נגד בוטים · בלי אינטרנט', en: 'Vs bots · no internet', ru: 'С ботами · без интернета', ar: 'ضد الروبوتات · بدون إنترنت' },
+  'srv.here': { he: 'השרת הזה', en: 'This server', ru: 'Этот сервер', ar: 'هذا الخادم' },
+  'srv.hereRegion': { he: 'השרת שממנו נפתח המשחק', en: 'The server hosting this game', ru: 'Сервер, на котором открыта игра', ar: 'الخادم الذي فُتحت منه اللعبة' },
+  'srv.down': { he: 'לא זמין', en: 'Unavailable', ru: 'Недоступен', ar: 'غير متاح' },
+  'srv.counts': { he: '{online} מחוברים · {rooms} חדרים בשרת הזה', en: '{online} online · {rooms} rooms on this server', ru: 'Онлайн: {online} · комнат: {rooms}', ar: '{online} متصل · {rooms} غرف على هذا الخادم' },
+  'srv.mode': { he: 'כולם נגד כולם', en: 'Free for all', ru: 'Все против всех', ar: 'الجميع ضد الجميع' },
+
+  // ---- characters, weapons, map ----
+  'char.assault': { he: 'לוחם סער', en: 'Assault', ru: 'Штурмовик', ar: 'مقاتل اقتحام' },
+  'char.assault.role': { he: 'מאוזן · מתאים לכל טווח', en: 'Balanced · any range', ru: 'Универсал · любая дистанция', ar: 'متوازن · لكل المسافات' },
+  'char.ranger': { he: 'סייר יער', en: 'Ranger', ru: 'Рейнджер', ar: 'حارس الغابة' },
+  'char.ranger.role': { he: 'הסוואה ירוקה · צלף', en: 'Green camo · sniper', ru: 'Зелёный камуфляж · снайпер', ar: 'تمويه أخضر · قنّاص' },
+  'char.urban': { he: 'כוח עירוני', en: 'Urban ops', ru: 'Городской спецназ', ar: 'قوة حضرية' },
+  'char.urban.role': { he: 'מדים כהים · קרב צמוד', en: 'Dark uniform · close combat', ru: 'Тёмная форма · ближний бой', ar: 'زي داكن · قتال قريب' },
+  'weapon.rifle': { he: 'רובה סער', en: 'Assault rifle', ru: 'Штурмовая винтовка', ar: 'بندقية هجومية' },
+  'weapon.shotgun': { he: 'שוטגאן', en: 'Shotgun', ru: 'Дробовик', ar: 'بندقية خرطوش' },
+  'weapon.sniper': { he: 'צלף', en: 'Sniper', ru: 'Снайперская винтовка', ar: 'قنّاصة' },
+  'weapon.pistol': { he: 'אקדח', en: 'Pistol', ru: 'Пистолет', ar: 'مسدس' },
+  'map.neon': { he: 'מחסן ניאון', en: 'Neon Warehouse', ru: 'Неоновый склад', ar: 'مستودع النيون' },
+
+  // ---- quick chat (sent as an index, shown in each player's language) ----
+  'quick.0': { he: 'עזרה!', en: 'Help!', ru: 'Помогите!', ar: 'النجدة!' },
+  'quick.1': { he: 'אויב משמאל!', en: 'Enemy left!', ru: 'Враг слева!', ar: 'عدو على اليسار!' },
+  'quick.2': { he: 'אויב מימין!', en: 'Enemy right!', ru: 'Враг справа!', ar: 'عدو على اليمين!' },
+  'quick.3': { he: 'יפה!', en: 'Nice!', ru: 'Отлично!', ar: 'أحسنت!' },
+  'quick.4': { he: 'משחק טוב!', en: 'Good game!', ru: 'Хорошая игра!', ar: 'لعبة جيدة!' },
+  'quick.5': { he: 'עקבו אחריי!', en: 'Follow me!', ru: 'За мной!', ar: 'اتبعوني!' },
+
+  // ---- HUD ----
+  'hud.chatPh': { he: 'כתבו הודעה… (Enter לשליחה, Esc לביטול)', en: 'Type a message… (Enter to send, Esc to cancel)', ru: 'Сообщение… (Enter — отправить, Esc — отмена)', ar: 'اكتب رسالة… (Enter للإرسال، Esc للإلغاء)' },
+  'hud.scoreboard': { he: 'טבלת ניקוד', en: 'Scoreboard', ru: 'Таблица счёта', ar: 'لوحة النتائج' },
+  'hud.scoreboardRoom': { he: 'טבלת ניקוד · חדר {code}', en: 'Scoreboard · room {code}', ru: 'Таблица счёта · комната {code}', ar: 'لوحة النتائج · غرفة {code}' },
+  'hud.player': { he: 'שחקן', en: 'Player', ru: 'Игрок', ar: 'اللاعب' },
+  'hud.kills': { he: 'הריגות', en: 'Kills', ru: 'Убийства', ar: 'القتلى' },
+  'hud.deaths': { he: 'מוות', en: 'Deaths', ru: 'Смерти', ar: 'الوفيات' },
+  'hud.ping': { he: 'פינג', en: 'Ping', ru: 'Пинг', ar: 'البينغ' },
+  'hud.you': { he: 'את/ה', en: 'You', ru: 'Вы', ar: 'أنت' },
+  'hud.leader': { he: 'מוביל/ה: {name} ({kills}/{limit})', en: 'Leader: {name} ({kills}/{limit})', ru: 'Лидер: {name} ({kills}/{limit})', ar: 'المتصدر: {name} ({kills}/{limit})' },
+  'hud.dead': { he: 'נפלת!', en: 'You were eliminated!', ru: 'Вы выбыли!', ar: 'لقد سقطت!' },
+  'hud.killedBy': { he: 'חוסלת על ידי {name}', en: 'Eliminated by {name}', ru: 'Вас уничтожил {name}', ar: 'قضى عليك {name}' },
+  'hud.headshotTag': { he: ' (ירייה בראש)', en: ' (headshot)', ru: ' (в голову)', ar: ' (طلقة في الرأس)' },
+  'hud.respawnIn': { he: 'חוזר/ת לקרב בעוד {s}…', en: 'Respawning in {s}…', ru: 'Возрождение через {s}…', ar: 'العودة إلى القتال خلال {s}…' },
+  'hud.youKilled': { he: 'חיסלת את {name}', en: 'You eliminated {name}', ru: 'Вы уничтожили {name}', ar: 'قضيت على {name}' },
+  'hud.headshot': { he: ' · ירייה בראש! 🎯', en: ' · Headshot! 🎯', ru: ' · В голову! 🎯', ar: ' · في الرأس! 🎯' },
+  'hud.streak': { he: '🔥 רצף {n}', en: '🔥 Streak {n}', ru: '🔥 Серия {n}', ar: '🔥 سلسلة {n}' },
+  'hud.pause': { he: 'לחצו כדי להמשיך', en: 'Click to continue', ru: 'Нажмите, чтобы продолжить', ar: 'انقر للمتابعة' },
+  'hud.pauseKeys': { he: 'WASD תנועה · רווח קפיצה · עכבר ירי/כוונת · 1-4 נשקים · R טעינה · Tab ניקוד · Enter צ\'אט · B הודעות מהירות', en: 'WASD move · Space jump · Mouse fire/aim · 1-4 weapons · R reload · Tab scores · Enter chat · B quick messages', ru: 'WASD — движение · Пробел — прыжок · Мышь — огонь/прицел · 1-4 — оружие · R — перезарядка · Tab — счёт · Enter — чат · B — быстрые фразы', ar: 'WASD للحركة · المسافة للقفز · الفأرة للإطلاق/التصويب · 1-4 الأسلحة · R إعادة التعبئة · Tab النتائج · Enter الدردشة · B رسائل سريعة' },
+  'hud.inviteFrom': { he: '{from} מזמין/ה אותך לחדר {code}', en: '{from} invites you to room {code}', ru: '{from} приглашает вас в комнату {code}', ar: '{from} يدعوك إلى الغرفة {code}' },
+  'hud.notNow': { he: 'לא עכשיו', en: 'Not now', ru: 'Не сейчас', ar: 'ليس الآن' },
+
+  // ---- end of match ----
+  'end.youWon': { he: '🏆 ניצחת!', en: '🏆 You won!', ru: '🏆 Вы победили!', ar: '🏆 لقد فزت!' },
+  'end.winner': { he: '🏆 {name} ניצח/ה!', en: '🏆 {name} wins!', ru: '🏆 Победил {name}!', ar: '🏆 فاز {name}!' },
+  'end.next': { he: 'סבב הבא בעוד {s} שניות…', en: 'Next round in {s} seconds…', ru: 'Следующий раунд через {s} с…', ar: 'الجولة التالية خلال {s} ثانية…' },
+  'end.xp': { he: '+{xp} XP · רמה {level}', en: '+{xp} XP · level {level}', ru: '+{xp} XP · уровень {level}', ar: '+{xp} XP · المستوى {level}' },
+  'end.levelUp': { he: ' 🎉 עלית רמה!', en: ' 🎉 Level up!', ru: ' 🎉 Новый уровень!', ar: ' 🎉 ارتقيت مستوى!' },
+  'end.goal': { he: 'עוד {n} הריגות לרמה {level}. רק עוד משחק אחד? 😉', en: '{n} more kills to level {level}. Just one more game? 😉', ru: 'Ещё {n} убийств до уровня {level}. Ещё одну партию? 😉', ar: '{n} قتلى أخرى للوصول إلى المستوى {level}. جولة واحدة أخرى؟ 😉' },
+
+  // ---- system messages sent by the server as keys ----
+  'sys.welcome': { he: "ברוכים הבאים ל{map}! Enter לצ'אט, B להודעות מהירות.", en: 'Welcome to {map}! Enter to chat, B for quick messages.', ru: 'Добро пожаловать на {map}! Enter — чат, B — быстрые фразы.', ar: 'مرحبًا بك في {map}! Enter للدردشة، B للرسائل السريعة.' },
+  'sys.joined': { he: '{name} הצטרף/ה לזירה', en: '{name} joined the arena', ru: '{name} вошёл на арену', ar: 'انضم {name} إلى الساحة' },
+  'sys.left': { he: '{name} עזב/ה', en: '{name} left', ru: '{name} вышел', ar: 'غادر {name}' },
+  'sys.streak': { he: '🔥 {name}: {streak} ({n} ברצף)', en: '🔥 {name}: {streak} ({n} in a row)', ru: '🔥 {name}: {streak} ({n} подряд)', ar: '🔥 {name}: {streak} ({n} على التوالي)' },
+  'sys.newRound': { he: 'סבב חדש התחיל! ראשון ל-{n} הריגות מנצח.', en: 'New round! First to {n} kills wins.', ru: 'Новый раунд! Побеждает тот, кто первым наберёт {n} убийств.', ar: 'جولة جديدة! أول من يصل إلى {n} قتلى يفوز.' },
+  'sys.reportOk': { he: 'הדיווח התקבל. תודה ששמרת על הזירה בטוחה!', en: 'Report received. Thanks for keeping the arena safe!', ru: 'Жалоба принята. Спасибо, что помогаете держать арену безопасной!', ar: 'تم استلام البلاغ. شكرًا لحفاظك على أمان الساحة!' },
+  'sys.muted': { he: "הצ'אט שלך מושתק זמנית.", en: 'Your chat is temporarily muted.', ru: 'Ваш чат временно отключён.', ar: 'تم كتم دردشتك مؤقتًا.' },
+  'sys.slowDown': { he: 'לאט לאט 🙂 יותר מדי הודעות.', en: 'Slow down 🙂 too many messages.', ru: 'Помедленнее 🙂 слишком много сообщений.', ar: 'على مهلك 🙂 رسائل كثيرة جدًا.' },
+  'sys.mutedMinute': { he: 'הושתקת לדקה בגלל שפה או מידע אישי.', en: 'You are muted for a minute for language or personal info.', ru: 'Вы отключены от чата на минуту за лексику или личные данные.', ar: 'تم كتمك لمدة دقيقة بسبب الألفاظ أو المعلومات الشخصية.' },
+  'sys.warning': { he: 'אזהרה {n}/3: בלי קללות, קישורים או מידע אישי.', en: 'Warning {n}/3: no swearing, links or personal info.', ru: 'Предупреждение {n}/3: без мата, ссылок и личных данных.', ar: 'تحذير {n}/3: بلا شتائم أو روابط أو معلومات شخصية.' },
+  'sys.roomNotFound': { he: 'לא נמצא חדר עם הקוד הזה.', en: 'No room with that code.', ru: 'Комната с таким кодом не найдена.', ar: 'لا توجد غرفة بهذا الرمز.' },
+  'sys.roomFull': { he: 'החדר מלא.', en: 'The room is full.', ru: 'Комната заполнена.', ar: 'الغرفة ممتلئة.' },
+  'sys.inviteNeedsLogin': { he: 'כדי להזמין חברים צריך להתחבר עם Google.', en: 'Sign in with Google to invite friends.', ru: 'Чтобы приглашать друзей, войдите через Google.', ar: 'سجّل الدخول عبر Google لدعوة الأصدقاء.' },
+  'sys.inviteLimit': { he: 'יותר מדי הזמנות. נסו שוב בעוד דקה.', en: 'Too many invites. Try again in a minute.', ru: 'Слишком много приглашений. Попробуйте через минуту.', ar: 'دعوات كثيرة جدًا. حاول بعد دقيقة.' },
+  'sys.inviteSent': { he: 'ההזמנה נשלחה!', en: 'Invite sent!', ru: 'Приглашение отправлено!', ar: 'تم إرسال الدعوة!' },
+  'sys.inviteOffline': { he: 'השחקן לא מחובר כרגע. שלחו לו את קוד החדר: {code}', en: 'That player is offline. Send them the room code: {code}', ru: 'Игрок не в сети. Отправьте ему код комнаты: {code}', ar: 'اللاعب غير متصل. أرسل له رمز الغرفة: {code}' },
+  'sys.disconnected': { he: 'החיבור לשרת נותק. מרענן…', en: 'Disconnected from the server. Reloading…', ru: 'Соединение с сервером потеряно. Перезагрузка…', ar: 'انقطع الاتصال بالخادم. جارٍ إعادة التحميل…' },
+  'sys.noSuchPlayer': { he: 'לא נמצא שחקן בשם הזה.', en: 'No player with that name.', ru: 'Игрок с таким именем не найден.', ar: 'لا يوجد لاعب بهذا الاسم.' },
+  'sys.youMuted': { he: '{name} מושתק/ת אצלך.', en: '{name} is muted for you.', ru: '{name} скрыт в вашем чате.', ar: 'تم كتم {name} لديك.' },
+  'sys.youUnmuted': { he: '{name} כבר לא מושתק/ת.', en: '{name} is no longer muted.', ru: '{name} снова виден в чате.', ar: 'لم يعد {name} مكتومًا.' },
+  'sys.roomCode': { he: 'קוד החדר: {code}', en: 'Room code: {code}', ru: 'Код комнаты: {code}', ar: 'رمز الغرفة: {code}' },
+  'sys.noRoom': { he: 'אימון מקומי (בלי חדר).', en: 'Local practice (no room).', ru: 'Локальная тренировка (без комнаты).', ar: 'تدريب محلي (بدون غرفة).' },
+  'sys.commands': { he: 'פקודות: /invite gmail · /room · /mute שם · /unmute שם · /report שם סיבה', en: 'Commands: /invite gmail · /room · /mute name · /unmute name · /report name reason', ru: 'Команды: /invite gmail · /room · /mute имя · /unmute имя · /report имя причина', ar: 'الأوامر: ‎/invite gmail · ‎/room · ‎/mute الاسم · ‎/unmute الاسم · ‎/report الاسم السبب' },
+
+  // ---- admin (server answers with these keys) ----
+  'admin.denied': { he: 'אין לך הרשאה לפקודה הזו.', en: 'You do not have permission for that command.', ru: 'У вас нет прав на эту команду.', ar: 'ليست لديك صلاحية لهذا الأمر.' },
+  'admin.unknown': { he: 'פקודת אדמין לא מוכרת.', en: 'Unknown admin command.', ru: 'Неизвестная команда администратора.', ar: 'أمر إداري غير معروف.' },
+  'admin.badArgs': { he: 'ערכים לא תקינים. שימוש: {usage}', en: 'Invalid values. Usage: {usage}', ru: 'Неверные значения. Формат: {usage}', ar: 'قيم غير صالحة. الاستخدام: {usage}' },
+  'admin.noTarget': { he: 'השחקן לא נמצא בחדר.', en: 'Player not found in this room.', ru: 'Игрок не найден в этой комнате.', ar: 'اللاعب غير موجود في هذه الغرفة.' },
+  'admin.rate': { he: 'יותר מדי פקודות. חכו כמה שניות.', en: 'Too many commands. Wait a few seconds.', ru: 'Слишком много команд. Подождите несколько секунд.', ar: 'أوامر كثيرة جدًا. انتظر بضع ثوانٍ.' },
+  'admin.ok': { he: 'בוצע: {action} → {target}', en: 'Done: {action} → {target}', ru: 'Готово: {action} → {target}', ar: 'تم: {action} ← {target}' },
+  'admin.role': { he: 'ההרשאה שלך: {role}', en: 'Your role: {role}', ru: 'Ваша роль: {role}', ar: 'دورك: {role}' },
+  'admin.loginFail': { he: 'קוד אדמין שגוי.', en: 'Wrong admin code.', ru: 'Неверный код администратора.', ar: 'رمز المسؤول غير صحيح.' },
+  'admin.healed': { he: 'אדמין ריפא אותך (+{n})', en: 'An admin healed you (+{n})', ru: 'Администратор вылечил вас (+{n})', ar: 'عالجك مسؤول (+{n})' },
+  'admin.kicked': { he: 'הוצאת מהשרת על ידי אדמין. סיבה: {reason}', en: 'You were kicked by an admin. Reason: {reason}', ru: 'Администратор исключил вас. Причина: {reason}', ar: 'طردك مسؤول. السبب: {reason}' },
+  'admin.banned': { he: 'נחסמת מהשרת. סיבה: {reason}', en: 'You are banned from this server. Reason: {reason}', ru: 'Вы заблокированы на этом сервере. Причина: {reason}', ar: 'تم حظرك من هذا الخادم. السبب: {reason}' },
+  'admin.announce': { he: '📢 הודעת שרת: {text}', en: '📢 Server: {text}', ru: '📢 Сервер: {text}', ar: '📢 الخادم: {text}' },
+  'admin.noEconomy': { he: 'מערכת המטבעות עוד לא פעילה בשרת הזה.', en: 'The currency system is not active on this server yet.', ru: 'Система валюты на этом сервере пока не работает.', ar: 'نظام العملة غير مفعّل على هذا الخادم بعد.' },
+  'admin.panel': { he: 'ניהול שרת', en: 'Server admin', ru: 'Администрирование', ar: 'إدارة الخادم' },
+  'admin.search': { he: 'חיפוש שחקן', en: 'Search player', ru: 'Поиск игрока', ar: 'بحث عن لاعب' },
+  'admin.confirm': { he: 'לבצע {action} על {target}?', en: '{action} {target}?', ru: 'Выполнить «{action}» для {target}?', ar: 'تنفيذ {action} على {target}؟' },
+  'admin.yes': { he: 'כן, בצע', en: 'Yes, do it', ru: 'Да, выполнить', ar: 'نعم، نفّذ' },
+  'admin.cancel': { he: 'ביטול', en: 'Cancel', ru: 'Отмена', ar: 'إلغاء' },
+  'admin.reasonPh': { he: 'סיבה (חובה לחסימה)', en: 'Reason (required for bans)', ru: 'Причина (обязательно для бана)', ar: 'السبب (مطلوب للحظر)' },
+  'admin.act.heal': { he: 'ריפוי', en: 'Heal', ru: 'Лечение', ar: 'علاج' },
+  'admin.act.sethealth': { he: 'קביעת חיים', en: 'Set health', ru: 'Задать здоровье', ar: 'تعيين الصحة' },
+  'admin.act.giveweapon': { he: 'מילוי נשק', en: 'Give weapon', ru: 'Выдать оружие', ar: 'منح سلاح' },
+  'admin.act.givemoney': { he: 'הענקת מטבעות', en: 'Give money', ru: 'Выдать валюту', ar: 'منح عملة' },
+  'admin.act.kick': { he: 'הוצאה', en: 'Kick', ru: 'Исключить', ar: 'طرد' },
+  'admin.act.ban': { he: 'חסימה', en: 'Ban', ru: 'Бан', ar: 'حظر' },
+  'admin.act.announce': { he: 'הודעת שרת', en: 'Announce', ru: 'Объявление', ar: 'إعلان' },
+  'admin.act.teleport': { he: 'שיגור', en: 'Teleport', ru: 'Телепорт', ar: 'نقل فوري' },
+  'role.Player': { he: 'שחקן', en: 'Player', ru: 'Игрок', ar: 'لاعب' },
+  'role.Moderator': { he: 'מנחה', en: 'Moderator', ru: 'Модератор', ar: 'مشرف' },
+  'role.Admin': { he: 'אדמין', en: 'Admin', ru: 'Администратор', ar: 'مسؤول' },
+  'role.Owner': { he: 'בעלים', en: 'Owner', ru: 'Владелец', ar: 'المالك' },
+};
+
+let current = 'he';
+
+export function detectLang(saved) {
+  if (saved && LANGS[saved]) return saved;
+  const nav = (typeof navigator !== 'undefined' && navigator.language || 'he').slice(0, 2);
+  return LANGS[nav] ? nav : 'he';
+}
+export const getLang = () => current;
+export function setLang(lang) { if (LANGS[lang]) current = lang; }
+
+// t('sys.joined', { name: 'Dani' }); params that are themselves keys (e.g. a weapon) can be passed pre-translated
+export function t(key, params = {}, lang = current) {
+  const entry = S[key];
+  let s = entry ? (entry[lang] ?? entry.en ?? entry.he) : key;
+  for (const [k, v] of Object.entries(params)) s = s.split('{' + k + '}').join(String(v));
+  return s;
+}
+export const hasKey = (key) => key in S;
+export const STRING_KEYS = Object.keys(S);

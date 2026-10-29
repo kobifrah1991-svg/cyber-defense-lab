@@ -46,7 +46,7 @@ add([18, 0, 14], [19.5, 2.4, 15.5], 0xff6d00);
 add([-19.5, 0, -15.5], [-18, 2.4, -14], 0xff6d00);
 
 export const MAP = {
-  name: 'מחסן ניאון',
+  id: 'neon', // display name: i18n key map.neon
   boxes,
   spawns: [
     [-26, 0, 0], [26, 0, 0], [0, 0, -27], [0, 0, 27],

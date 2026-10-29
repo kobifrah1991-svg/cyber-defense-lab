@@ -112,25 +112,25 @@ wss.on('connection', (ws) => {
         sess.send({ t: 'authed', user: sess.user && { name: sess.user.name, picture: sess.user.picture, email: sess.user.email }, googleClientId: GOOGLE_CLIENT_ID });
         return;
       }
-      case 'quick': enterRoom(sess, quickRoom()); return;
+      case 'quickMatch': enterRoom(sess, quickRoom()); return; // not 'quick': that is quick chat inside a room
       case 'create': enterRoom(sess, newRoom(false)); return;
       case 'joinCode': {
         const room = rooms.get(String(m.code || '').toUpperCase().trim());
-        if (!room) sess.send({ t: 'lobbyError', text: 'לא נמצא חדר עם הקוד הזה.' });
-        else if (!enterRoom(sess, room)) sess.send({ t: 'lobbyError', text: 'החדר מלא.' });
+        if (!room) sess.send({ t: 'lobbyError', key: 'sys.roomNotFound' });
+        else if (!enterRoom(sess, room)) sess.send({ t: 'lobbyError', key: 'sys.roomFull' });
         return;
       }
       case 'invite': {
         // Find a friend by their Gmail address. Only signed-in players can invite or be found,
         // and the reply never reveals anything about the address beyond online/offline.
-        if (!sess.user) { sess.send({ t: 'chat', sys: true, text: 'כדי להזמן חברים צריך להתחבר עם Google.' }); return; }
+        if (!sess.user) { sess.send({ t: 'chat', sys: true, key: 'sys.inviteNeedsLogin' }); return; }
         if (!sess.room) return;
         const email = String(m.email || '').toLowerCase().trim();
-        if (sess.invites.filter((t) => Date.now() - t < 60000).length >= 5) { sess.send({ t: 'chat', sys: true, text: 'יותר מדי הזמנות. נסו שוב בעוד דקה.' }); return; }
+        if (sess.invites.filter((t) => Date.now() - t < 60000).length >= 5) { sess.send({ t: 'chat', sys: true, key: 'sys.inviteLimit' }); return; }
         sess.invites.push(Date.now());
         const friend = [...sessions].find((s) => s.user && s.user.email === email && s !== sess);
         if (friend) friend.send({ t: 'invited', from: sess.user.name, code: sess.room.code });
-        sess.send({ t: 'chat', sys: true, text: friend ? 'ההזמנה נשלחה!' : 'השחקן לא מחובר כרגע. שלחו לו את קוד החדר: ' + sess.room.code });
+        sess.send(friend ? { t: 'chat', sys: true, key: 'sys.inviteSent' } : { t: 'chat', sys: true, key: 'sys.inviteOffline', p: { code: sess.room.code } });
         return;
       }
       case 'leaveRoom': leaveRoom(sess); return;

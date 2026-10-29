@@ -1,3 +1,3 @@
 [
-  { "id": "here", "name": "השרת הזה", "region": "השרת שממנו נפתח המשחק", "url": "" }
+  { "id": "here", "nameKey": "srv.here", "regionKey": "srv.hereRegion", "url": "" }
 ]

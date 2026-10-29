@@ -47,7 +47,9 @@ export function createGame(opts = {}) {
   const humans = () => [...players.values()].filter((p) => !p.bot);
   const send = (p, msg) => { if (p.ws && p.ws.readyState === 1) p.ws.send(JSON.stringify(msg)); };
   const broadcast = (msg, except) => { const s = JSON.stringify(msg); for (const p of players.values()) if (p !== except && p.ws && p.ws.readyState === 1) p.ws.send(s); };
-  const sys = (text) => broadcast({ t: 'chat', sys: true, text });
+  // System messages carry a key and neutral params; each client shows them in its own language
+  const sys = (key, p = {}) => broadcast({ t: 'chat', sys: true, key, p });
+  const tell = (pl, key, p = {}) => send(pl, { t: 'chat', sys: true, key, p });
 
   function roster() {
     return [...players.values()].map((p) => ({ id: p.id, name: p.name, bot: p.bot, color: p.color, kills: p.kills, deaths: p.deaths, ping: p.bot ? 0 : Math.round(p.rtt), character: p.character }));
@@ -165,7 +167,7 @@ export function createGame(opts = {}) {
     if (killer.alive) killer.hp = Math.min(PLAYER.maxHp, killer.hp + 25);
     const streakName = STREAKS[killer.streak] || null;
     broadcast({ t: 'kill', killer: killer.id, victim: victim.id, w: wKey, head, streak: killer.streak, streakName, pos: victim.p });
-    if (killer.streak >= 5 && streakName) sys(`🔥 ${killer.name} ב-${streakName}! (${killer.streak} ברצף)`);
+    if (killer.streak >= 5 && streakName) sys('sys.streak', { name: killer.name, streak: streakName, n: killer.streak });
     sendRoster();
     if (killer.kills >= KILL_LIMIT) endMatch(killer);
   }
@@ -187,18 +189,18 @@ export function createGame(opts = {}) {
     for (const p of players.values()) { p.kills = 0; p.deaths = 0; p.heads = 0; spawn(p); }
     broadcast({ t: 'match', state: 'playing', endsAt: match.endsAt });
     sendRoster();
-    sys('סבב חדש התחיל! ראשון ל-' + KILL_LIMIT + ' הריגות מנצח.');
+    sys('sys.newRound', { n: KILL_LIMIT });
   }
 
   // ---------- bots ----------
-  const BOT_NAMES = ['ניאון', 'ברק', 'טורבו', 'פיקסל', 'רובו', 'צל', 'זיק', 'קומטה', 'גלקסי', 'ריינבו'];
+  const BOT_NAMES = ['Neon', 'Blitz', 'Turbo', 'Pixel', 'Robo', 'Shadow', 'Spark', 'Comet', 'Galaxy', 'Rainbow'];
   function balanceBots() {
     const total = players.size;
     const bots = [...players.values()].filter((p) => p.bot);
     const want = humans().length ? Math.max(0, config.bots - humans().length) : 0;
     if (bots.length < want && total < MAX_PLAYERS && humans().length > 0) {
       const used = new Set(bots.map((b) => b.name));
-      const name = '🤖 ' + (BOT_NAMES.find((n) => !used.has('🤖 ' + n)) || 'בוט' + nextId);
+      const name = '🤖 ' + (BOT_NAMES.find((n) => !used.has('🤖 ' + n)) || 'Bot' + nextId);
       newPlayer(name, true).character = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)].id;
       sendRoster();
     } else if (bots.length > want) {
@@ -301,7 +303,7 @@ export function createGame(opts = {}) {
         me.ws = ws;
         send(me, { t: 'welcome', id: me.id, color: me.color, match: { state: match.state, endsAt: match.endsAt }, killLimit: KILL_LIMIT, quick: QUICK_CHAT });
         sendRoster();
-        sys(`${me.name} הצטרף/ה לזירה`);
+        sys('sys.joined', { name: me.name });
         if (match.state === 'playing') spawn(me);
         return;
       }
@@ -346,12 +348,12 @@ export function createGame(opts = {}) {
           onChat(me, m.text);
           break;
         case 'quick':
-          if (Number.isInteger(m.i) && QUICK_CHAT[m.i]) onChat(me, QUICK_CHAT[m.i], true);
+          if (Number.isInteger(m.i) && QUICK_CHAT[m.i]) onChat(me, '', true, m.i);
           break;
         case 'report': {
           const target = [...players.values()].find((p) => p.name === String(m.name || ''));
           console.log(`[REPORT] ${me.name} reported ${target ? target.name : m.name}: ${String(m.reason || '').slice(0, 100)}`);
-          send(me, { t: 'chat', sys: true, text: 'הדיווח התקבל. תודה ששמרת על הזירה בטוחה!' });
+          tell(me, 'sys.reportOk');
           break;
         }
       }
@@ -361,27 +363,28 @@ export function createGame(opts = {}) {
       if (!me) return;
       players.delete(me.id);
       broadcast({ t: 'leave', id: me.id });
-      sys(`${me.name} עזב/ה`);
+      sys('sys.left', { name: me.name });
       sendRoster();
     }
     return { message, close };
   }
 
-  function onChat(p, text, quick = false) {
+  function onChat(p, text, quick = false, quickIndex = -1) {
     const now = Date.now();
-    if (now < p.mutedUntil) { send(p, { t: 'chat', sys: true, text: 'הצ\'אט שלך מושתק זמנית.' }); return; }
+    if (now < p.mutedUntil) { tell(p, 'sys.muted'); return; }
     p.chatTimes = p.chatTimes.filter((t) => now - t < 5000);
-    if (p.chatTimes.length >= 4) { send(p, { t: 'chat', sys: true, text: 'לאט לאט 🙂 יותר מדי הודעות.' }); return; }
+    if (p.chatTimes.length >= 4) { tell(p, 'sys.slowDown'); return; }
     p.chatTimes.push(now);
-    const { text: clean, flagged } = quick ? { text, flagged: false } : filterChat(text);
+    const { text: clean, flagged } = quick ? { text: 'q', flagged: false } : filterChat(text);
     if (!clean) return;
     if (flagged) {
       // Graduated enforcement (GDD §13): warning, then a temporary mute
       p.strikes++;
-      if (p.strikes >= 3) { p.mutedUntil = now + 60000; p.strikes = 0; send(p, { t: 'chat', sys: true, text: 'הושתקת לדקה בגלל שפה/מידע אישי.' }); }
-      else send(p, { t: 'chat', sys: true, text: `אזהרה ${p.strikes}/3: אין קללות, קישורים או מידע אישי.` });
+      if (p.strikes >= 3) { p.mutedUntil = now + 60000; p.strikes = 0; tell(p, 'sys.mutedMinute'); }
+      else tell(p, 'sys.warning', { n: p.strikes });
     }
-    broadcast({ t: 'chat', from: p.id, name: p.name, color: p.color, text: clean, quick });
+    // Quick messages travel as an index so each player reads them in their language
+    broadcast(quick ? { t: 'chat', from: p.id, name: p.name, color: p.color, q: quickIndex, quick: true } : { t: 'chat', from: p.id, name: p.name, color: p.color, text: clean });
   }
 
   // ---------- main loop ----------

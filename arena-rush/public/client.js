@@ -4,6 +4,7 @@ import { WEAPONS, WEAPON_ORDER } from './shared/weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './shared/physics.js';
 import { buildArena, setupLighting, buildCharacter, buildGun, loadCharacters, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance } from './visuals.js';
 import { CHARACTERS, characterById } from './shared/characters.js';
+import { t, LANGS, getLang, setLang, detectLang } from './shared/i18n.js';
 const gunModel = (key, scale) => buildGun(key, WEAPONS[key].color, scale);
 
 const $ = (id) => document.getElementById(id);
@@ -177,7 +178,7 @@ function syncRoster(list) {
   for (const [id, r] of remotes) if (!list.find((p) => p.id === id)) { scene.remove(r.group); remotes.delete(id); }
   updateScoreboard();
 }
-const nameOf = (id) => (id === me.id ? 'את/ה' : roster.find((p) => p.id === id)?.name || '???');
+const nameOf = (id) => (id === me.id ? t('hud.you') : roster.find((p) => p.id === id)?.name || '???');
 const colorOf = (id) => '#' + ((id === me.id ? me.color : roster.find((p) => p.id === id)?.color) ?? 0xffffff).toString(16).padStart(6, '0');
 
 const INTERP = 100; // ms behind the newest snapshot
@@ -289,7 +290,7 @@ function killFeed(killer, victim, w, head) {
   const el = document.createElement('div');
   el.className = 'kf' + (killer === me.id || victim === me.id ? ' me' : '');
   const k = document.createElement('b'); k.style.color = colorOf(killer); k.textContent = nameOf(killer);
-  const ws_ = document.createElement('span'); ws_.className = 'w'; ws_.textContent = `[${WEAPONS[w]?.name || w}]${head ? ' 🎯' : ''}`;
+  const ws_ = document.createElement('span'); ws_.className = 'w'; ws_.textContent = `[${t('weapon.' + w)}]${head ? ' 🎯' : ''}`;
   const v = document.createElement('b'); v.style.color = colorOf(victim); v.textContent = nameOf(victim);
   el.append(k, ws_, v);
   const feed = $('killfeed');
@@ -301,14 +302,14 @@ function killFeed(killer, victim, w, head) {
 // ======================= HUD =======================
 function updateWeaponHud() {
   const w = WEAPONS[me.weapon];
-  $('weapon-name').textContent = w.name;
+  $('weapon-name').textContent = t('weapon.' + me.weapon);
   $('mag').textContent = performance.now() < me.reloadUntil ? '…' : me.ammo[me.weapon];
   $('mag').classList.toggle('empty', me.ammo[me.weapon] === 0);
   $('mag-max').textContent = w.mag;
   $('weapon-slots').innerHTML = '';
   for (const k of WEAPON_ORDER) {
     const s = document.createElement('span');
-    s.textContent = WEAPONS[k].key + ' ' + WEAPONS[k].name;
+    s.textContent = WEAPONS[k].key + ' ' + t('weapon.' + k);
     if (k === me.weapon) s.className = 'on';
     $('weapon-slots').appendChild(s);
   }
@@ -325,7 +326,7 @@ function updateScoreboard() {
   tb.innerHTML = '';
   for (const p of sorted) tb.appendChild(boardRow(p, [p.kills, p.deaths, p.bot ? 'BOT' : p.ping]));
   const lead = sorted[0];
-  $('leader').textContent = lead ? `מוביל/ה: ${lead.name} (${lead.kills}/${killLimit})` : '';
+  $('leader').textContent = lead ? t('hud.leader', { name: lead.name, kills: lead.kills, limit: killLimit }) : '';
 }
 function boardRow(p, cols, rank) {
   const tr = document.createElement('tr');
@@ -340,16 +341,28 @@ function boardRow(p, cols, rank) {
 }
 
 // ======================= chat =======================
-function addChat({ name, color, text, sys, quick, from }) {
+// Params ending in "Key" are translated too, e.g. { mapKey: 'map.neon' } -> {map}
+function tr(key, p = {}) {
+  const out = {};
+  for (const [k, v] of Object.entries(p)) if (k.endsWith('Key')) out[k.slice(0, -3)] = t(v); else out[k] = v;
+  return t(key, out);
+}
+function addChat({ name, color, text, sys, quick, from, key, p, q }) {
   if (from && muted.has(from)) return;
   const el = document.createElement('div');
-  if (sys) { el.className = 'sys'; el.textContent = text; }
-  else {
+  if (sys) {
+    el.className = 'sys';
+    el._render = () => { el.textContent = key ? tr(key, p) : text; };
+    el._render();
+  } else {
     if (quick) el.className = 'quick';
     const b = document.createElement('b');
     b.style.color = '#' + (color ?? 0xffffff).toString(16).padStart(6, '0');
     b.textContent = name + ':';
-    el.append(b, document.createTextNode(' ' + text));
+    const body = document.createTextNode('');
+    el.append(b, body);
+    el._render = () => { body.textContent = ' ' + (quick ? t('quick.' + q) : text); };
+    el._render();
     if (from !== me.id) sfx.chat();
   }
   const log = $('chat-log');
@@ -385,18 +398,18 @@ function handleChatText(text) {
     const [cmd, name, ...rest] = text.slice(1).split(' ');
     const target = roster.find((p) => p.name === name);
     if (cmd === 'mute' || cmd === 'unmute') {
-      if (!target) return addChat({ sys: true, text: 'לא נמצא שחקן בשם הזה.' });
+      if (!target) return addChat({ sys: true, key: 'sys.noSuchPlayer' });
       cmd === 'mute' ? muted.add(target.id) : muted.delete(target.id);
       updateScoreboard();
-      return addChat({ sys: true, text: cmd === 'mute' ? `${target.name} הושתק/ה אצלך.` : `${target.name} כבר לא מושתק/ת.` });
+      return addChat({ sys: true, key: cmd === 'mute' ? 'sys.youMuted' : 'sys.youUnmuted', p: { name: target.name } });
     }
     if (cmd === 'report') {
-      if (!target) return addChat({ sys: true, text: 'לא נמצא שחקן בשם הזה.' });
+      if (!target) return addChat({ sys: true, key: 'sys.noSuchPlayer' });
       return net({ t: 'report', name: target.name, reason: rest.join(' ') });
     }
     if (cmd === 'invite') return net({ t: 'invite', email: name || '' });
-    if (cmd === 'room') return addChat({ sys: true, text: roomCode ? `קוד החדר: ${roomCode}` : 'אימון מקומי (בלי חדר).' });
-    return addChat({ sys: true, text: 'פקודות: /invite gmail · /room · /mute שם · /unmute שם · /report שם סיבה' });
+    if (cmd === 'room') return addChat({ sys: true, key: roomCode ? 'sys.roomCode' : 'sys.noRoom', p: { code: roomCode } });
+    return addChat({ sys: true, key: 'sys.commands' });
   }
   net({ t: 'chat', text });
 }
@@ -409,7 +422,7 @@ function toggleQuick() {
     quickChat.forEach((text, i) => {
       const d = document.createElement('div');
       const k = document.createElement('kbd'); k.textContent = i + 1;
-      d.append(k, document.createTextNode(text));
+      d.append(k, document.createTextNode(t(text)));
       d.addEventListener('pointerdown', (e) => { e.stopPropagation(); sendQuick(i); });
       q.appendChild(d);
     });
@@ -529,12 +542,12 @@ class LocalSocket {
 
 let pinger = null;
 let roomCode = null;
-// action: { t: 'quick' } | { t: 'create' } | { t: 'joinCode', code }
-function connect(name, action = { t: 'quick' }, offline = offlineOnly || !!selectedServer()?.offline) {
+// action: { t: 'quickMatch' } | { t: 'create' } | { t: 'joinCode', code }
+function connect(name, action = { t: 'quickMatch' }, offline = offlineOnly || !!selectedServer()?.offline) {
   let opened = false;
   lobby = { name, action, offline };
   ws = offline ? new LocalSocket() : new WebSocket(wsUrl(selectedServer()));
-  $('menu-status').textContent = offline ? 'מכין זירת אימון…' : 'מתחבר לשרת…';
+  $('menu-status').textContent = t(offline ? 'menu.preparing' : 'menu.connecting');
   ws.onopen = () => {
     opened = true;
     // Online: sign in (or as a guest), pick a room, then join it. Offline: join the local match directly.
@@ -543,10 +556,10 @@ function connect(name, action = { t: 'quick' }, offline = offlineOnly || !!selec
   };
   ws.onerror = () => {
     // No server reachable: fall back to practice against bots in the browser
-    if (!opened) { $('menu-status').textContent = 'אין שרת, עובר לאימון נגד בוטים…'; connect(name, action, true); }
+    if (!opened) { $('menu-status').textContent = t('menu.noServer'); connect(name, action, true); }
   };
   ws.onclose = () => {
-    if (me.id && !offline) { addChat({ sys: true, text: 'החיבור לשרת נותק. מרענן…' }); setTimeout(() => location.reload(), 2500); }
+    if (me.id && !offline) { addChat({ sys: true, key: 'sys.disconnected' }); setTimeout(() => location.reload(), 2500); }
   };
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));
   clearInterval(pinger);
@@ -562,11 +575,11 @@ function onMessage(m) {
       break;
     case 'room':
       roomCode = m.code;
-      $('scoreboard').querySelector('h2').textContent = `טבלת ניקוד · חדר ${m.code}`;
+      $('scoreboard').querySelector('h2').textContent = t('hud.scoreboardRoom', { code: m.code });
       net({ t: 'join', name: lobby.name, character: selectedChar });
       break;
     case 'lobbyError':
-      $('menu-status').textContent = m.text;
+      $('menu-status').textContent = t(m.key);
       $('play').disabled = false;
       ws.close();
       break;
@@ -577,10 +590,10 @@ function onMessage(m) {
       $('menu').classList.add('hidden');
       $('hud').classList.remove('hidden');
       if (isTouch) $('touch').classList.remove('hidden'); else lockPointer();
-      addChat({ sys: true, text: `ברוכים הבאים ל-${MAP.name}! Enter לצ'אט, B להודעות מהירות.` });
+      addChat({ sys: true, key: 'sys.welcome', p: { mapKey: 'map.' + MAP.id } });
       break;
     case 'full':
-      $('menu-status').textContent = 'הזירה מלאה. נסו שוב בעוד רגע.';
+      $('menu-status').textContent = t('menu.full');
       $('play').disabled = false;
       break;
     case 'roster': syncRoster(m.players); break;
@@ -653,8 +666,8 @@ function onKillMsg(m) {
     if (m.head) me.heads++;
     sfx.kill();
     vibrate([30, 40, 60]);
-    centerMsg(`חיסלת את ${nameOf(m.victim)}${m.head ? ' · ירייה בראש! 🎯' : ''}`, 1800);
-    $('streak').textContent = me.streak >= 2 ? `🔥 רצף ${me.streak}` : '';
+    centerMsg(t('hud.youKilled', { name: nameOf(m.victim) }) + (m.head ? t('hud.headshot') : ''), 1800);
+    $('streak').textContent = me.streak >= 2 ? t('hud.streak', { n: me.streak }) : '';
     if (m.streakName) { announce(m.streakName); say(m.streakName.toLowerCase()); }
   }
   if (m.victim === me.id) {
@@ -662,7 +675,7 @@ function onKillMsg(m) {
     me.ads = false;
     deathUntil = performance.now() + 3000;
     $('death').classList.remove('hidden');
-    $('death-by').textContent = `חוסלת על ידי ${nameOf(m.killer)}${m.head ? ' (ירייה בראש)' : ''}`;
+    $('death-by').textContent = t('hud.killedBy', { name: nameOf(m.killer) }) + (m.head ? t('hud.headshotTag') : '');
     lastHurtFrom = m.killer;
     $('streak').textContent = '';
   }
@@ -674,7 +687,7 @@ function onMatch(m) {
     keys.clear(); mouseDown = false;
     if (document.pointerLockElement) document.exitPointerLock();
     const won = m.winner === me.id;
-    $('end-title').textContent = won ? '🏆 ניצחת!' : `🏆 ${m.winnerName || ''} ניצח/ה!`;
+    $('end-title').textContent = won ? t('end.youWon') : t('end.winner', { name: m.winnerName || '' });
     const tb = $('end-board').querySelector('tbody');
     tb.innerHTML = '';
     m.board.forEach((p, i) => tb.appendChild(boardRow(p, [p.kills, p.deaths], i + 1)));
@@ -682,7 +695,7 @@ function onMatch(m) {
     $('end').classList.remove('hidden');
     const tick = () => {
       const s = Math.max(0, Math.ceil((m.next - Date.now()) / 1000));
-      $('end-next').textContent = `סבב הבא בעוד ${s} שניות…`;
+      $('end-next').textContent = t('end.next', { s });
       if (matchInfo.state === 'ended') setTimeout(tick, 500);
     };
     tick();
@@ -702,17 +715,17 @@ function awardXp(won) {
   let leveled = false;
   while (prof.xp >= need(prof.level)) { prof.xp -= need(prof.level); prof.level++; leveled = true; }
   store.set('profile', prof);
-  $('xp-line').textContent = `+${gained} XP · רמה ${prof.level}${leveled ? ' 🎉 עלית רמה!' : ''}`;
+  $('xp-line').textContent = t('end.xp', { xp: gained, level: prof.level }) + (leveled ? t('end.levelUp') : '');
   $('xp-fill').style.width = '0';
   setTimeout(() => ($('xp-fill').style.width = Math.round((prof.xp / need(prof.level)) * 100) + '%'), 50);
   const left = need(prof.level) - prof.xp;
-  $('next-goal').textContent = `עוד ${Math.ceil(left / 100)} הריגות לרמה ${prof.level + 1}. רק עוד משחק אחד? 😉`;
+  $('next-goal').textContent = t('end.goal', { n: Math.ceil(left / 100), level: prof.level + 1 });
   if (leveled) { sfx.kill(); announce('LEVEL UP'); }
   showProfile();
 }
 function showProfile() {
   const prof = store.get('profile', { xp: 0, level: 1 });
-  $('profile').textContent = `רמה ${prof.level} · ${prof.xp} XP`;
+  $('profile').textContent = t('menu.level', { level: prof.level, xp: prof.xp });
 }
 
 // ======================= input =======================
@@ -817,6 +830,31 @@ function setupTouch() {
 }
 if (isTouch) setupTouch();
 
+// ======================= language =======================
+// Applies the chosen language to static text (data-i18n attributes), direction and dynamic UI.
+// Works mid-game: nothing is sent to the server, so the connection is untouched.
+function applyLang(lang) {
+  setLang(lang);
+  store.set('lang', getLang());
+  document.documentElement.lang = getLang();
+  document.documentElement.dir = LANGS[getLang()].dir;
+  document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  document.querySelectorAll('#chat-log > div').forEach((el) => el._render?.());
+  for (const sel of document.querySelectorAll('.lang-select')) sel.value = getLang();
+  if (typeof renderServers === 'function' && $('servers').children.length) renderServers();
+  if (typeof refreshPreview === 'function' && preview?.scene) refreshPreview();
+  showProfile();
+  updateWeaponHud();
+  updateScoreboard();
+  if (roomCode) $('scoreboard').querySelector('h2').textContent = t('hud.scoreboardRoom', { code: roomCode });
+}
+for (const sel of document.querySelectorAll('.lang-select')) {
+  for (const [code, info] of Object.entries(LANGS)) sel.append(new Option(info.name, code));
+  sel.addEventListener('change', (e) => applyLang(e.target.value));
+}
+
 // ======================= menu =======================
 $('name').value = store.get('name', '');
 $('sens').value = sens;
@@ -835,29 +873,29 @@ function startOnline(action) {
   if (isTouch) document.documentElement.requestFullscreen?.().catch(() => {});
   connect(name, action);
 }
-$('play').addEventListener('click', () => startOnline({ t: 'quick' }));
+$('play').addEventListener('click', () => startOnline({ t: 'quickMatch' }));
 $('create').addEventListener('click', () => startOnline({ t: 'create' }));
 $('join-code').addEventListener('click', () => {
   const code = $('code').value.trim().toUpperCase();
-  if (code.length !== 5) { $('menu-status').textContent = 'קוד חדר הוא 5 תווים.'; return; }
+  if (code.length !== 5) { $('menu-status').textContent = t('menu.codeLength'); return; }
   startOnline({ t: 'joinCode', code });
 });
 
 // Invitations from friends (by Gmail) and invite links (?room=CODE)
 function showInvite(from, code) {
   const box = $('invite');
-  box.querySelector('span').textContent = `${from} מזמין/ה אותך לחדר ${code}`;
+  box.querySelector('span').textContent = t('hud.inviteFrom', { from, code });
   box.classList.remove('hidden');
   box.querySelector('.yes').onclick = () => { location.href = location.pathname + '?room=' + code; };
   box.querySelector('.no').onclick = () => box.classList.add('hidden');
 }
 const roomFromLink = new URLSearchParams(location.search).get('room');
-if (roomFromLink) { $('code').value = roomFromLink.toUpperCase(); $('menu-status').textContent = 'הוזמנת לחדר! לחצו "הצטרף".'; }
+if (roomFromLink) { $('code').value = roomFromLink.toUpperCase(); $('menu-status').textContent = t('menu.invitedLink'); }
 
 // Google sign-in (only when the server has a Google client ID configured)
 function showAccount() {
   if (!googleUser) return;
-  $('account').textContent = `מחובר/ת כ-${googleUser.name} (${googleUser.email})`;
+  $('account').textContent = t('menu.signedIn', { name: googleUser.name, email: googleUser.email });
   $('gsi').classList.add('hidden');
   if (!$('name').value) $('name').value = googleUser.name;
 }
@@ -886,7 +924,7 @@ function setupGoogle(clientId) {
 
 // ---------- server list ----------
 // public/servers.json lists online servers ({ name, region, url }); url "" means the server hosting this page.
-const LOCAL_SERVER = { id: 'device', name: 'אימון במכשיר', region: 'נגד בוטים · בלי אינטרנט', offline: true };
+const LOCAL_SERVER = { id: 'device', nameKey: 'srv.device', regionKey: 'srv.deviceRegion', offline: true };
 let servers = [LOCAL_SERVER];
 const serverState = new Map(); // id -> { ping, online, rooms, googleClientId, down }
 let selectedServerId = store.get('server', null);
@@ -911,14 +949,14 @@ function renderServers() {
     const dot = document.createElement('span');
     dot.className = 'dot ' + (sv.offline ? 'ok' : !st ? '' : st.down ? 'down' : st.ping > 150 ? 'slow' : 'ok');
     const info = document.createElement('span');
-    const title = document.createElement('b'); title.textContent = sv.name;
-    const sub = document.createElement('small'); sub.textContent = sv.region || '';
+    const title = document.createElement('b'); title.textContent = sv.nameKey ? t(sv.nameKey) : sv.name;
+    const sub = document.createElement('small'); sub.textContent = (sv.regionKey ? t(sv.regionKey) : sv.region || '') + (sv.offline ? '' : ' · ' + t('srv.mode'));
     info.append(title, sub);
     const meta = document.createElement('span');
     meta.className = 'meta';
     if (sv.offline) meta.textContent = 'offline';
     else if (!st) meta.textContent = '…';
-    else if (st.down) meta.textContent = 'לא זמין';
+    else if (st.down) meta.textContent = t('srv.down');
     else {
       const ping = document.createElement('strong'); ping.textContent = st.ping + ' ms';
       meta.append(ping, document.createTextNode(`${st.online} online`));
@@ -930,9 +968,9 @@ function renderServers() {
   // Online-only controls follow the selected server
   const online = !current.offline;
   document.querySelectorAll('.online-only').forEach((el) => el.classList.toggle('hidden', !online));
-  $('play').textContent = online ? 'משחק מהיר' : 'התחל אימון';
+  $('play').textContent = t(online ? 'menu.quickPlay' : 'menu.startPractice');
   const st = serverState.get(current.id);
-  $('online-count').textContent = online && st && !st.down ? `${st.online} מחוברים · ${st.rooms} חדרים בשרת הזה` : '';
+  $('online-count').textContent = online && st && !st.down ? t('srv.counts', { online: st.online, rooms: st.rooms }) : '';
   if (online && st && !st.down) setupGoogle(st.googleClientId);
   else $('gsi').replaceChildren();
 }
@@ -954,7 +992,7 @@ async function pingServer(sv) {
 
 async function loadServers() {
   if (!offlineOnly) {
-    let list = [{ name: 'השרת הזה', region: 'אוטומטי', url: '' }];
+    let list = [{ nameKey: 'srv.here', regionKey: 'srv.hereRegion', url: '' }];
     try {
       const r = await fetch('servers.json', { cache: 'no-store' });
       if (r.ok) list = await r.json();
@@ -1003,8 +1041,8 @@ function refreshPreview() {
   preview.model = m;
   preview.scene.add(m.root);
   const def = characterById(selectedChar);
-  $('char-name').textContent = def.name;
-  $('char-role').textContent = def.role;
+  $('char-name').textContent = t('char.' + def.id);
+  $('char-role').textContent = t('char.' + def.id + '.role');
   document.querySelectorAll('.char-card').forEach((el) => el.setAttribute('aria-checked', String(el.dataset.id === selectedChar)));
 }
 
@@ -1024,7 +1062,8 @@ for (const def of CHARACTERS) {
   b.className = 'char-card';
   b.dataset.id = def.id;
   b.setAttribute('role', 'radio');
-  b.textContent = def.name;
+  b.dataset.i18n = 'char.' + def.id;
+  b.textContent = t('char.' + def.id);
   b.addEventListener('click', () => chooseChar(def.id));
   $('char-list').appendChild(b);
 }
@@ -1092,7 +1131,7 @@ function frame(now) {
     camera.position.y += (me.p[1] + 4 - camera.position.y) * Math.min(1, dt * 2);
     const killer = remotes.get(lastHurtFrom);
     if (killer?.cur) camera.lookAt(killer.cur.p[0], killer.cur.p[1] + 1, killer.cur.p[2]);
-    $('death-count').textContent = `חוזר/ת לקרב בעוד ${Math.max(0, Math.ceil((deathUntil - now) / 1000))}…`;
+    $('death-count').textContent = t('hud.respawnIn', { s: Math.max(0, Math.ceil((deathUntil - now) / 1000)) });
   }
 
   // Viewmodel sway, bob, recoil, reload dip
@@ -1130,3 +1169,6 @@ function frame(now) {
 for (const g in viewGuns) viewGuns[g].visible = g === me.weapon;
 updateWeaponHud();
 requestAnimationFrame(frame);
+
+// Language last: every UI piece it updates exists by now
+applyLang(detectLang(store.get('lang', null)));

@@ -83,6 +83,12 @@ button.link { background: none; border: 0; color: var(--cyan); font-size: 13px; 
   #char-preview { max-height: 38vh; }
 }
 
+/* language pickers */
+.head-side { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.lang-pick, .pause-lang { display: inline-flex; align-items: center; gap: 6px; margin: 0; color: var(--muted); font-size: 13px; }
+.lang-pick select, .pause-lang select { display: inline-block; width: auto; margin: 0; padding: 6px 8px; font-size: 14px; }
+.pause-lang { margin-top: 12px; pointer-events: auto; }
+
 /* ---------- HUD ---------- */
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 #crosshair, #hitmarker { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
