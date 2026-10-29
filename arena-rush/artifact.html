@@ -86,6 +86,35 @@ button.link { background: none; border: 0; color: var(--cyan); font-size: 13px; 
   #char-preview { max-height: 38vh; }
 }
 
+/* team lobby */
+#lobby { position: fixed; inset: 0; z-index: 15; display: grid; place-items: center; padding: 16px; background: rgba(5,6,16,.72); }
+.lobby-card { width: min(640px, 100%); background: var(--panel); border: 1px solid rgba(255,255,255,.14); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+#lobby-title { margin: 0; text-align: center; font-size: 22px; }
+.lobby-teams { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.team { border-radius: 14px; padding: 12px; background: rgba(0,0,0,.3); }
+.team-a { border: 1px solid #40c4ff; }
+.team-b { border: 1px solid #ff1744; }
+.team h3 { margin: 0 0 8px; font-size: 15px; }
+.team-a h3 { color: #40c4ff; }
+.team-b h3 { color: #ff5c7a; }
+.team ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.team li { padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,.06); display: flex; gap: 8px; align-items: center; min-width: 0; overflow-wrap: anywhere; }
+.team li.me { outline: 1px solid var(--yellow); }
+.team li.open { color: var(--muted); font-style: italic; }
+.team li .ok { color: #00e676; font-weight: 900; }
+.team li .wait { color: var(--muted); }
+#lobby-status { text-align: center; color: var(--yellow); margin: 0; min-height: 1.3em; }
+#lobby-ready { flex: 1; padding: 12px; border: 0; border-radius: 12px; font-weight: 900; font-size: 17px; color: #fff; background: linear-gradient(90deg, var(--pink), #ff6d00); }
+#lobby-ready.on { background: #00c853; }
+#lobby-invite { text-align: center; color: var(--cyan); font-size: 14px; margin: 0; }
+#lobby-leave { align-self: center; }
+#mode { flex: 1; min-width: 0; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-size: 15px; }
+#team-score { font-size: 26px; font-weight: 900; direction: ltr; margin-bottom: 4px; background: var(--panel); border-radius: 10px; padding: 2px 16px; }
+#team-score .ta { color: #40c4ff; }
+#team-score .tb { color: #ff5c7a; }
+#team-score .vs { margin: 0 8px; color: var(--muted); }
+@media (max-width: 520px) { .lobby-teams { grid-template-columns: minmax(0, 1fr); } }
+
 /* admin panel */
 #admin-btn { position: fixed; z-index: 7; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--yellow); background: var(--panel); color: var(--yellow); font-weight: 700; }
 #admin-panel { position: fixed; z-index: 25; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(520px, calc(100% - 32px)); max-height: 80vh; display: flex; flex-direction: column; gap: 10px; background: var(--panel); border: 1px solid var(--yellow); border-radius: 16px; padding: 16px; backdrop-filter: blur(8px); }
@@ -256,6 +285,7 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     <div id="dmg-numbers"></div>
 
     <div id="topbar">
+      <div id="team-score" class="hidden"><span id="ts-a" class="ta">0</span><span class="vs">:</span><span id="ts-b" class="tb">0</span></div>
       <div id="timer">5:00</div>
       <div id="leader"></div>
     </div>
@@ -276,6 +306,24 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     <div id="scoreboard" class="hidden"><h2 data-i18n="hud.scoreboard"></h2><table><thead><tr><th data-i18n="hud.player"></th><th data-i18n="hud.kills"></th><th data-i18n="hud.deaths"></th><th data-i18n="hud.ping"></th></tr></thead><tbody></tbody></table></div>
     <div id="death" class="hidden"><div class="big" data-i18n="hud.dead"></div><div id="death-by"></div><div id="death-count"></div></div>
     <div id="pause" class="hidden"><div class="big" data-i18n="hud.pause"></div><div class="keys" data-i18n="hud.pauseKeys"></div><label class="pause-lang" onclick="event.stopPropagation()"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang-game"></select></label></div>
+  </div>
+
+  <!-- Team lobby -->
+  <div id="lobby" class="hidden">
+    <div class="lobby-card">
+      <h2 id="lobby-title"></h2>
+      <div class="lobby-teams">
+        <section id="lobby-A" class="team team-a"><h3></h3><ul></ul></section>
+        <section id="lobby-B" class="team team-b"><h3></h3><ul></ul></section>
+      </div>
+      <p id="lobby-status"></p>
+      <div class="row">
+        <button id="lobby-switch" class="secondary" type="button" data-i18n="lobby.switch"></button>
+        <button id="lobby-ready" type="button"></button>
+      </div>
+      <p id="lobby-invite"></p>
+      <button id="lobby-leave" class="link" type="button" data-i18n="lobby.leave"></button>
+    </div>
   </div>
 
   <!-- Admin panel (staff only; the server checks every action) -->
@@ -340,6 +388,11 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
         <p id="account"></p>
         <button id="play" data-i18n="menu.quickPlay"></button>
         <div class="row online-only">
+          <select id="mode" data-i18n-aria="menu.mode">
+            <option value="ffa" data-i18n="mode.ffa"></option>
+            <option value="duel" data-i18n="mode.duel"></option>
+            <option value="team2" data-i18n="mode.team2"></option>
+          </select>
           <button id="create" class="secondary" data-i18n="menu.createRoom"></button>
         </div>
         <div class="row online-only">

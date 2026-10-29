@@ -7,13 +7,23 @@ import { filterChat, cleanName, QUICK_CHAT } from './chatfilter.js';
 import { CHARACTERS, characterById } from './characters.js';
 
 // Each call creates an independent match (one per room).
+// Game modes. Team modes start from a lobby (choose team, ready up) and have no bots.
+export const MODES = {
+  ffa: { teams: false, perTeam: 12, killLimit: 25 },
+  duel: { teams: true, perTeam: 1, killLimit: 10 },
+  team2: { teams: true, perTeam: 2, killLimit: 15 },
+};
+const TEAM_COLORS = { A: 0x40c4ff, B: 0xff1744 };
+
 export function createGame(opts = {}) {
-  const config = { bots: opts.bots ?? 4 }; // bots fill up to this many fighters
+  const mode = MODES[opts.mode] ? opts.mode : 'ffa';
+  const M = MODES[mode];
+  const config = { bots: M.teams ? 0 : (opts.bots ?? 4), mode }; // bots fill up to this many fighters
   const TICK = 1 / 30;
   const SNAP_EVERY = 2;              // snapshots at 15 Hz
-  const MAX_PLAYERS = 12;
+  const MAX_PLAYERS = M.teams ? M.perTeam * 2 : 12;
   const MATCH_SECONDS = 300;
-  const KILL_LIMIT = 25;
+  const KILL_LIMIT = M.killLimit;
   const RESPAWN_SECONDS = 3;
   const SPAWN_PROTECT = 1.5;
   const COLORS = [0xff2e88, 0x00e5ff, 0xffd600, 0x76ff03, 0xff6d00, 0xd500f9, 0x40c4ff, 0xff1744, 0x1de9b6, 0xf50057, 0xc6ff00, 0x651fff];
@@ -23,7 +33,8 @@ export function createGame(opts = {}) {
   const players = new Map(); // id -> player (humans and bots)
   let nextId = 1;
   let tick = 0;
-  const match = { state: 'playing', endsAt: Date.now() + MATCH_SECONDS * 1000, winner: null };
+  const match = { state: M.teams ? 'lobby' : 'playing', endsAt: Date.now() + MATCH_SECONDS * 1000, winner: null, countdownAt: 0 };
+  const teamScore = { A: 0, B: 0 };
 
   function newPlayer(name, bot = false) {
     const used = new Set([...players.values()].map((p) => p.color));
@@ -34,7 +45,7 @@ export function createGame(opts = {}) {
       p: [0, 0, 0], v: [0, 0, 0], onGround: true, yaw: 0, pitch: 0,
       hp: PLAYER.maxHp, alive: false, respawnAt: Date.now() + 500, protectUntil: 0,
       weapon: 'rifle', ammo: {}, reloadUntil: 0, lastShot: {}, lastHurt: 0,
-      kills: 0, deaths: 0, streak: 0, heads: 0,
+      kills: 0, deaths: 0, streak: 0, heads: 0, team: null, ready: false,
       history: [], rtt: 80, lastState: Date.now(), chatTimes: [], strikes: 0, mutedUntil: 0,
       ai: bot ? { wp: null, stuck: 0, target: null, seenAt: 0, strafe: 1, strafeT: 0, jumpT: 0, aimErr: 0 } : null,
     };
@@ -52,14 +63,51 @@ export function createGame(opts = {}) {
   const tell = (pl, key, p = {}) => send(pl, { t: 'chat', sys: true, key, p });
 
   function roster() {
-    return [...players.values()].map((p) => ({ id: p.id, name: p.name, bot: p.bot, color: p.color, kills: p.kills, deaths: p.deaths, ping: p.bot ? 0 : Math.round(p.rtt), character: p.character }));
+    return [...players.values()].map((p) => ({ id: p.id, name: p.name, bot: p.bot, color: p.color, kills: p.kills, deaths: p.deaths, ping: p.bot ? 0 : Math.round(p.rtt), character: p.character, team: p.team, ready: p.ready }));
   }
-  const sendRoster = () => broadcast({ t: 'roster', players: roster() });
+  const sendRoster = () => broadcast({ t: 'roster', players: roster(), mode, teamScore: M.teams ? teamScore : null });
+
+  // ---------- teams & lobby ----------
+  const teamOf = (team) => [...players.values()].filter((p) => p.team === team);
+  function assignTeam(p, team) {
+    p.team = team;
+    p.color = TEAM_COLORS[team];
+    p.ready = false;
+  }
+  function smallerTeam() {
+    const a = teamOf('A').length, b = teamOf('B').length;
+    if (a >= M.perTeam && b >= M.perTeam) return null;
+    return a <= b ? 'A' : 'B';
+  }
+  function lobbyState() {
+    return { t: 'lobby', mode, perTeam: M.perTeam, state: match.state, countdownAt: match.countdownAt, players: roster() };
+  }
+  const sendLobby = () => broadcast(lobbyState());
+  // Ready when every player is ready, both teams have someone and team sizes match
+  function checkStart() {
+    if (match.state !== 'lobby') return;
+    const a = teamOf('A'), b = teamOf('B');
+    const ok = a.length > 0 && a.length === b.length && [...players.values()].every((p) => p.ready);
+    match.countdownAt = ok ? Date.now() + 3000 : 0;
+    sendLobby();
+  }
+  function startTeamMatch() {
+    match.state = 'playing';
+    match.countdownAt = 0;
+    match.endsAt = Date.now() + MATCH_SECONDS * 1000;
+    teamScore.A = teamScore.B = 0;
+    for (const p of players.values()) { p.kills = 0; p.deaths = 0; p.heads = 0; spawn(p); }
+    broadcast({ t: 'match', state: 'playing', endsAt: match.endsAt, mode });
+    sendRoster();
+    sys('sys.matchStart', { n: KILL_LIMIT });
+  }
 
   function pickSpawn(p) {
-    const enemies = [...players.values()].filter((o) => o !== p && o.alive);
+    const enemies = [...players.values()].filter((o) => o !== p && o.alive && (!M.teams || o.team !== p.team));
     let best = MAP.spawns[0], bestScore = -1;
-    for (const s of MAP.spawns) {
+    // Team modes: each team starts on its own side of the arena
+    const side = !M.teams ? MAP.spawns : MAP.spawns.filter((s) => (p.team === 'A' ? s[0] <= 0 : s[0] >= 0));
+    for (const s of side) {
       let d = 1e9;
       for (const e of enemies) d = Math.min(d, Math.hypot(e.p[0] - s[0], e.p[2] - s[2]));
       const score = d + Math.random() * 6;
@@ -116,7 +164,7 @@ export function createGame(opts = {}) {
     // Lag compensation: rewind targets to what the shooter saw
     const rewind = shooter.bot ? 0 : Math.min(300, shooter.rtt / 2 + 100);
     const tShot = now - rewind;
-    const targets = [...players.values()].filter((t) => t !== shooter && t.alive).map((t) => ({ t, pos: positionAt(t, tShot) }));
+    const targets = [...players.values()].filter((t) => t !== shooter && t.alive && (!M.teams || t.team !== shooter.team)).map((t) => ({ t, pos: positionAt(t, tShot) }));
 
     const ends = [];
     const dmgBy = new Map();
@@ -147,18 +195,56 @@ export function createGame(opts = {}) {
     for (const [target, e] of dmgBy) applyDamage(shooter, target, e.dmg, e.head, wKey, e.at);
   }
 
-  function applyDamage(attacker, target, dmg, head, wKey, at) {
+  // Knife: nearest enemy in a short arc in front, in line of sight. Hits from behind kill outright.
+  function melee(attacker, yaw, pitch) {
+    const w = WEAPONS.knife, now = Date.now();
+    if (!attacker.alive || match.state !== 'playing') return;
+    if (now - (attacker.lastShot.knife || 0) < w.rate * 1000 * 0.85) return;
+    attacker.lastShot.knife = now;
+    attacker.weapon = 'knife';
+    attacker.protectUntil = 0;
+    if (Number.isFinite(yaw)) attacker.yaw = yaw;
+    if (Number.isFinite(pitch)) attacker.pitch = Math.max(-1.55, Math.min(1.55, pitch));
+    const fwd = dirFromAngles(attacker.yaw, attacker.pitch);
+    const eye = [attacker.p[0], attacker.p[1] + PLAYER.eye, attacker.p[2]];
+    const tHit = now - (attacker.bot ? 0 : Math.min(300, attacker.rtt / 2 + 100));
+    let best = null, bestDist = w.range;
+    for (const t of players.values()) {
+      if (t === attacker || !t.alive || (M.teams && t.team === attacker.team)) continue;
+      const pos = positionAt(t, tHit);
+      const c = [pos[0], pos[1] + 1.1, pos[2]];
+      const d = [c[0] - eye[0], c[1] - eye[1], c[2] - eye[2]];
+      const dist = Math.hypot(d[0], d[1], d[2]);
+      if (dist > bestDist + 0.4) continue; // body radius
+      const dot = (d[0] * fwd[0] + d[1] * fwd[1] + d[2] * fwd[2]) / Math.max(dist, 0.01);
+      if (dot < w.arc) continue;
+      if (rayWorld(eye, d.map((v) => v / dist), MAP.boxes, dist) < dist - 0.05) continue;
+      best = { t, dist, pos };
+      bestDist = dist;
+    }
+    broadcast({ t: 'swing', id: attacker.id }, attacker);
+    if (!best) return;
+    // Backstab: the target looks the same way we are attacking (we are behind them)
+    const tf = [-Math.sin(best.t.yaw), -Math.cos(best.t.yaw)];
+    const dx = best.pos[0] - attacker.p[0], dz = best.pos[2] - attacker.p[2], dl = Math.hypot(dx, dz) || 1;
+    const back = (tf[0] * dx + tf[1] * dz) / dl > 0.5;
+    const dmg = Math.round(w.damage * (back ? w.backstabMul : 1));
+    applyDamage(attacker, best.t, dmg, false, 'knife', [best.pos[0], best.pos[1] + 1.2, best.pos[2]], back);
+  }
+
+  function applyDamage(attacker, target, dmg, head, wKey, at, backstab = false) {
     if (!target.alive || Date.now() < target.protectUntil) return;
+    if (M.teams && attacker !== target && attacker.team === target.team) return; // no friendly fire
     target.hp -= dmg;
     target.lastHurt = Date.now();
     const kill = target.hp <= 0;
-    send(attacker, { t: 'hit', target: target.id, dmg, head, kill, at });
+    send(attacker, { t: 'hit', target: target.id, dmg, head, kill, at, backstab });
     send(target, { t: 'hurt', by: attacker.id, hp: Math.max(0, target.hp), from: attacker.p });
     if (target.bot && target.ai) { target.ai.target = attacker.id; target.ai.seenAt = Date.now(); }
-    if (kill) onKill(attacker, target, wKey, head);
+    if (kill) onKill(attacker, target, wKey, head, backstab);
   }
 
-  function onKill(killer, victim, wKey, head) {
+  function onKill(killer, victim, wKey, head, backstab = false) {
     victim.alive = false; victim.hp = 0; victim.deaths++; victim.streak = 0;
     victim.respawnAt = Date.now() + RESPAWN_SECONDS * 1000;
     killer.kills++; killer.streak++;
@@ -166,23 +252,37 @@ export function createGame(opts = {}) {
     // Kill reward: heal a little so aggressive play feels good
     if (killer.alive) killer.hp = Math.min(PLAYER.maxHp, killer.hp + 25);
     const streakName = STREAKS[killer.streak] || null;
-    broadcast({ t: 'kill', killer: killer.id, victim: victim.id, w: wKey, head, streak: killer.streak, streakName, pos: victim.p });
+    if (M.teams && killer.team) teamScore[killer.team]++;
+    broadcast({ t: 'kill', killer: killer.id, victim: victim.id, w: wKey, head, backstab, streak: killer.streak, streakName, pos: victim.p });
     if (killer.streak >= 5 && streakName) sys('sys.streak', { name: killer.name, streak: streakName, n: killer.streak });
     sendRoster();
-    if (killer.kills >= KILL_LIMIT) endMatch(killer);
+    if (M.teams ? teamScore[killer.team] >= KILL_LIMIT : killer.kills >= KILL_LIMIT) endMatch(killer);
   }
 
-  function endMatch(winner) {
+  function endMatch(winner, forceTeam = null) {
     if (match.state !== 'playing') return;
     const board = roster().sort((a, b) => b.kills - a.kills || a.deaths - b.deaths);
-    winner = winner || players.get(board[0]?.id);
+    let winTeam = null;
+    if (M.teams) {
+      winTeam = forceTeam || (winner?.team) || (teamScore.A === teamScore.B ? null : teamScore.A > teamScore.B ? 'A' : 'B');
+      winner = null;
+    } else winner = winner || players.get(board[0]?.id);
     match.state = 'ended';
     match.winner = winner ? winner.id : null;
     match.endsAt = Date.now() + 10000;
-    broadcast({ t: 'match', state: 'ended', winner: match.winner, winnerName: winner?.name, board, next: match.endsAt });
+    broadcast({ t: 'match', state: 'ended', winner: match.winner, winnerName: winner?.name, winTeam, teamScore: M.teams ? teamScore : null, board, next: match.endsAt, mode });
   }
 
   function newMatch() {
+    if (M.teams) {
+      // Team modes go back to the lobby; everyone readies up again
+      match.state = 'lobby';
+      for (const p of players.values()) { p.ready = false; p.alive = false; }
+      broadcast({ t: 'match', state: 'lobby', mode });
+      sendRoster();
+      sendLobby();
+      return;
+    }
     match.state = 'playing';
     match.winner = null;
     match.endsAt = Date.now() + MATCH_SECONDS * 1000;
@@ -292,7 +392,7 @@ export function createGame(opts = {}) {
       if (!m || typeof m.t !== 'string') return;
 
       if (m.t === 'join' && !me) {
-        if (humans().length >= MAX_PLAYERS) { ws.send(JSON.stringify({ t: 'full' })); ws.close(); return; }
+        if (humans().length >= MAX_PLAYERS || (M.teams && !smallerTeam())) { ws.send(JSON.stringify({ t: 'full' })); ws.close(); return; }
         // Make room by removing a bot if the arena is full
         if (players.size >= MAX_PLAYERS) {
           const bot = [...players.values()].find((p) => p.bot);
@@ -301,10 +401,12 @@ export function createGame(opts = {}) {
         me = newPlayer(cleanName(m.name));
         me.character = characterById(m.character).id;
         me.ws = ws;
-        send(me, { t: 'welcome', id: me.id, color: me.color, match: { state: match.state, endsAt: match.endsAt }, killLimit: KILL_LIMIT, quick: QUICK_CHAT });
+        if (M.teams) assignTeam(me, smallerTeam());
+        send(me, { t: 'welcome', id: me.id, color: me.color, match: { state: match.state, endsAt: match.endsAt }, killLimit: KILL_LIMIT, quick: QUICK_CHAT, mode, team: me.team });
         sendRoster();
         sys('sys.joined', { name: me.name });
         if (match.state === 'playing') spawn(me);
+        if (M.teams) checkStart();
         return;
       }
       if (!me) return;
@@ -329,7 +431,26 @@ export function createGame(opts = {}) {
           break;
         }
         case 'shoot':
+          if (WEAPONS[m.w]?.melee) break;
           fire(me, m.w, m.o, m.dirs);
+          break;
+        case 'melee':
+          melee(me, m.yaw, m.pitch);
+          break;
+        case 'team': {
+          // Switch team in the lobby, if the other team has room
+          if (!M.teams || match.state !== 'lobby' || (m.team !== 'A' && m.team !== 'B') || m.team === me.team) break;
+          if (teamOf(m.team).length >= M.perTeam) break;
+          assignTeam(me, m.team);
+          sendRoster();
+          checkStart();
+          break;
+        }
+        case 'ready':
+          if (!M.teams || match.state !== 'lobby') break;
+          me.ready = !!m.v;
+          sendRoster();
+          checkStart();
           break;
         case 'reload': {
           const w = WEAPONS[m.w];
@@ -365,6 +486,11 @@ export function createGame(opts = {}) {
       broadcast({ t: 'leave', id: me.id });
       sys('sys.left', { name: me.name });
       sendRoster();
+      if (M.teams) {
+        // A team emptied mid-match: the other side wins
+        if (match.state === 'playing' && (teamOf('A').length === 0 || teamOf('B').length === 0)) endMatch(null, teamOf('A').length ? 'A' : 'B');
+        else checkStart();
+      }
     }
     return { message, close, player: () => me };
   }
@@ -398,6 +524,7 @@ export function createGame(opts = {}) {
     last = now;
     tick++;
 
+    if (match.state === 'lobby' && match.countdownAt && now >= match.countdownAt) startTeamMatch();
     if (match.state === 'playing' && now >= match.endsAt) endMatch(null);
     if (match.state === 'ended' && now >= match.endsAt) newMatch();
     if (tick % 15 === 0) balanceBots();
@@ -464,5 +591,5 @@ export function createGame(opts = {}) {
     announce: (text) => sys('admin.announce', { text }),
   };
 
-  return { connect, start, stop, humanCount, config, admin };
+  return { connect, start, stop, humanCount, config, admin, mode };
 }

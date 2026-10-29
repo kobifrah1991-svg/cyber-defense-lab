@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
-import { createGame } from './shared/game.js';
+import { createGame, MODES } from './shared/game.js';
 import { cleanName } from './shared/chatfilter.js';
 import { createAdmin } from './admin.js';
 
@@ -60,11 +60,12 @@ const rooms = new Map();     // code -> { code, isPublic, game, members:Set<sess
 const sessions = new Set();  // every connected socket's session
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-function newRoom(isPublic) {
+function newRoom(isPublic, mode = 'ffa') {
   let code;
   do code = Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
   while (rooms.has(code));
-  const room = { code, isPublic, game: createGame({ bots: BOTS }), members: new Set() };
+  const game = createGame({ bots: BOTS, mode: MODES[mode] ? mode : 'ffa' });
+  const room = { code, isPublic, mode: game.mode, game, members: new Set() };
   room.game.start();
   rooms.set(code, room);
   return room;
@@ -73,7 +74,7 @@ function newRoom(isPublic) {
 // Quick match: the fullest public room that still has space, so players meet each other
 function quickRoom() {
   let best = null;
-  for (const r of rooms.values()) if (r.isPublic && r.members.size < ROOM_SIZE && (!best || r.members.size > best.members.size)) best = r;
+  for (const r of rooms.values()) if (r.isPublic && r.mode === 'ffa' && r.members.size < ROOM_SIZE && (!best || r.members.size > best.members.size)) best = r;
   return best || newRoom(true);
 }
 
@@ -82,7 +83,7 @@ function enterRoom(sess, room) {
   sess.room = room;
   room.members.add(sess);
   sess.conn = room.game.connect(sess.ws);
-  sess.send({ t: 'room', code: room.code, isPublic: room.isPublic });
+  sess.send({ t: 'room', code: room.code, isPublic: room.isPublic, mode: room.mode });
   return true;
 }
 
@@ -127,7 +128,7 @@ wss.on('connection', (ws, req) => {
         return;
       }
       case 'quickMatch': enterRoom(sess, quickRoom()); return; // not 'quick': that is quick chat inside a room
-      case 'create': enterRoom(sess, newRoom(false)); return;
+      case 'create': enterRoom(sess, newRoom(false, String(m.mode || 'ffa'))); return;
       case 'joinCode': {
         const room = rooms.get(String(m.code || '').toUpperCase().trim());
         if (!room) sess.send({ t: 'lobbyError', key: 'sys.roomNotFound' });

@@ -86,6 +86,7 @@ function blip(freq, dur = 0.08, type = 'square', vol = 0.15, delay = 0) {
   o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
 }
 const sfx = {
+  swing: () => { if (!actx) return; const t0 = actx.currentTime; const src = actx.createBufferSource(); src.buffer = noise; const f = actx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(900, t0); f.frequency.exponentialRampToValueAtTime(3000, t0 + 0.15); const g = actx.createGain(); g.gain.setValueAtTime(0.25, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18); src.connect(f).connect(g).connect(actx.destination); src.start(t0, 0, 0.2); },
   hit: () => blip(1400, 0.05, 'square', 0.12),
   head: () => { blip(1900, 0.06, 'square', 0.14); blip(2500, 0.08, 'square', 0.12, 0.05); },
   kill: () => { blip(660, 0.12, 'triangle', 0.25); blip(990, 0.15, 'triangle', 0.25, 0.08); blip(1320, 0.25, 'triangle', 0.25, 0.16); },
@@ -174,6 +175,8 @@ function syncRoster(list) {
     if (info.id === me.id) { me.kills = info.kills; me.deaths = info.deaths; continue; }
     const r = remotes.get(info.id);
     if (!r) remotes.set(info.id, makeRemote(info));
+    else if (r.color !== info.color) { scene.remove(r.group); remotes.set(info.id, makeRemote(info)); } // team change
+    if (info.id === me.id) me.color = info.color;
   }
   for (const [id, r] of remotes) if (!list.find((p) => p.id === id)) { scene.remove(r.group); remotes.delete(id); }
   updateScoreboard();
@@ -304,8 +307,9 @@ function killFeed(killer, victim, w, head) {
 function updateWeaponHud() {
   const w = WEAPONS[me.weapon];
   $('weapon-name').textContent = t('weapon.' + me.weapon);
-  $('mag').textContent = performance.now() < me.reloadUntil ? '…' : me.ammo[me.weapon];
+  $('mag').textContent = WEAPONS[me.weapon].melee ? '∞' : performance.now() < me.reloadUntil ? '…' : me.ammo[me.weapon];
   $('mag').classList.toggle('empty', me.ammo[me.weapon] === 0);
+  $('mag-max').parentElement.style.visibility = w.melee ? 'hidden' : '';
   $('mag-max').textContent = w.mag;
   $('weapon-slots').innerHTML = '';
   for (const k of WEAPON_ORDER) {
@@ -455,7 +459,7 @@ function cycleWeapon(dir) {
 }
 function reload() {
   const w = WEAPONS[me.weapon];
-  if (!me.alive || performance.now() < me.reloadUntil || me.ammo[me.weapon] >= w.mag) return;
+  if (w.melee || !me.alive || performance.now() < me.reloadUntil || me.ammo[me.weapon] >= w.mag) return;
   me.reloadUntil = performance.now() + w.reload * 1000;
   const k = me.weapon;
   net({ t: 'reload', w: k });
@@ -465,9 +469,21 @@ function reload() {
 }
 
 let semiReady = true;
+let swingAt = -10;
+function knifeSwing(now) {
+  const w = WEAPONS.knife;
+  if (now - me.lastShot < w.rate * 1000 || !semiReady) return;
+  semiReady = false;
+  me.lastShot = now;
+  swingAt = now;
+  net({ t: 'melee', yaw: me.yaw, pitch: me.pitch });
+  sfx.swing();
+  vibrate(15);
+}
 function tryFire(now) {
   const w = WEAPONS[me.weapon];
   if (!me.alive || chatOpen || matchInfo.state !== 'playing') return;
+  if (w.melee) return knifeSwing(now);
   if (now < me.reloadUntil || now - me.lastShot < w.rate * 1000) return;
   if (!w.auto && !semiReady) return;
   if (me.ammo[me.weapon] <= 0) { if (semiReady) sfx.empty(); semiReady = false; reload(); return; }
@@ -591,6 +607,8 @@ function onMessage(m) {
       ws.close();
       break;
     case 'invited': showInvite(m.from, m.code); break;
+    case 'swing': sfx.swing(); break;
+    case 'lobby': onLobby(m); break;
     case 'role':
       myRole = m.role;
       $('admin-btn').classList.toggle('hidden', ROLE_RANK[myRole] < 1);
@@ -602,17 +620,23 @@ function onMessage(m) {
       break;
     case 'welcome':
       me.id = m.id; me.color = m.color;
-      matchInfo = m.match; killLimit = m.killLimit; quickChat = m.quick;
+      matchInfo = m.match; killLimit = m.killLimit; quickChat = m.quick; gameMode = m.mode || 'ffa';
       $('menu').classList.add('hidden');
       $('hud').classList.remove('hidden');
-      if (isTouch) $('touch').classList.remove('hidden'); else lockPointer();
+      if (matchInfo.state === 'lobby') $('lobby').classList.remove('hidden');
+      else if (isTouch) $('touch').classList.remove('hidden'); else lockPointer();
       addChat({ sys: true, key: 'sys.welcome', p: { mapKey: 'map.' + MAP.id } });
       break;
     case 'full':
       $('menu-status').textContent = t('menu.full');
       $('play').disabled = false;
       break;
-    case 'roster': syncRoster(m.players); break;
+    case 'roster':
+      syncRoster(m.players);
+      teamScore = m.teamScore;
+      $('team-score').classList.toggle('hidden', !teamScore);
+      if (teamScore) { $('ts-a').textContent = teamScore.A; $('ts-b').textContent = teamScore.B; }
+      break;
     case 'snap':
       for (const s of m.players) {
         if (s.id === me.id) { updateHp(s.hp); continue; }
@@ -682,7 +706,7 @@ function onKillMsg(m) {
     if (m.head) me.heads++;
     sfx.kill();
     vibrate([30, 40, 60]);
-    centerMsg(t('hud.youKilled', { name: nameOf(m.victim) }) + (m.head ? t('hud.headshot') : ''), 1800);
+    centerMsg(t('hud.youKilled', { name: nameOf(m.victim) }) + (m.backstab ? t('hud.backstab') : m.head ? t('hud.headshot') : ''), 1800);
     $('streak').textContent = me.streak >= 2 ? t('hud.streak', { n: me.streak }) : '';
     if (m.streakName) { announce(m.streakName); say(m.streakName.toLowerCase()); }
   }
@@ -699,11 +723,24 @@ function onKillMsg(m) {
 
 function onMatch(m) {
   matchInfo = m;
+  if (m.state === 'lobby') {
+    // Team modes: back to the lobby after the results screen
+    $('end').classList.add('hidden');
+    $('touch').classList.add('hidden');
+    $('lobby').classList.remove('hidden');
+    me.alive = false;
+    if (document.pointerLockElement) document.exitPointerLock();
+    return;
+  }
+  $('lobby').classList.add('hidden');
   if (m.state === 'ended') {
     keys.clear(); mouseDown = false;
     if (document.pointerLockElement) document.exitPointerLock();
-    const won = m.winner === me.id;
-    $('end-title').textContent = won ? t('end.youWon') : t('end.winner', { name: m.winnerName || '' });
+    const myTeam = roster.find((p) => p.id === me.id)?.team;
+    const won = m.winTeam ? m.winTeam === myTeam : m.winner === me.id;
+    $('end-title').textContent = m.mode && m.mode !== 'ffa'
+      ? (m.winTeam ? t('end.teamWon', { team: t('team.' + m.winTeam) }) : t('end.draw'))
+      : won ? t('end.youWon') : t('end.winner', { name: m.winnerName || '' });
     const tb = $('end-board').querySelector('tbody');
     tb.innerHTML = '';
     m.board.forEach((p, i) => tb.appendChild(boardRow(p, [p.kills, p.deaths], i + 1)));
@@ -711,16 +748,75 @@ function onMatch(m) {
     $('end').classList.remove('hidden');
     const tick = () => {
       const s = Math.max(0, Math.ceil((m.next - Date.now()) / 1000));
-      $('end-next').textContent = t('end.next', { s });
+      $('end-next').textContent = t(m.mode && m.mode !== 'ffa' ? 'end.toLobby' : 'end.next', { s });
       if (matchInfo.state === 'ended') setTimeout(tick, 500);
     };
     tick();
   } else {
     $('end').classList.add('hidden');
     me.heads = 0;
-    if (!isTouch) lockPointer();
+    if (isTouch) $('touch').classList.remove('hidden'); else lockPointer();
   }
 }
+
+// ======================= team lobby =======================
+let gameMode = 'ffa', lobbyInfo = null, teamScore = null;
+function onLobby(m) {
+  lobbyInfo = m;
+  gameMode = m.mode;
+  if (m.state !== 'lobby') return;
+  $('lobby').classList.remove('hidden');
+  renderLobby();
+}
+function renderLobby() {
+  const m = lobbyInfo;
+  if (!m) return;
+  $('lobby-title').textContent = t('lobby.title', { mode: t('mode.' + m.mode), code: roomCode || '' });
+  const mine = m.players.find((p) => p.id === me.id);
+  for (const team of ['A', 'B']) {
+    const col = $('lobby-' + team);
+    col.querySelector('h3').textContent = t('team.' + team);
+    const list = col.querySelector('ul');
+    list.replaceChildren();
+    const members = m.players.filter((p) => p.team === team);
+    for (let i = 0; i < m.perTeam; i++) {
+      const li = document.createElement('li');
+      const p = members[i];
+      if (p) {
+        li.textContent = p.name;
+        if (p.id === me.id) li.classList.add('me');
+        const st = document.createElement('span');
+        st.className = p.ready ? 'ok' : 'wait';
+        st.textContent = p.ready ? '✔' : '…';
+        li.prepend(st);
+      } else {
+        li.className = 'open';
+        li.textContent = t('lobby.empty');
+      }
+      list.appendChild(li);
+    }
+  }
+  $('lobby-ready').textContent = t(mine?.ready ? 'lobby.notReady' : 'lobby.ready');
+  $('lobby-ready').classList.toggle('on', !!mine?.ready);
+  $('lobby-invite').textContent = roomCode ? t('lobby.invite', { code: roomCode }) : '';
+  updateLobbyStatus();
+}
+function updateLobbyStatus() {
+  if (!lobbyInfo || $('lobby').classList.contains('hidden')) return;
+  const left = lobbyInfo.countdownAt ? Math.max(0, Math.ceil((lobbyInfo.countdownAt - Date.now()) / 1000)) : 0;
+  $('lobby-status').textContent = lobbyInfo.countdownAt ? t('lobby.starting', { s: left }) : t('lobby.waiting');
+}
+setInterval(updateLobbyStatus, 250);
+$('lobby-ready').addEventListener('click', () => {
+  const mine = lobbyInfo?.players.find((p) => p.id === me.id);
+  initAudio();
+  net({ t: 'ready', v: !mine?.ready });
+});
+$('lobby-switch').addEventListener('click', () => {
+  const mine = lobbyInfo?.players.find((p) => p.id === me.id);
+  net({ t: 'team', team: mine?.team === 'A' ? 'B' : 'A' });
+});
+$('lobby-leave').addEventListener('click', () => location.reload());
 
 // Local progression (GDD §9–10): XP bar and "one more game" goal
 function awardXp(won) {
@@ -921,6 +1017,7 @@ function applyLang(lang) {
   updateWeaponHud();
   updateScoreboard();
   if (roomCode) $('scoreboard').querySelector('h2').textContent = t('hud.scoreboardRoom', { code: roomCode });
+  renderLobby();
 }
 for (const sel of document.querySelectorAll('.lang-select')) {
   for (const [code, info] of Object.entries(LANGS)) sel.append(new Option(info.name, code));
@@ -946,7 +1043,7 @@ function startOnline(action) {
   connect(name, action);
 }
 $('play').addEventListener('click', () => startOnline({ t: 'quickMatch' }));
-$('create').addEventListener('click', () => startOnline({ t: 'create' }));
+$('create').addEventListener('click', () => startOnline({ t: 'create', mode: $('mode').value }));
 $('join-code').addEventListener('click', () => {
   const code = $('code').value.trim().toUpperCase();
   if (code.length !== 5) { $('menu-status').textContent = t('menu.codeLength'); return; }
@@ -1214,7 +1311,8 @@ function frame(now) {
     -0.2 + adsK * 0.07 + Math.abs(Math.cos(bob)) * 0.01 - (reloading ? 0.15 : 0),
     -0.45 + recoil * 0.25,
   );
-  vmRoot.rotation.set(recoil * 0.6 + (reloading ? -0.6 : 0), 0, 0);
+  const sw = Math.max(0, 1 - (now - swingAt) / 250); // knife slash: quick arc across the screen
+  vmRoot.rotation.set(recoil * 0.6 + (reloading ? -0.6 : 0) - Math.sin(sw * Math.PI) * 0.5, Math.sin(sw * Math.PI) * 0.9, -Math.sin(sw * Math.PI) * 0.4);
   vmRoot.visible = me.alive && !sniperScoped;
   flash.position.set(vmRoot.position.x, vmRoot.position.y + 0.03, vmRoot.position.z - muzzleDistance(me.weapon));
   $('scope').classList.toggle('hidden', !sniperScoped);

@@ -30,9 +30,18 @@ export const WEAPONS = {
     falloff: [15, 40], minMul: 0.55, range: 100,
     recoil: 0.025, adsFov: 60, color: 0x76ff03,
   },
+  // Melee: no ammo. range in metres, arc = minimum cos of the angle to the target.
+  // A hit from behind (target facing away) multiplies damage by backstabMul — enough to kill outright.
+  knife: {
+    key: '5', auto: false, melee: true,
+    damage: 55, headMul: 1, pellets: 1, rate: 0.55,
+    mag: 1, reload: 0, spread: 0, adsSpread: 0,
+    falloff: [99, 100], minMul: 1, range: 2.4, arc: 0.72, backstabMul: 4,
+    recoil: 0, adsFov: 78, color: 0xeceff1,
+  },
 };
 
-export const WEAPON_ORDER = ['rifle', 'shotgun', 'sniper', 'pistol'];
+export const WEAPON_ORDER = ['rifle', 'shotgun', 'sniper', 'pistol', 'knife'];
 
 export function damageAt(w, dist, head) {
   const [a, b] = w.falloff;

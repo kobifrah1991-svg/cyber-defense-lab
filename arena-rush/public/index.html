@@ -22,6 +22,7 @@
     <div id="dmg-numbers"></div>
 
     <div id="topbar">
+      <div id="team-score" class="hidden"><span id="ts-a" class="ta">0</span><span class="vs">:</span><span id="ts-b" class="tb">0</span></div>
       <div id="timer">5:00</div>
       <div id="leader"></div>
     </div>
@@ -42,6 +43,24 @@
     <div id="scoreboard" class="hidden"><h2 data-i18n="hud.scoreboard"></h2><table><thead><tr><th data-i18n="hud.player"></th><th data-i18n="hud.kills"></th><th data-i18n="hud.deaths"></th><th data-i18n="hud.ping"></th></tr></thead><tbody></tbody></table></div>
     <div id="death" class="hidden"><div class="big" data-i18n="hud.dead"></div><div id="death-by"></div><div id="death-count"></div></div>
     <div id="pause" class="hidden"><div class="big" data-i18n="hud.pause"></div><div class="keys" data-i18n="hud.pauseKeys"></div><label class="pause-lang" onclick="event.stopPropagation()"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang-game"></select></label></div>
+  </div>
+
+  <!-- Team lobby -->
+  <div id="lobby" class="hidden">
+    <div class="lobby-card">
+      <h2 id="lobby-title"></h2>
+      <div class="lobby-teams">
+        <section id="lobby-A" class="team team-a"><h3></h3><ul></ul></section>
+        <section id="lobby-B" class="team team-b"><h3></h3><ul></ul></section>
+      </div>
+      <p id="lobby-status"></p>
+      <div class="row">
+        <button id="lobby-switch" class="secondary" type="button" data-i18n="lobby.switch"></button>
+        <button id="lobby-ready" type="button"></button>
+      </div>
+      <p id="lobby-invite"></p>
+      <button id="lobby-leave" class="link" type="button" data-i18n="lobby.leave"></button>
+    </div>
   </div>
 
   <!-- Admin panel (staff only; the server checks every action) -->
@@ -106,6 +125,11 @@
         <p id="account"></p>
         <button id="play" data-i18n="menu.quickPlay"></button>
         <div class="row online-only">
+          <select id="mode" data-i18n-aria="menu.mode">
+            <option value="ffa" data-i18n="mode.ffa"></option>
+            <option value="duel" data-i18n="mode.duel"></option>
+            <option value="team2" data-i18n="mode.team2"></option>
+          </select>
           <button id="create" class="secondary" data-i18n="menu.createRoom"></button>
         </div>
         <div class="row online-only">
