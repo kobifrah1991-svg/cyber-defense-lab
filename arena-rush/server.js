@@ -7,6 +7,7 @@ import { WebSocketServer } from 'ws';
 import { createGame, MODES } from './shared/game.js';
 import { cleanName } from './shared/chatfilter.js';
 import { createAdmin } from './admin.js';
+import { createEconomy } from './economy.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 3000;
@@ -64,7 +65,7 @@ function newRoom(isPublic, mode = 'ffa') {
   let code;
   do code = Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
   while (rooms.has(code));
-  const game = createGame({ bots: BOTS, mode: MODES[mode] ? mode : 'ffa' });
+  const game = createGame({ bots: BOTS, mode: MODES[mode] ? mode : 'ffa', onMatchEnd: (results) => payRewards(results) });
   const room = { code, isPublic, mode: game.mode, game, members: new Set() };
   room.game.start();
   rooms.set(code, room);
@@ -96,7 +97,21 @@ function leaveRoom(sess) {
   if (room.members.size === 0) { room.game.stop(); rooms.delete(room.code); }
 }
 
-const admin = createAdmin({ dataDir: process.env.DATA_DIR || path.join(ROOT, 'data'), rooms, sessions });
+const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, 'data');
+const economy = createEconomy({ dataDir: DATA_DIR });
+const admin = createAdmin({ dataDir: DATA_DIR, rooms, sessions, economy });
+
+// Match rewards come from the server's own results, never from the client
+function payRewards(results) {
+  for (const r of results) {
+    const sess = [...sessions].find((s) => s.conn?.player() === r.player);
+    const id = sess && economy.accountId(sess);
+    if (!id) continue;
+    const reward = economy.award(id, r);
+    sess.send({ t: 'reward', reward, profile: economy.profile(economy.get(id)) });
+  }
+}
+const sendProfile = (sess) => { const id = economy.accountId(sess); if (id) sess.send({ t: 'profile', profile: economy.profile(economy.get(id)) }); };
 
 // ---------- networking ----------
 const wss = new WebSocketServer({ server, maxPayload: 8 * 1024 });
@@ -122,9 +137,27 @@ wss.on('connection', (ws, req) => {
     switch (m.t) {
       case 'auth': {
         sess.user = m.credential ? await verifyGoogle(m.credential) : null;
+        sess.guestToken = typeof m.guestToken === 'string' ? m.guestToken.slice(0, 64) : null;
         if (refuseIfBanned()) return;
         admin.onAuth(sess);
         sess.send({ t: 'authed', user: sess.user && { name: sess.user.name, picture: sess.user.picture, email: sess.user.email }, googleClientId: GOOGLE_CLIENT_ID });
+        sendProfile(sess);
+        return;
+      }
+      // ---- shop (economy service decides; the client only asks) ----
+      case 'profile': sendProfile(sess); return;
+      case 'buy': {
+        const id = economy.accountId(sess);
+        const res = economy.buy(id, String(m.item || ''), m.purchaseId);
+        if (!res.ok) sess.send({ t: 'shopError', key: res.key });
+        sendProfile(sess);
+        return;
+      }
+      case 'equip': {
+        const id = economy.accountId(sess);
+        const res = economy.equip(id, String(m.slot || ''), m.item === null ? null : String(m.item || ''));
+        if (!res.ok) sess.send({ t: 'shopError', key: res.key });
+        sendProfile(sess);
         return;
       }
       case 'quickMatch': enterRoom(sess, quickRoom()); return; // not 'quick': that is quick chat inside a room
@@ -150,9 +183,14 @@ wss.on('connection', (ws, req) => {
       }
       case 'leaveRoom': leaveRoom(sess); return;
       case 'admin': admin.handle(sess, m.cmd, m.args); return; // permissions are checked inside, server-side
-      case 'join':
+      case 'join': {
         if (sess.user) m.name = sess.user.name; // signed-in players play under their Google first name
+        // Cosmetics and restored stats come only from the server, never from the client message
+        const id = economy.accountId(sess);
+        m.cosmetics = id ? economy.cosmetics(economy.get(id)) : {};
+        delete m.restore;
         break;
+      }
     }
     if (!sess.room) {
       // Old clients (and offline fallbacks) that skip the lobby go straight to quick match

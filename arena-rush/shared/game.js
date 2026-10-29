@@ -5,6 +5,7 @@ import { WEAPONS, WEAPON_ORDER, damageAt } from './weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles, collides } from './physics.js';
 import { filterChat, cleanName, QUICK_CHAT } from './chatfilter.js';
 import { CHARACTERS, characterById } from './characters.js';
+import { itemById } from './shop.js';
 
 // Each call creates an independent match (one per room).
 // Game modes. Team modes start from a lobby (choose team, ready up) and have no bots.
@@ -63,7 +64,7 @@ export function createGame(opts = {}) {
   const tell = (pl, key, p = {}) => send(pl, { t: 'chat', sys: true, key, p });
 
   function roster() {
-    return [...players.values()].map((p) => ({ id: p.id, name: p.name, bot: p.bot, color: p.color, kills: p.kills, deaths: p.deaths, ping: p.bot ? 0 : Math.round(p.rtt), character: p.character, team: p.team, ready: p.ready }));
+    return [...players.values()].map((p) => ({ id: p.id, name: p.name, bot: p.bot, color: p.color, kills: p.kills, deaths: p.deaths, ping: p.bot ? 0 : Math.round(p.rtt), character: p.character, team: p.team, ready: p.ready, cosmetics: p.cosmetics || {} }));
   }
   const sendRoster = () => broadcast({ t: 'roster', players: roster(), mode, teamScore: M.teams ? teamScore : null });
 
@@ -271,6 +272,8 @@ export function createGame(opts = {}) {
     match.winner = winner ? winner.id : null;
     match.endsAt = Date.now() + 10000;
     broadcast({ t: 'match', state: 'ended', winner: match.winner, winnerName: winner?.name, winTeam, teamScore: M.teams ? teamScore : null, board, next: match.endsAt, mode });
+    // Hand the results to the host (server.js pays rewards); humans only
+    opts.onMatchEnd?.(humans().map((p) => ({ player: p, kills: p.kills, heads: p.heads, won: M.teams ? !!winTeam && p.team === winTeam : p.id === match.winner })));
   }
 
   function newMatch() {
@@ -400,6 +403,9 @@ export function createGame(opts = {}) {
         }
         me = newPlayer(cleanName(m.name));
         me.character = characterById(m.character).id;
+        // Equipped cosmetics, already validated by the server's economy service
+        me.cosmetics = {};
+        for (const slot of ['outfit', 'camo']) if (typeof m.cosmetics?.[slot] === 'string' && itemById(m.cosmetics[slot])?.slot === slot) me.cosmetics[slot] = m.cosmetics[slot];
         me.ws = ws;
         if (M.teams) assignTeam(me, smallerTeam());
         send(me, { t: 'welcome', id: me.id, color: me.color, match: { state: match.state, endsAt: match.endsAt }, killLimit: KILL_LIMIT, quick: QUICK_CHAT, mode, team: me.team });

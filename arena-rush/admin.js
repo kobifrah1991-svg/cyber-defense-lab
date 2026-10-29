@@ -23,7 +23,7 @@ const COMMANDS = {
   givemoney: { role: 'Owner', usage: '/givemoney <player> <1-10000>' },
 };
 
-export function createAdmin({ dataDir, rooms, sessions }) {
+export function createAdmin({ dataDir, rooms, sessions, economy }) {
   fs.mkdirSync(dataDir, { recursive: true });
   const auditFile = path.join(dataDir, 'admin-audit.log');
   const bansFile = path.join(dataDir, 'bans.json');
@@ -172,9 +172,14 @@ export function createAdmin({ dataDir, rooms, sessions }) {
       case 'givemoney': {
         const n = Number(args[1]);
         if (!Number.isInteger(n) || n < 1 || n > 10000) return bad();
-        // Currency must go through the economy service (stage E), which does not exist yet
-        reply(sess, 'admin.noEconomy');
-        return audit(sess, cmd, target.name, n, 'unavailable');
+        // Currency only moves through the economy service, into the target's account
+        const victim = sessionOf(target);
+        const accId = victim && economy?.accountId(victim);
+        if (!accId) { reply(sess, 'admin.noEconomy'); return audit(sess, cmd, target.name, n, 'no-account'); }
+        if (!economy.grant(accId, n)) return bad();
+        victim.send({ t: 'profile', profile: economy.profile(economy.get(accId)) });
+        victim.send({ t: 'chat', sys: true, key: 'shop.granted', p: { n } });
+        return done(target.name, n);
       }
     }
   }

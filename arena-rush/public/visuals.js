@@ -1,6 +1,7 @@
 // Procedural textures, arena materials and humanoid character models.
 // Everything is drawn on canvases at startup, so the game ships with no image files.
 import * as THREE from 'three';
+import { itemById } from './shared/shop.js';
 
 const TEX = 256;
 
@@ -429,6 +430,19 @@ export function gunMaterials(accent) {
   };
 }
 
+// Weapon camo skin: tints every material of the weapon (cosmetic only)
+export function applyCamo(group, camoId) {
+  const camo = itemById(camoId);
+  if (!camo || camo.slot !== 'camo') return;
+  group.traverse((o) => {
+    if (!o.isMesh) return;
+    o.material = o.material.clone();
+    o.material.color.lerp(new THREE.Color(camo.color), 0.7);
+    if (camo.metal != null) { o.material.metalness = camo.metal; o.material.roughness = 0.3; }
+    if (camo.glow) { o.material.emissive = new THREE.Color(camo.color); o.material.emissiveIntensity = 0.35; }
+  });
+}
+
 // ---------- real weapon models (glTF) ----------
 // axis/muzzle: where the barrel points in the source file; length in metres;
 // back/up: where the hand grips, as fractions from the stock end and from the top.
@@ -463,10 +477,11 @@ export function muzzleDistance(key) {
 export const weaponsReady = () => Object.keys(weaponTemplates).length === Object.keys(WEAPON_MODELS).length;
 
 // Weapon meshes for the view model and for characters' hands
-export function buildGun(key, color, scale = 1) {
+export function buildGun(key, color, scale = 1, camoId = null) {
   if (weaponTemplates[key]) {
     const g = weaponTemplates[key].clone();
     g.scale.setScalar(scale);
+    applyCamo(g, camoId);
     return g;
   }
   const g = new THREE.Group();
@@ -565,7 +580,8 @@ function solveArm(arm, fore, hand, target, pole) {
   aimBone(fore, hand, a.clone().add(dir.multiplyScalar(d)));
 }
 
-export function buildSoldier(color, seed, characterId) {
+export function buildSoldier(color, seed, characterId, cosmetics = {}) {
+  const outfit = itemById(cosmetics.outfit);
   const def = charDefs.get(characterId) || charDefs.values().next().value;
   const t = charTemplates.get(def.file);
   const root = new THREE.Group();
@@ -580,6 +596,8 @@ export function buildSoldier(color, seed, characterId) {
       o.frustumCulled = false;
       o.material = o.material.clone();
       if (def.tint != null) o.material.color.multiply(new THREE.Color(def.tint).lerp(new THREE.Color(0xffffff), 0.35));
+      // Outfit skin recolours clothing and gear, never the face
+      if (outfit && !/head/i.test(o.material.name)) o.material.color.multiply(new THREE.Color(outfit.tint).lerp(new THREE.Color(0xffffff), 0.25));
       o.material.color.lerp(team, 0.12); // light team tint on the uniform
     }
   });

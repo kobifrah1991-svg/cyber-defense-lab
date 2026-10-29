@@ -5,7 +5,8 @@ import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './share
 import { buildArena, setupLighting, buildCharacter, buildGun, loadCharacters, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance } from './visuals.js';
 import { CHARACTERS, characterById } from './shared/characters.js';
 import { t, LANGS, getLang, setLang, detectLang } from './shared/i18n.js';
-const gunModel = (key, scale) => buildGun(key, WEAPONS[key].color, scale);
+import { SHOP, SLOTS } from './shared/shop.js';
+const gunModel = (key, scale, camo) => buildGun(key, WEAPONS[key].color, scale, camo);
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -142,41 +143,52 @@ const modelUrl = (file) => (window.ARENA_MODELS?.[file]) || './models/' + file;
 function rebuildModels() {
   for (const [id, r] of remotes) {
     scene.remove(r.group);
-    remotes.set(id, makeRemote({ id, name: r.name, color: r.color, bot: r.bot, character: r.character }));
+    remotes.set(id, makeRemote({ id, name: r.name, color: r.color, bot: r.bot, character: r.character, cosmetics: r.cosmetics }));
   }
 }
 loadCharacters(CHARACTERS, modelUrl).then(() => { rebuildModels(); refreshPreview(); }).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
+let viewCamo = null;
+function setViewCamo(camo) {
+  if (camo === viewCamo) return;
+  viewCamo = camo;
+  for (const k of WEAPON_ORDER) {
+    vmRoot.remove(viewGuns[k]);
+    viewGuns[k] = gunModel(k, 1, viewCamo);
+    viewGuns[k].visible = k === me.weapon;
+    vmRoot.add(viewGuns[k]);
+  }
+}
 loadWeapons((file) => modelUrl('weapons/' + file)).then(() => {
   for (const k of WEAPON_ORDER) {
     vmRoot.remove(viewGuns[k]);
-    viewGuns[k] = gunModel(k);
+    viewGuns[k] = gunModel(k, 1, viewCamo);
     viewGuns[k].visible = k === me.weapon;
     vmRoot.add(viewGuns[k]);
   }
   rebuildModels();
 }).catch((e) => console.warn('Weapon models unavailable, using simple guns', e));
 function makeRemote(info) {
-  const c = soldierReady() ? buildSoldier(info.color, charSeed++, info.character) : buildCharacter(info.color, charSeed++);
+  const c = soldierReady() ? buildSoldier(info.color, charSeed++, info.character, info.cosmetics || {}) : buildCharacter(info.color, charSeed++);
   const g = c.root;
   const guns = {};
-  for (const k of WEAPON_ORDER) { guns[k] = gunModel(k, 1); guns[k].visible = false; c.gunMount.add(guns[k]); }
+  for (const k of WEAPON_ORDER) { guns[k] = gunModel(k, 1, info.cosmetics?.camo); guns[k].visible = false; c.gunMount.add(guns[k]); }
   const tag = nameSprite(info.name, info.color); tag.position.y = 2.3;
   const shield = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.18, depthWrite: false }));
   shield.position.y = 0.9; shield.visible = false;
   g.add(tag, shield);
   g.visible = false;
   scene.add(g);
-  return { id: info.id, name: info.name, color: info.color, bot: info.bot, character: info.character, group: g, char: c, headPivot: c.neck, arm: c.aim, guns, tag, shield, buf: [], cur: null, weapon: null, lastSeen: 0, lastPos: null };
+  return { id: info.id, name: info.name, color: info.color, bot: info.bot, character: info.character, cosmetics: info.cosmetics, cosKey: JSON.stringify(info.cosmetics || {}), group: g, char: c, headPivot: c.neck, arm: c.aim, guns, tag, shield, buf: [], cur: null, weapon: null, lastSeen: 0, lastPos: null };
 }
 
 function syncRoster(list) {
   roster = list;
   for (const info of list) {
-    if (info.id === me.id) { me.kills = info.kills; me.deaths = info.deaths; continue; }
+    if (info.id === me.id) { me.kills = info.kills; me.deaths = info.deaths; me.color = info.color; setViewCamo(info.cosmetics?.camo || null); continue; }
     const r = remotes.get(info.id);
     if (!r) remotes.set(info.id, makeRemote(info));
-    else if (r.color !== info.color) { scene.remove(r.group); remotes.set(info.id, makeRemote(info)); } // team change
-    if (info.id === me.id) me.color = info.color;
+    else if (r.color !== info.color || r.cosKey !== JSON.stringify(info.cosmetics || {})) { scene.remove(r.group); remotes.set(info.id, makeRemote(info)); } // team or skin change
+    if (info.id === me.id) { me.color = info.color; setViewCamo(info.cosmetics?.camo || null); }
   }
   for (const [id, r] of remotes) if (!list.find((p) => p.id === id)) { scene.remove(r.group); remotes.delete(id); }
   updateScoreboard();
@@ -574,7 +586,7 @@ function connect(name, action = { t: 'quickMatch' }, offline = offlineOnly || !!
     opened = true;
     // Online: sign in (or as a guest), pick a room, then join it. Offline: join the local match directly.
     if (offline) net({ t: 'join', name, character: selectedChar });
-    else net({ t: 'auth', credential: googleCredential });
+    else net({ t: 'auth', credential: googleCredential, guestToken: guestToken() });
   };
   ws.onerror = () => {
     // No server reachable: fall back to practice against bots in the browser
@@ -608,6 +620,16 @@ function onMessage(m) {
       break;
     case 'invited': showInvite(m.from, m.code); break;
     case 'swing': sfx.swing(); break;
+    case 'profile': myProfile = m.profile; showProfile(); renderShop(); break;
+    case 'shopError': $('shop-status').textContent = t(m.key); break;
+    case 'reward':
+      myProfile = m.profile;
+      $('xp-line').textContent = t('end.reward', { credits: m.reward.credits, xp: m.reward.xp, level: m.reward.level }) + (m.reward.levelUp ? t('end.levelUp') : '');
+      $('xp-fill').style.width = Math.round((m.profile.xp / m.profile.need) * 100) + '%';
+      $('next-goal').textContent = t('end.goal', { n: Math.ceil((m.profile.need - m.profile.xp) / 100), level: m.profile.level + 1 });
+      if (m.reward.levelUp) { sfx.kill(); announce('LEVEL UP'); }
+      showProfile();
+      break;
     case 'lobby': onLobby(m); break;
     case 'role':
       myRole = m.role;
@@ -744,7 +766,7 @@ function onMatch(m) {
     const tb = $('end-board').querySelector('tbody');
     tb.innerHTML = '';
     m.board.forEach((p, i) => tb.appendChild(boardRow(p, [p.kills, p.deaths], i + 1)));
-    awardXp(won);
+    if (lobby?.offline) awardXp(won); else { $('xp-line').textContent = ''; $('next-goal').textContent = ''; }
     $('end').classList.remove('hidden');
     const tick = () => {
       const s = Math.max(0, Math.ceil((m.next - Date.now()) / 1000));
@@ -767,6 +789,7 @@ function onLobby(m) {
   if (m.state !== 'lobby') return;
   $('lobby').classList.remove('hidden');
   renderLobby();
+  renderShop();
 }
 function renderLobby() {
   const m = lobbyInfo;
@@ -836,6 +859,7 @@ function awardXp(won) {
   showProfile();
 }
 function showProfile() {
+  if (myProfile) { $('profile').textContent = t('menu.levelCredits', myProfile); return; }
   const prof = store.get('profile', { xp: 0, level: 1 });
   $('profile').textContent = t('menu.level', { level: prof.level, xp: prof.xp });
 }
@@ -943,6 +967,91 @@ function setupTouch() {
 }
 if (isTouch) setupTouch();
 
+// ======================= shop =======================
+// The economy service on the server owns balances; this screen only sends requests.
+let myProfile = null, shopWs = null;
+function uuid() {
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+// A random id kept on this device, so guests keep their credits and skins
+function guestToken() {
+  let tok = store.get('guestToken', null);
+  if (!tok) { tok = uuid(); store.set('guestToken', tok); }
+  return tok;
+}
+function shopSend(msg) {
+  const sock = ws && ws.readyState === 1 && !lobby?.offline ? ws : shopWs;
+  if (sock && sock.readyState === 1) sock.send(JSON.stringify(msg));
+}
+function openShop() {
+  $('shop').classList.remove('hidden');
+  $('shop-status').textContent = '';
+  if (ws && ws.readyState === 1 && !lobby?.offline) { shopSend({ t: 'profile' }); renderShop(); return; }
+  const sv = selectedServer();
+  if (offlineOnly || sv.offline) { myProfile = null; renderShop(); $('shop-status').textContent = t('shop.needOnline'); return; }
+  $('shop-status').textContent = t('shop.connecting');
+  shopWs = new WebSocket(wsUrl(sv));
+  shopWs.onopen = () => shopWs.send(JSON.stringify({ t: 'auth', credential: googleCredential, guestToken: guestToken() }));
+  shopWs.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.t === 'profile') { $('shop-status').textContent = ''; myProfile = m.profile; showProfile(); renderShop(); refreshPreview(); }
+    if (m.t === 'shopError') $('shop-status').textContent = t(m.key);
+  };
+  shopWs.onerror = () => { $('shop-status').textContent = t('shop.error'); };
+}
+function closeShop() {
+  $('shop').classList.add('hidden');
+  if (shopWs) { shopWs.close(); shopWs = null; }
+  refreshPreview();
+}
+function renderShop() {
+  if ($('shop').classList.contains('hidden')) return;
+  $('shop-balance').textContent = myProfile ? t('shop.balance', { n: myProfile.credits }) : '';
+  const box = $('shop-items');
+  box.replaceChildren();
+  for (const slot of SLOTS) {
+    const h = document.createElement('h3');
+    h.textContent = t('shop.slot.' + slot);
+    const grid = document.createElement('div');
+    grid.className = 'shop-grid';
+    for (const item of SHOP.filter((i) => i.slot === slot)) {
+      const owned = myProfile?.owned.includes(item.id);
+      const equipped = myProfile?.equipped?.[slot] === item.id;
+      const card = document.createElement('div');
+      card.className = 'shop-card' + (equipped ? ' on' : '');
+      const sw = document.createElement('span');
+      sw.className = 'swatch' + (item.glow ? ' glow' : '');
+      sw.style.background = '#' + (item.tint ?? item.color).toString(16).padStart(6, '0');
+      const name = document.createElement('b');
+      name.textContent = t('shop.' + item.id);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.disabled = !myProfile;
+      if (!owned) {
+        btn.textContent = t('shop.buy', { n: item.price });
+        btn.disabled = !myProfile || myProfile.credits < item.price;
+        btn.addEventListener('click', () => { btn.disabled = true; shopSend({ t: 'buy', item: item.id, purchaseId: uuid() }); });
+      } else if (equipped) {
+        btn.textContent = t('shop.unequip');
+        btn.addEventListener('click', () => shopSend({ t: 'equip', slot, item: null }));
+      } else {
+        btn.textContent = t('shop.equip');
+        btn.addEventListener('click', () => shopSend({ t: 'equip', slot, item: item.id }));
+      }
+      const tag = document.createElement('small');
+      tag.textContent = equipped ? t('shop.equipped') : '';
+      card.append(sw, name, tag, btn);
+      grid.appendChild(card);
+    }
+    box.append(h, grid);
+  }
+}
+$('shop-btn').addEventListener('click', openShop);
+$('shop-close').addEventListener('click', closeShop);
+
 // ======================= admin panel =======================
 // Convenience UI for staff. It only sends the same requests as the chat commands;
 // every permission and limit is enforced by the server.
@@ -1018,6 +1127,7 @@ function applyLang(lang) {
   updateScoreboard();
   if (roomCode) $('scoreboard').querySelector('h2').textContent = t('hud.scoreboardRoom', { code: roomCode });
   renderLobby();
+  renderShop();
 }
 for (const sel of document.querySelectorAll('.lang-select')) {
   for (const [code, info] of Object.entries(LANGS)) sel.append(new Option(info.name, code));
@@ -1205,8 +1315,9 @@ function refreshPreview() {
   if (!preview.scene) return;
   if (preview.model) preview.scene.remove(preview.model.root);
   const color = 0xff2e88;
-  const m = soldierReady() ? buildSoldier(color, 1, selectedChar) : buildCharacter(color, 1);
-  m.gunMount.add(gunModel('rifle', 1));
+  const eq = myProfile?.equipped || {};
+  const m = soldierReady() ? buildSoldier(color, 1, selectedChar, eq) : buildCharacter(color, 1);
+  m.gunMount.add(gunModel('rifle', 1, eq.camo));
   preview.model = m;
   preview.scene.add(m.root);
   const def = characterById(selectedChar);
