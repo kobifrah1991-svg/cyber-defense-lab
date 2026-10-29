@@ -48,6 +48,8 @@ const S = {
   'menu.tabPlay': { he: 'שחק עכשיו', en: 'Play now', ru: 'Играть', ar: 'العب الآن' },
   'menu.tabFriends': { he: 'עם חברים', en: 'With friends', ru: 'С друзьями', ar: 'مع الأصدقاء' },
   'menu.tabServers': { he: 'שרתים', en: 'Servers', ru: 'Серверы', ar: 'الخوادم' },
+  'menu.loadingChar': { he: 'טוען דמות…', en: 'Loading character…', ru: 'Загрузка персонажа…', ar: 'جارٍ تحميل الشخصية…' },
+  'menu.charFailed': { he: 'הדמות לא נטענה. בדוק את החיבור ולחץ על הדמות שוב.', en: 'The character did not load. Check your connection and tap the character again.', ru: 'Персонаж не загрузился. Проверьте связь и выберите его снова.', ar: 'لم يتم تحميل الشخصية. تحقق من الاتصال واضغط عليها مرة أخرى.' },
   'menu.dragHint': { he: 'גרור לסיבוב', en: 'Drag to rotate', ru: 'Потяните, чтобы повернуть', ar: 'اسحب للتدوير' },
   'menu.hintPractice': { he: 'אימון נגד בוטים על המכשיר הזה. כדי לשחק עם חברים באינטרנט, עבור ללשונית "עם חברים".', en: 'Practice against bots on this device. To play with friends online, open the "With friends" tab.', ru: 'Тренировка с ботами на этом устройстве. Чтобы играть с друзьями по сети, откройте вкладку «С друзьями».', ar: 'تدريب ضد الروبوتات على هذا الجهاز. للعب مع الأصدقاء عبر الإنترنت افتح تبويب "مع الأصدقاء".' },
   'menu.hintOnline': { he: 'משחק מהיר בשרת שנבחר: מצטרפים לחדר הציבורי הכי מלא.', en: 'Quick match on the selected server: joins the fullest public room.', ru: 'Быстрая игра на выбранном сервере: вход в самую заполненную комнату.', ar: 'مباراة سريعة على الخادم المختار: تنضم إلى أكثر غرفة عامة امتلاءً.' },

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MAP } from './shared/map.js';
 import { WEAPONS, WEAPON_ORDER } from './shared/weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './shared/physics.js';
-import { buildArena, setupLighting, buildCharacter, buildGun, loadCharacters, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance, setHold, buildFirstPerson, updateFirstPerson } from './visuals.js';
+import { buildArena, setupLighting, buildCharacter, buildGun, registerCharacters, loadCharacter, loadAnimations, characterLoaded, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance, setHold, buildFirstPerson, updateFirstPerson } from './visuals.js';
 import { CHARACTERS, characterById } from './shared/characters.js';
 import { t, LANGS, getLang, setLang, detectLang } from './shared/i18n.js';
 import { SHOP, SLOTS } from './shared/shop.js';
@@ -161,7 +161,18 @@ function refreshFirstPerson() {
   fpBody = buildFirstPerson(selectedChar, eq, me.color ?? 0xffffff);
   vmScene.add(fpBody.root);
 }
-loadCharacters(CHARACTERS, modelUrl).then(() => { rebuildModels(); refreshPreview(); }).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
+registerCharacters(CHARACTERS);
+const animsLoad = loadAnimations(CHARACTERS, modelUrl).catch((e) => { console.warn('Animations unavailable', e); throw e; });
+// Load a character's model when it is needed; players and the preview switch to it as soon as it arrives
+const charRequested = new Set(), charFailed = new Set();
+function ensureCharacter(id) {
+  id = characterById(id).id;
+  if (charRequested.has(id)) return;
+  charRequested.add(id);
+  Promise.all([animsLoad, loadCharacter(id, modelUrl)])
+    .then(() => { rebuildModels(); refreshPreview(); fpKey = ''; })
+    .catch((e) => { console.warn('Character model unavailable', id, e); charRequested.delete(id); charFailed.add(id); refreshPreview(); });
+}
 let viewCamo = null;
 function setViewCamo(camo) {
   if (camo === viewCamo) return;
@@ -200,6 +211,7 @@ function syncRoster(list) {
   roster = list;
   for (const info of list) {
     if (info.id === me.id) { me.kills = info.kills; me.deaths = info.deaths; me.color = info.color; setViewCamo(info.cosmetics?.camo || null); continue; }
+    ensureCharacter(info.character);
     const r = remotes.get(info.id);
     if (!r) remotes.set(info.id, makeRemote(info));
     else if (r.color !== info.color || r.cosKey !== JSON.stringify(info.cosmetics || {})) { scene.remove(r.group); remotes.set(info.id, makeRemote(info)); } // team or skin change
@@ -587,7 +599,7 @@ function updateVoiceHud() {
   $('voice-text').textContent = (talking ? t('voice.talking') : t(isTouch ? 'voice.holdTouch' : 'voice.holdKey')) + ' · 🔊 ' + voice.connected() + '/' + others;
 }
 setInterval(() => { if (me.id) updateVoiceHud(); }, 1000);
-if (new URLSearchParams(location.search).has('debug')) window.arenaDebug = { voice };
+if (new URLSearchParams(location.search).has('debug')) window.arenaDebug = { voice, me, remotes };
 async function setTalking(on) {
   if (on === talking || !me.id || lobby?.offline || !voiceOn) return;
   talking = on;
@@ -1426,11 +1438,20 @@ function refreshPreview() {
   if (preview.model) preview.scene.remove(preview.model.root);
   const color = 0xff2e88;
   const eq = myProfile?.equipped || {};
-  const m = soldierReady() ? buildSoldier(color, 1, selectedChar, eq) : buildCharacter(color, 1);
-  m.gunMount.add(gunModel('rifle', 1, eq.camo));
-  preview.model = m;
-  preview.scene.add(m.root);
   const def = characterById(selectedChar);
+  // Show the chosen character itself, never a stand-in: wait (with a message) until its model is in
+  const ready = soldierReady() && characterLoaded(def.id);
+  preview.model = null;
+  if (ready) {
+    const m = buildSoldier(color, 1, def.id, eq);
+    m.gunMount.add(gunModel('rifle', 1, eq.camo));
+    preview.model = m;
+    preview.scene.add(m.root);
+  }
+  const failed = !ready && charFailed.has(def.id);
+  if (!ready && !failed) ensureCharacter(def.id);
+  $('char-loading').textContent = t(failed ? 'menu.charFailed' : 'menu.loadingChar');
+  $('char-loading').classList.toggle('hidden', ready);
   $('char-name').textContent = t('char.' + def.id);
   $('char-role').textContent = t('char.' + def.id + '.role');
   $('char-kind').textContent = t(def.civ ? 'char.kindCivilian' : 'char.kindSoldier');
@@ -1441,6 +1462,7 @@ function refreshPreview() {
 function chooseChar(id) {
   selectedChar = characterById(id).id;
   store.set('character', selectedChar);
+  charFailed.delete(selectedChar); // choosing again retries a failed download
   refreshPreview();
 }
 function stepChar(dir) {

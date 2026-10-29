@@ -85,6 +85,7 @@ code { direction: rtl; unicode-bidi: plaintext; background: rgba(255,255,255,.08
 .kind.civ { background: rgba(0,229,255,.15); color: #8ff3ff; border-color: rgba(0,229,255,.5); }
 .char-name { margin-top: 6px; font-size: 28px; font-weight: 900; }
 .char-role { color: var(--muted); font-size: 14px; min-height: 1.3em; }
+.char-loading { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); padding: 10px 16px; border-radius: 12px; background: rgba(5,6,16,.75); border: 1px solid rgba(0,229,255,.4); color: var(--text); font-weight: 700; text-align: center; max-width: 80%; }
 .drag-hint { position: absolute; top: 10px; inset-inline-start: 12px; font-size: 12px; color: var(--muted); background: rgba(0,0,0,.35); padding: 3px 8px; border-radius: 999px; }
 .char-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .char-card { display: flex; flex-direction: column; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); border-radius: 12px; padding: 8px 4px; font-size: 12px; font-weight: 700; min-width: 0; transition: border-color .15s, transform .1s; }
@@ -496,6 +497,7 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
             <div id="char-role" class="char-role"></div>
           </div>
           <span class="drag-hint" data-i18n="menu.dragHint"></span>
+          <div id="char-loading" class="char-loading hidden" role="status"></div>
         </div>
         <h2 class="sub" data-i18n="menu.charSelect"></h2>
         <div id="char-list" class="char-list" role="radiogroup"></div>

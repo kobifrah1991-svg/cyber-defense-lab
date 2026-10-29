@@ -512,16 +512,25 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 const charTemplates = new Map();
 const charDefs = new Map();
 const animSets = new Map(); // anims file key -> { Idle, Walk, Run } clips
-export async function loadCharacters(list, urlFor) {
-  const loader = new GLTFLoader();
-  const files = [...new Map(list.map((c) => [c.file, c.height || 1.8])).entries()];
-  await Promise.all(files.map(async ([file, height]) => {
-    const gltf = await loader.loadAsync(urlFor(file));
-    const box = new THREE.Box3().setFromObject(gltf.scene);
-    const scale = height / (box.max.y - box.min.y);
-    charTemplates.set(file, { scene: gltf.scene, animations: gltf.animations, scale, footY: -box.min.y * scale });
-  }));
-  // Separate animation files (e.g. Rocketbox idle/walk/run), shared by characters with the same skeleton
+// Characters load one by one, on demand (the chosen one and those in the match), so a phone never
+// holds all ten models at once and one failed download can't take the others down with it.
+const loader = new GLTFLoader();
+const charLoads = new Map(); // file -> promise
+export function registerCharacters(list) { for (const c of list) charDefs.set(c.id, c); }
+export function loadCharacter(id, urlFor) {
+  const def = charDefs.get(id);
+  if (!def) return Promise.reject(new Error('unknown character ' + id));
+  if (!charLoads.has(def.file)) {
+    charLoads.set(def.file, loader.loadAsync(urlFor(def.file)).then((gltf) => {
+      const box = new THREE.Box3().setFromObject(gltf.scene);
+      const scale = (def.height || 1.8) / (box.max.y - box.min.y);
+      charTemplates.set(def.file, { scene: gltf.scene, animations: gltf.animations, scale, footY: -box.min.y * scale });
+    }).catch((e) => { charLoads.delete(def.file); throw e; })); // a later request retries
+  }
+  return charLoads.get(def.file);
+}
+// Separate animation files (Rocketbox idle/walk/run), shared by characters with the same skeleton
+export async function loadAnimations(list, urlFor) {
   const sets = new Map();
   for (const c of list) if (c.anims) sets.set(JSON.stringify(c.anims), c.anims);
   await Promise.all([...sets.entries()].map(async ([key, anims]) => {
@@ -541,9 +550,17 @@ export async function loadCharacters(list, urlFor) {
     }));
     animSets.set(key, out);
   }));
-  for (const c of list) charDefs.set(c.id, c);
 }
-export const soldierReady = () => charDefs.size > 0; // set once models and clips have all loaded
+export const characterLoaded = (id) => charTemplates.has(charDefs.get(id)?.file);
+// Real soldiers can be drawn once the clips and at least one model are in
+export const soldierReady = () => animSets.size > 0 && charTemplates.size > 0;
+// A character whose model isn't loaded yet borrows a loaded one (same gender if possible) until it arrives
+function loadedDef(id) {
+  const want = charDefs.get(id) || charDefs.values().next().value;
+  if (charTemplates.has(want.file)) return want;
+  const loaded = [...charDefs.values()].filter((d) => charTemplates.has(d.file));
+  return loaded.find((d) => !!d.female === !!want.female) || loaded[0];
+}
 
 const _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
 
@@ -582,7 +599,7 @@ function solveArm(arm, fore, hand, target, pole) {
 
 export function buildSoldier(color, seed, characterId, cosmetics = {}) {
   const outfit = itemById(cosmetics.outfit);
-  const def = charDefs.get(characterId) || charDefs.values().next().value;
+  const def = loadedDef(characterId);
   const t = charTemplates.get(def.file);
   const root = new THREE.Group();
   const model = SkeletonUtils.clone(t.scene);
