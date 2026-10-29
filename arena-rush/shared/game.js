@@ -4,6 +4,7 @@ import { MAP } from './map.js';
 import { WEAPONS, WEAPON_ORDER, damageAt } from './weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './physics.js';
 import { filterChat, cleanName, QUICK_CHAT } from './chatfilter.js';
+import { CHARACTERS, characterById } from './characters.js';
 
 // Each call creates an independent match (one per room).
 export function createGame(opts = {}) {
@@ -49,7 +50,7 @@ export function createGame(opts = {}) {
   const sys = (text) => broadcast({ t: 'chat', sys: true, text });
 
   function roster() {
-    return [...players.values()].map((p) => ({ id: p.id, name: p.name, bot: p.bot, color: p.color, kills: p.kills, deaths: p.deaths, ping: p.bot ? 0 : Math.round(p.rtt) }));
+    return [...players.values()].map((p) => ({ id: p.id, name: p.name, bot: p.bot, color: p.color, kills: p.kills, deaths: p.deaths, ping: p.bot ? 0 : Math.round(p.rtt), character: p.character }));
   }
   const sendRoster = () => broadcast({ t: 'roster', players: roster() });
 
@@ -198,7 +199,7 @@ export function createGame(opts = {}) {
     if (bots.length < want && total < MAX_PLAYERS && humans().length > 0) {
       const used = new Set(bots.map((b) => b.name));
       const name = '🤖 ' + (BOT_NAMES.find((n) => !used.has('🤖 ' + n)) || 'בוט' + nextId);
-      newPlayer(name, true);
+      newPlayer(name, true).character = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)].id;
       sendRoster();
     } else if (bots.length > want) {
       const b = bots[bots.length - 1];
@@ -296,6 +297,7 @@ export function createGame(opts = {}) {
           if (bot) { players.delete(bot.id); broadcast({ t: 'leave', id: bot.id }); }
         }
         me = newPlayer(cleanName(m.name));
+        me.character = characterById(m.character).id;
         me.ws = ws;
         send(me, { t: 'welcome', id: me.id, color: me.color, match: { state: match.state, endsAt: match.endsAt }, killLimit: KILL_LIMIT, quick: QUICK_CHAT });
         sendRoster();

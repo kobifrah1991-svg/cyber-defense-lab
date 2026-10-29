@@ -20,7 +20,8 @@ const server = http.createServer((req, res) => {
   const url = decodeURIComponent((req.url || '/').split('?')[0]);
   if (url === '/health') { res.writeHead(200); res.end('ok'); return; }
   if (url === '/config') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    // Readable from other servers' start screens, so players can compare servers
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
     res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID, online: sessions.size, rooms: rooms.size }));
     return;
   }

@@ -59,37 +59,64 @@
 
   <!-- Main menu -->
   <div id="menu">
-    <div class="menu-card">
-      <h1>ARENA <span>RUSH</span></h1>
-      <p class="tag">יריות בגוף ראשון · כולם נגד כולם · ראשון ל-25 הריגות</p>
-      <div id="profile"></div>
-      <label>שם בזירה <input id="name" maxlength="16" placeholder="הכינוי שלך"></label>
-      <label>רגישות עכבר <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
-      <label>זמן ביום <select id="time"><option value="day">יום</option><option value="night">לילה (ניאון)</option></select></label>
-      <div id="gsi"></div>
-      <p id="account"></p>
-      <button id="play">משחק מהיר</button>
-      <div class="row">
-        <button id="create" class="secondary">חדר פרטי חדש</button>
-      </div>
-      <div class="row">
-        <input id="code" maxlength="5" placeholder="קוד חדר" autocomplete="off">
-        <button id="join-code" class="secondary">הצטרף</button>
-      </div>
-      <p id="online-count"></p>
-      <p id="menu-status"></p>
-      <details>
-        <summary>שליטה</summary>
-        <ul>
-          <li><b>WASD</b> תנועה · <b>רווח</b> קפיצה</li>
-          <li><b>לחיצה שמאלית</b> ירי · <b>ימנית</b> כוונת / סקופ</li>
-          <li><b>1-4</b> או גלגלת: רובה סער, שוטגאן, צלף, אקדח · <b>R</b> טעינה</li>
-          <li><b>Enter</b> צ'אט · <b>B</b> הודעות מהירות · <b>Tab</b> ניקוד</li>
-          <li>הזמנת חבר: <code>/invite חבר@gmail.com</code> · <code>/room</code> לקוד החדר</li>
-          <li>פקודות צ'אט: <code>/mute שם</code> · <code>/unmute שם</code> · <code>/report שם סיבה</code></li>
-        </ul>
-      </details>
-      <p class="safe">🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.</p>
+    <div class="menu-shell">
+      <header class="menu-head">
+        <h1>ARENA <span>RUSH</span></h1>
+        <div id="profile"></div>
+      </header>
+
+      <section class="panel char-panel" aria-label="בחירת דמות">
+        <h2>בחירת דמות</h2>
+        <div class="preview-wrap">
+          <canvas id="char-preview" width="480" height="560"></canvas>
+          <button id="char-prev" class="arrow" aria-label="דמות קודמת">›</button>
+          <button id="char-next" class="arrow" aria-label="דמות הבאה">‹</button>
+        </div>
+        <div id="char-name" class="char-name"></div>
+        <div id="char-role" class="char-role"></div>
+        <div id="char-list" class="char-list"></div>
+      </section>
+
+      <section class="panel play-panel" aria-label="הגדרות משחק">
+        <label>שם שחקן <input id="name" maxlength="16" placeholder="הכינוי שלך" autocomplete="nickname"></label>
+
+        <div class="server-head">
+          <h2>שרת</h2>
+          <button id="servers-refresh" class="link" type="button">רענון</button>
+        </div>
+        <div id="servers" class="servers" role="radiogroup" aria-label="בחירת שרת"></div>
+
+        <div id="gsi"></div>
+        <p id="account"></p>
+        <button id="play">משחק מהיר</button>
+        <div class="row online-only">
+          <button id="create" class="secondary">חדר פרטי חדש</button>
+        </div>
+        <div class="row online-only">
+          <input id="code" maxlength="5" placeholder="קוד חדר" autocomplete="off">
+          <button id="join-code" class="secondary">הצטרף</button>
+        </div>
+        <p id="online-count"></p>
+        <p id="menu-status"></p>
+
+        <details>
+          <summary>הגדרות</summary>
+          <label>רגישות עכבר <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+          <label>זמן ביום <select id="time"><option value="day">יום</option><option value="night">לילה (ניאון)</option></select></label>
+        </details>
+        <details>
+          <summary>שליטה</summary>
+          <ul>
+            <li><b>WASD</b> תנועה · <b>רווח</b> קפיצה</li>
+            <li><b>לחיצה שמאלית</b> ירי · <b>ימנית</b> כוונת / סקופ</li>
+            <li><b>1-4</b> או גלגלת: רובה סער, שוטגאן, צלף, אקדח · <b>R</b> טעינה</li>
+            <li><b>Enter</b> צ'אט · <b>B</b> הודעות מהירות · <b>Tab</b> ניקוד</li>
+            <li>הזמנת חבר: <code>/invite חבר@gmail.com</code> · <code>/room</code> לקוד החדר</li>
+            <li>פקודות צ'אט: <code>/mute שם</code> · <code>/unmute שם</code> · <code>/report שם סיבה</code></li>
+          </ul>
+        </details>
+        <p class="safe">🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.</p>
+      </section>
     </div>
   </div>
 

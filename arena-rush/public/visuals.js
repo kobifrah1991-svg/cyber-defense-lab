@@ -492,14 +492,20 @@ export function buildGun(key, color, scale = 1) {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
-let soldierTemplate = null;
-export async function loadSoldier(url) {
-  const gltf = await new GLTFLoader().loadAsync(url);
-  const box = new THREE.Box3().setFromObject(gltf.scene);
-  soldierTemplate = { scene: gltf.scene, animations: gltf.animations, scale: 1.8 / (box.max.y - box.min.y) };
-  return soldierTemplate;
+// One template per model file, shared by every character that uses it
+const charTemplates = new Map();
+const charDefs = new Map();
+export async function loadCharacters(list, urlFor) {
+  const loader = new GLTFLoader();
+  const files = [...new Set(list.map((c) => c.file))];
+  await Promise.all(files.map(async (file) => {
+    const gltf = await loader.loadAsync(urlFor(file));
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    charTemplates.set(file, { scene: gltf.scene, animations: gltf.animations, scale: 1.8 / (box.max.y - box.min.y) });
+  }));
+  for (const c of list) charDefs.set(c.id, c);
 }
-export const soldierReady = () => !!soldierTemplate;
+export const soldierReady = () => charTemplates.size > 0;
 
 const _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
 
@@ -536,8 +542,9 @@ function solveArm(arm, fore, hand, target, pole) {
   aimBone(fore, hand, a.clone().add(dir.multiplyScalar(d)));
 }
 
-export function buildSoldier(color, seed) {
-  const t = soldierTemplate;
+export function buildSoldier(color, seed, characterId) {
+  const def = charDefs.get(characterId) || charDefs.values().next().value;
+  const t = charTemplates.get(def.file);
   const root = new THREE.Group();
   const model = SkeletonUtils.clone(t.scene);
   model.scale.setScalar(t.scale);
@@ -548,11 +555,17 @@ export function buildSoldier(color, seed) {
       o.castShadow = true;
       o.frustumCulled = false;
       o.material = o.material.clone();
+      if (def.tint != null) o.material.color.multiply(new THREE.Color(def.tint).lerp(new THREE.Color(0xffffff), 0.35));
       o.material.color.lerp(team, 0.12); // light team tint on the uniform
     }
   });
   root.add(model);
-  const bone = (n) => model.getObjectByName('mixamorig' + n);
+  // Mixamo names first, then any bone whose name ends the same way (other rigs)
+  const bone = (n) => {
+    let found = model.getObjectByName('mixamorig' + n);
+    if (!found) model.traverse((o) => { if (!found && o.isBone && o.name.toLowerCase().endsWith(n.toLowerCase())) found = o; });
+    return found;
+  };
   const bones = {
     rArm: bone('RightArm'), rFore: bone('RightForeArm'), rHand: bone('RightHand'),
     lArm: bone('LeftArm'), lFore: bone('LeftForeArm'), lHand: bone('LeftHand'),
@@ -561,14 +574,18 @@ export function buildSoldier(color, seed) {
   // Team-coloured glowing armband so players are easy to tell apart
   const band = new THREE.Mesh(new THREE.TorusGeometry(0.06 / t.scale, 0.015 / t.scale, 6, 16), new THREE.MeshBasicMaterial({ color }));
   band.rotation.x = Math.PI / 2;
-  bones.lArm.add(band);
-  band.position.y = 0.12 / t.scale;
+  if (bones.lArm) { bones.lArm.add(band); band.position.y = 0.12 / t.scale; }
 
   const mixer = new THREE.AnimationMixer(model);
-  const clip = (n) => mixer.clipAction(THREE.AnimationClip.findByName(t.animations, n));
-  const actions = { Idle: clip('Idle'), Walk: clip('Walk'), Run: clip('Run') };
-  for (const a of Object.values(actions)) { a.play(); a.setEffectiveWeight(0); }
-  actions.Idle.setEffectiveWeight(1);
+  // Find clips by name, tolerating other naming (e.g. "idle", "Armature|Run")
+  const find = (n) => t.animations.find((a) => a.name.toLowerCase().includes(n.toLowerCase()));
+  const actions = {};
+  for (const n of ['Idle', 'Walk', 'Run']) {
+    const c = find(n) || find('Idle') || t.animations[0];
+    actions[n] = c ? mixer.clipAction(c) : null;
+  }
+  for (const a of Object.values(actions)) if (a) { a.play(); a.setEffectiveWeight(0); }
+  actions.Idle?.setEffectiveWeight(1);
   mixer.setTime(seed * 0.37); // desync idle cycles
 
   // Aim pivot at chest height carries the weapon; hands are solved onto it every frame
@@ -588,13 +605,15 @@ function updateSoldier(c, speed, dt) {
   const k = Math.min(1, dt * 8);
   ['Idle', 'Walk', 'Run'].forEach((n, i) => {
     const a = c.actions[n];
-    a.setEffectiveWeight(a.getEffectiveWeight() + (w[i] - a.getEffectiveWeight()) * k);
+    if (a) a.setEffectiveWeight(a.getEffectiveWeight() + (w[i] - a.getEffectiveWeight()) * k);
   });
-  c.actions.Run.timeScale = Math.max(0.7, speed / 6);
-  c.actions.Walk.timeScale = Math.max(0.7, speed / 2.5);
+  if (c.actions.Run) c.actions.Run.timeScale = Math.max(0.7, speed / 6);
+  if (c.actions.Walk) c.actions.Walk.timeScale = Math.max(0.7, speed / 2.5);
   c.mixer.update(dt);
   c.root.updateMatrixWorld(true);
   const b = c.bones, wp = (o) => o.getWorldPosition(new THREE.Vector3());
+  // Models without Mixamo arm bones keep their own pose
+  if (!b.rArm || !b.rFore || !b.rHand || !b.lArm || !b.lFore || !b.lHand) return;
   solveArm(b.rArm, b.rFore, b.rHand, wp(c.grip), wp(c.rPole));
   solveArm(b.lArm, b.lFore, b.lHand, wp(c.fore), wp(c.lPole));
 }

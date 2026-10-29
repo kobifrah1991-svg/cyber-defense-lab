@@ -49,6 +49,43 @@ code { direction: rtl; unicode-bidi: plaintext; background: rgba(255,255,255,.08
 .safe { font-size: 12px; color: var(--muted); border-top: 1px solid rgba(255,255,255,.1); padding-top: 10px; }
 #profile { text-align: center; color: var(--cyan); font-weight: 700; }
 
+/* ---------- start screen ---------- */
+#menu { place-items: start center; overflow-y: auto; }
+.menu-shell { width: min(1040px, 100%); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin: auto; padding-block: 12px; }
+.menu-head { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.menu-head h1 { text-align: start; }
+.panel { background: var(--panel); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 18px; backdrop-filter: blur(8px); min-width: 0; }
+.panel h2 { margin: 0 0 10px; font-size: 15px; letter-spacing: 1px; color: var(--muted); font-weight: 600; }
+.preview-wrap { position: relative; border-radius: 14px; overflow: hidden; background: radial-gradient(circle at 50% 35%, rgba(0,229,255,.18), transparent 60%), linear-gradient(180deg, #1b2348, #0d1024); }
+#char-preview { display: block; width: 100%; height: auto; aspect-ratio: 480 / 560; max-height: 52vh; object-fit: contain; cursor: grab; touch-action: none; }
+.arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); background: rgba(10,12,30,.6); color: #fff; font-size: 26px; line-height: 1; }
+#char-prev { right: 10px; }
+#char-next { left: 10px; }
+.arrow:focus-visible, .char-card:focus-visible, .server:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.char-name { margin-top: 12px; font-size: 24px; font-weight: 900; }
+.char-role { color: var(--muted); font-size: 14px; min-height: 1.3em; }
+.char-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.char-card { border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.3); color: var(--text); border-radius: 12px; padding: 10px 6px; font-size: 13px; font-weight: 700; }
+.char-card[aria-checked="true"] { border-color: var(--pink); background: rgba(255,46,136,.18); box-shadow: 0 0 14px rgba(255,46,136,.35); }
+.server-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px; }
+button.link { background: none; border: 0; color: var(--cyan); font-size: 13px; padding: 4px; }
+.servers { display: flex; flex-direction: column; gap: 8px; }
+.server { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; text-align: start; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.3); color: var(--text); border-radius: 12px; padding: 10px 12px; }
+.server[aria-checked="true"] { border-color: var(--cyan); background: rgba(0,229,255,.12); }
+.server .dot { width: 10px; height: 10px; border-radius: 50%; background: #666; }
+.server .dot.ok { background: #00e676; box-shadow: 0 0 8px #00e676; }
+.server .dot.slow { background: var(--yellow); }
+.server .dot.down { background: #ff1744; }
+.server b { display: block; font-size: 15px; }
+.server small { color: var(--muted); font-size: 12px; }
+.server .meta { text-align: end; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; direction: ltr; }
+.server .meta strong { display: block; color: var(--text); font-size: 14px; }
+.play-panel #play { margin-top: 14px; }
+@media (max-width: 860px) {
+  .menu-shell { grid-template-columns: minmax(0, 1fr); }
+  #char-preview { max-height: 38vh; }
+}
+
 /* ---------- HUD ---------- */
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 #crosshair, #hitmarker { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
@@ -236,37 +273,64 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
 
   <!-- Main menu -->
   <div id="menu">
-    <div class="menu-card">
-      <h1>ARENA <span>RUSH</span></h1>
-      <p class="tag">יריות בגוף ראשון · כולם נגד כולם · ראשון ל-25 הריגות</p>
-      <div id="profile"></div>
-      <label>שם בזירה <input id="name" maxlength="16" placeholder="הכינוי שלך"></label>
-      <label>רגישות עכבר <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
-      <label>זמן ביום <select id="time"><option value="day">יום</option><option value="night">לילה (ניאון)</option></select></label>
-      <div id="gsi"></div>
-      <p id="account"></p>
-      <button id="play">משחק מהיר</button>
-      <div class="row">
-        <button id="create" class="secondary">חדר פרטי חדש</button>
-      </div>
-      <div class="row">
-        <input id="code" maxlength="5" placeholder="קוד חדר" autocomplete="off">
-        <button id="join-code" class="secondary">הצטרף</button>
-      </div>
-      <p id="online-count"></p>
-      <p id="menu-status"></p>
-      <details>
-        <summary>שליטה</summary>
-        <ul>
-          <li><b>WASD</b> תנועה · <b>רווח</b> קפיצה</li>
-          <li><b>לחיצה שמאלית</b> ירי · <b>ימנית</b> כוונת / סקופ</li>
-          <li><b>1-4</b> או גלגלת: רובה סער, שוטגאן, צלף, אקדח · <b>R</b> טעינה</li>
-          <li><b>Enter</b> צ'אט · <b>B</b> הודעות מהירות · <b>Tab</b> ניקוד</li>
-          <li>הזמנת חבר: <code>/invite חבר@gmail.com</code> · <code>/room</code> לקוד החדר</li>
-          <li>פקודות צ'אט: <code>/mute שם</code> · <code>/unmute שם</code> · <code>/report שם סיבה</code></li>
-        </ul>
-      </details>
-      <p class="safe">🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.</p>
+    <div class="menu-shell">
+      <header class="menu-head">
+        <h1>ARENA <span>RUSH</span></h1>
+        <div id="profile"></div>
+      </header>
+
+      <section class="panel char-panel" aria-label="בחירת דמות">
+        <h2>בחירת דמות</h2>
+        <div class="preview-wrap">
+          <canvas id="char-preview" width="480" height="560"></canvas>
+          <button id="char-prev" class="arrow" aria-label="דמות קודמת">›</button>
+          <button id="char-next" class="arrow" aria-label="דמות הבאה">‹</button>
+        </div>
+        <div id="char-name" class="char-name"></div>
+        <div id="char-role" class="char-role"></div>
+        <div id="char-list" class="char-list"></div>
+      </section>
+
+      <section class="panel play-panel" aria-label="הגדרות משחק">
+        <label>שם שחקן <input id="name" maxlength="16" placeholder="הכינוי שלך" autocomplete="nickname"></label>
+
+        <div class="server-head">
+          <h2>שרת</h2>
+          <button id="servers-refresh" class="link" type="button">רענון</button>
+        </div>
+        <div id="servers" class="servers" role="radiogroup" aria-label="בחירת שרת"></div>
+
+        <div id="gsi"></div>
+        <p id="account"></p>
+        <button id="play">משחק מהיר</button>
+        <div class="row online-only">
+          <button id="create" class="secondary">חדר פרטי חדש</button>
+        </div>
+        <div class="row online-only">
+          <input id="code" maxlength="5" placeholder="קוד חדר" autocomplete="off">
+          <button id="join-code" class="secondary">הצטרף</button>
+        </div>
+        <p id="online-count"></p>
+        <p id="menu-status"></p>
+
+        <details>
+          <summary>הגדרות</summary>
+          <label>רגישות עכבר <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+          <label>זמן ביום <select id="time"><option value="day">יום</option><option value="night">לילה (ניאון)</option></select></label>
+        </details>
+        <details>
+          <summary>שליטה</summary>
+          <ul>
+            <li><b>WASD</b> תנועה · <b>רווח</b> קפיצה</li>
+            <li><b>לחיצה שמאלית</b> ירי · <b>ימנית</b> כוונת / סקופ</li>
+            <li><b>1-4</b> או גלגלת: רובה סער, שוטגאן, צלף, אקדח · <b>R</b> טעינה</li>
+            <li><b>Enter</b> צ'אט · <b>B</b> הודעות מהירות · <b>Tab</b> ניקוד</li>
+            <li>הזמנת חבר: <code>/invite חבר@gmail.com</code> · <code>/room</code> לקוד החדר</li>
+            <li>פקודות צ'אט: <code>/mute שם</code> · <code>/unmute שם</code> · <code>/report שם סיבה</code></li>
+          </ul>
+        </details>
+        <p class="safe">🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.</p>
+      </section>
     </div>
   </div>
 

@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { MAP } from './shared/map.js';
 import { WEAPONS, WEAPON_ORDER } from './shared/weapons.js';
 import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './shared/physics.js';
-import { buildArena, setupLighting, buildCharacter, buildGun, loadSoldier, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance } from './visuals.js';
+import { buildArena, setupLighting, buildCharacter, buildGun, loadCharacters, buildSoldier, soldierReady, animate, loadWeapons, muzzleDistance } from './visuals.js';
+import { CHARACTERS, characterById } from './shared/characters.js';
 const gunModel = (key, scale) => buildGun(key, WEAPONS[key].color, scale);
 
 const $ = (id) => document.getElementById(id);
@@ -139,10 +140,10 @@ const modelUrl = (file) => (window.ARENA_MODELS?.[file]) || './models/' + file;
 function rebuildModels() {
   for (const [id, r] of remotes) {
     scene.remove(r.group);
-    remotes.set(id, makeRemote({ id, name: r.name, color: r.color, bot: r.bot }));
+    remotes.set(id, makeRemote({ id, name: r.name, color: r.color, bot: r.bot, character: r.character }));
   }
 }
-loadSoldier(modelUrl('Soldier.glb')).then(rebuildModels).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
+loadCharacters(CHARACTERS, modelUrl).then(() => { rebuildModels(); refreshPreview(); }).catch((e) => console.warn('Soldier model unavailable, using simple characters', e));
 loadWeapons((file) => modelUrl('weapons/' + file)).then(() => {
   for (const k of WEAPON_ORDER) {
     vmRoot.remove(viewGuns[k]);
@@ -153,7 +154,7 @@ loadWeapons((file) => modelUrl('weapons/' + file)).then(() => {
   rebuildModels();
 }).catch((e) => console.warn('Weapon models unavailable, using simple guns', e));
 function makeRemote(info) {
-  const c = soldierReady() ? buildSoldier(info.color, charSeed++) : buildCharacter(info.color, charSeed++);
+  const c = soldierReady() ? buildSoldier(info.color, charSeed++, info.character) : buildCharacter(info.color, charSeed++);
   const g = c.root;
   const guns = {};
   for (const k of WEAPON_ORDER) { guns[k] = gunModel(k, 1); guns[k].visible = false; c.gunMount.add(guns[k]); }
@@ -163,7 +164,7 @@ function makeRemote(info) {
   g.add(tag, shield);
   g.visible = false;
   scene.add(g);
-  return { id: info.id, name: info.name, color: info.color, bot: info.bot, group: g, char: c, headPivot: c.neck, arm: c.aim, guns, tag, shield, buf: [], cur: null, weapon: null, lastSeen: 0, lastPos: null };
+  return { id: info.id, name: info.name, color: info.color, bot: info.bot, character: info.character, group: g, char: c, headPivot: c.neck, arm: c.aim, guns, tag, shield, buf: [], cur: null, weapon: null, lastSeen: 0, lastPos: null };
 }
 
 function syncRoster(list) {
@@ -529,15 +530,15 @@ class LocalSocket {
 let pinger = null;
 let roomCode = null;
 // action: { t: 'quick' } | { t: 'create' } | { t: 'joinCode', code }
-function connect(name, action = { t: 'quick' }, offline = window.ARENA_OFFLINE || location.protocol === 'file:') {
+function connect(name, action = { t: 'quick' }, offline = offlineOnly || !!selectedServer()?.offline) {
   let opened = false;
   lobby = { name, action, offline };
-  ws = offline ? new LocalSocket() : new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+  ws = offline ? new LocalSocket() : new WebSocket(wsUrl(selectedServer()));
   $('menu-status').textContent = offline ? 'מכין זירת אימון…' : 'מתחבר לשרת…';
   ws.onopen = () => {
     opened = true;
     // Online: sign in (or as a guest), pick a room, then join it. Offline: join the local match directly.
-    if (offline) net({ t: 'join', name });
+    if (offline) net({ t: 'join', name, character: selectedChar });
     else net({ t: 'auth', credential: googleCredential });
   };
   ws.onerror = () => {
@@ -562,7 +563,7 @@ function onMessage(m) {
     case 'room':
       roomCode = m.code;
       $('scoreboard').querySelector('h2').textContent = `טבלת ניקוד · חדר ${m.code}`;
-      net({ t: 'join', name: lobby.name });
+      net({ t: 'join', name: lobby.name, character: selectedChar });
       break;
     case 'lobbyError':
       $('menu-status').textContent = m.text;
@@ -823,6 +824,7 @@ $('sens').addEventListener('input', (e) => { sens = Number(e.target.value); stor
 $('time').value = store.get('time', 'day');
 $('time').addEventListener('change', (e) => { store.set('time', e.target.value); location.reload(); });
 showProfile();
+const offlineOnly = !!window.ARENA_OFFLINE || location.protocol === 'file:';
 let lobby = null, googleCredential = null, googleUser = null;
 try { googleCredential = sessionStorage.getItem('arena.gcred'); } catch { /* storage blocked */ }
 function startOnline(action) {
@@ -859,31 +861,193 @@ function showAccount() {
   $('gsi').classList.add('hidden');
   if (!$('name').value) $('name').value = googleUser.name;
 }
-const offlineOnly = window.ARENA_OFFLINE || location.protocol === 'file:';
-if (offlineOnly) {
-  for (const id of ['create', 'join-code', 'code', 'gsi']) $(id).classList.add('hidden');
-  $('play').textContent = 'אימון נגד בוטים';
-} else {
-  fetch('/config').then((r) => r.json()).then((cfg) => {
-    $('online-count').textContent = `${cfg.online} מחוברים כרגע · ${cfg.rooms} חדרים`;
-    if (!cfg.googleClientId) return;
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.onload = () => {
-      google.accounts.id.initialize({
-        client_id: cfg.googleClientId,
-        callback: (resp) => {
-          googleCredential = resp.credential;
-          try { sessionStorage.setItem('arena.gcred', resp.credential); } catch { /* storage blocked */ }
-          // Show the name straight away; the server verifies the token when we connect
-          try { const p = JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); googleUser = { name: p.given_name || p.name, email: p.email }; showAccount(); } catch { /* ignore */ }
-        },
-      });
-      google.accounts.id.renderButton($('gsi'), { theme: 'filled_black', size: 'large', text: 'signin_with', locale: 'he' });
-    };
-    document.head.appendChild(s);
-  }).catch(() => {});
+let googleReadyFor = null;
+function setupGoogle(clientId) {
+  if (!clientId || googleUser || googleReadyFor === clientId) { if (!clientId) $('gsi').replaceChildren(); return; }
+  googleReadyFor = clientId;
+  const render = () => {
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (resp) => {
+        googleCredential = resp.credential;
+        try { sessionStorage.setItem('arena.gcred', resp.credential); } catch { /* storage blocked */ }
+        // Show the name straight away; the server verifies the token when we connect
+        try { const p = JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); googleUser = { name: p.given_name || p.name, email: p.email }; showAccount(); } catch { /* ignore */ }
+      },
+    });
+    google.accounts.id.renderButton($('gsi'), { theme: 'filled_black', size: 'large', text: 'signin_with', locale: 'he' });
+  };
+  if (window.google?.accounts) return render();
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = render;
+  document.head.appendChild(s);
 }
+
+// ---------- server list ----------
+// public/servers.json lists online servers ({ name, region, url }); url "" means the server hosting this page.
+const LOCAL_SERVER = { id: 'device', name: 'אימון במכשיר', region: 'נגד בוטים · בלי אינטרנט', offline: true };
+let servers = [LOCAL_SERVER];
+const serverState = new Map(); // id -> { ping, online, rooms, googleClientId, down }
+let selectedServerId = store.get('server', null);
+function selectedServer() { return servers.find((sv) => sv.id === selectedServerId) || servers[servers.length - 1]; }
+function httpBase(sv) { return sv.url ? sv.url.replace(/\/$/, '') : ''; }
+function wsUrl(sv) {
+  if (sv?.url) return sv.url.replace(/^http/, 'ws').replace(/\/$/, '');
+  return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+}
+
+function renderServers() {
+  const list = $('servers');
+  list.replaceChildren();
+  const current = selectedServer();
+  for (const sv of servers) {
+    const st = serverState.get(sv.id);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'server';
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('aria-checked', String(sv === current));
+    const dot = document.createElement('span');
+    dot.className = 'dot ' + (sv.offline ? 'ok' : !st ? '' : st.down ? 'down' : st.ping > 150 ? 'slow' : 'ok');
+    const info = document.createElement('span');
+    const title = document.createElement('b'); title.textContent = sv.name;
+    const sub = document.createElement('small'); sub.textContent = sv.region || '';
+    info.append(title, sub);
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    if (sv.offline) meta.textContent = 'offline';
+    else if (!st) meta.textContent = '…';
+    else if (st.down) meta.textContent = 'לא זמין';
+    else {
+      const ping = document.createElement('strong'); ping.textContent = st.ping + ' ms';
+      meta.append(ping, document.createTextNode(`${st.online} online`));
+    }
+    btn.append(dot, info, meta);
+    btn.addEventListener('click', () => { selectedServerId = sv.id; store.set('server', sv.id); renderServers(); });
+    list.appendChild(btn);
+  }
+  // Online-only controls follow the selected server
+  const online = !current.offline;
+  document.querySelectorAll('.online-only').forEach((el) => el.classList.toggle('hidden', !online));
+  $('play').textContent = online ? 'משחק מהיר' : 'התחל אימון';
+  const st = serverState.get(current.id);
+  $('online-count').textContent = online && st && !st.down ? `${st.online} מחוברים · ${st.rooms} חדרים בשרת הזה` : '';
+  if (online && st && !st.down) setupGoogle(st.googleClientId);
+  else $('gsi').replaceChildren();
+}
+
+async function pingServer(sv) {
+  const t0 = performance.now();
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch(httpBase(sv) + '/config', { cache: 'no-store', signal: ctrl.signal });
+    clearTimeout(timer);
+    const cfg = await r.json();
+    serverState.set(sv.id, { ping: Math.round(performance.now() - t0), online: cfg.online, rooms: cfg.rooms, googleClientId: cfg.googleClientId });
+  } catch {
+    serverState.set(sv.id, { down: true });
+  }
+  renderServers();
+}
+
+async function loadServers() {
+  if (!offlineOnly) {
+    let list = [{ name: 'השרת הזה', region: 'אוטומטי', url: '' }];
+    try {
+      const r = await fetch('servers.json', { cache: 'no-store' });
+      if (r.ok) list = await r.json();
+    } catch { /* keep the default */ }
+    servers = [LOCAL_SERVER, ...list.map((sv, i) => ({ id: sv.id || 'srv' + i, ...sv }))];
+    if (!selectedServerId || !servers.some((sv) => sv.id === selectedServerId)) selectedServerId = servers[1]?.id || LOCAL_SERVER.id;
+  } else {
+    selectedServerId = LOCAL_SERVER.id;
+  }
+  renderServers();
+  servers.filter((sv) => !sv.offline).forEach(pingServer);
+}
+loadServers();
+$('servers-refresh').addEventListener('click', () => { serverState.clear(); renderServers(); servers.filter((sv) => !sv.offline).forEach(pingServer); });
+
+// ---------- character select with a live 3D preview ----------
+let selectedChar = characterById(store.get('character', CHARACTERS[0].id)).id;
+const preview = { renderer: null, scene: null, camera: null, model: null, yaw: 0.5, dragging: false, lastX: 0 };
+
+function initPreview() {
+  const c = $('char-preview');
+  preview.renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true, alpha: true });
+  preview.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  preview.renderer.outputColorSpace = THREE.SRGBColorSpace;
+  preview.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  preview.scene = new THREE.Scene();
+  preview.scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x302040, 2.2));
+  const key = new THREE.DirectionalLight(0xffffff, 2.5); key.position.set(2, 3, -3); preview.scene.add(key);
+  const rim = new THREE.DirectionalLight(0xff2e88, 2); rim.position.set(-3, 2, 2); preview.scene.add(rim);
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(0.9, 48), new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.15 }));
+  floor.rotation.x = -Math.PI / 2; preview.scene.add(floor);
+  preview.camera = new THREE.PerspectiveCamera(32, 480 / 560, 0.1, 20);
+  preview.camera.position.set(0, 1.25, -3.9);
+  preview.camera.lookAt(0, 0.95, 0);
+  c.addEventListener('pointerdown', (e) => { preview.dragging = true; preview.lastX = e.clientX; c.setPointerCapture(e.pointerId); });
+  c.addEventListener('pointermove', (e) => { if (preview.dragging) { preview.yaw += (e.clientX - preview.lastX) * 0.01; preview.lastX = e.clientX; } });
+  c.addEventListener('pointerup', () => { preview.dragging = false; });
+}
+
+function refreshPreview() {
+  if (!preview.scene) return;
+  if (preview.model) preview.scene.remove(preview.model.root);
+  const color = 0xff2e88;
+  const m = soldierReady() ? buildSoldier(color, 1, selectedChar) : buildCharacter(color, 1);
+  m.gunMount.add(gunModel('rifle', 1));
+  preview.model = m;
+  preview.scene.add(m.root);
+  const def = characterById(selectedChar);
+  $('char-name').textContent = def.name;
+  $('char-role').textContent = def.role;
+  document.querySelectorAll('.char-card').forEach((el) => el.setAttribute('aria-checked', String(el.dataset.id === selectedChar)));
+}
+
+function chooseChar(id) {
+  selectedChar = characterById(id).id;
+  store.set('character', selectedChar);
+  refreshPreview();
+}
+function stepChar(dir) {
+  const i = CHARACTERS.findIndex((c) => c.id === selectedChar);
+  chooseChar(CHARACTERS[(i + dir + CHARACTERS.length) % CHARACTERS.length].id);
+}
+
+for (const def of CHARACTERS) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'char-card';
+  b.dataset.id = def.id;
+  b.setAttribute('role', 'radio');
+  b.textContent = def.name;
+  b.addEventListener('click', () => chooseChar(def.id));
+  $('char-list').appendChild(b);
+}
+$('char-list').setAttribute('role', 'radiogroup');
+$('char-prev').addEventListener('click', () => stepChar(-1));
+$('char-next').addEventListener('click', () => stepChar(1));
+initPreview();
+refreshPreview();
+
+let previewLast = performance.now();
+function previewFrame(now) {
+  if ($('menu').classList.contains('hidden')) return; // stop once the game starts
+  requestAnimationFrame(previewFrame);
+  const dt = Math.min(0.05, (now - previewLast) / 1000);
+  previewLast = now;
+  if (!preview.dragging) preview.yaw += dt * 0.4;
+  if (preview.model) {
+    preview.model.root.rotation.y = preview.yaw;
+    animate(preview.model, 0, now / 1000, dt);
+  }
+  preview.renderer.render(preview.scene, preview.camera);
+}
+requestAnimationFrame(previewFrame);
 $('name').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('play').click(); });
 
 // ======================= main loop =======================
