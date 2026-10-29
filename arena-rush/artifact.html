@@ -86,6 +86,26 @@ button.link { background: none; border: 0; color: var(--cyan); font-size: 13px; 
   #char-preview { max-height: 38vh; }
 }
 
+/* admin panel */
+#admin-btn { position: fixed; z-index: 7; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--yellow); background: var(--panel); color: var(--yellow); font-weight: 700; }
+#admin-panel { position: fixed; z-index: 25; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(520px, calc(100% - 32px)); max-height: 80vh; display: flex; flex-direction: column; gap: 10px; background: var(--panel); border: 1px solid var(--yellow); border-radius: 16px; padding: 16px; backdrop-filter: blur(8px); }
+.admin-head { display: flex; justify-content: space-between; align-items: center; }
+.admin-head h2 { margin: 0; font-size: 18px; color: var(--yellow); }
+.admin-head button { background: none; border: 0; color: var(--text); font-size: 20px; }
+#admin-search, #admin-confirm input { padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-size: 15px; }
+#admin-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+.admin-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(0,0,0,.3); flex-wrap: wrap; }
+.admin-row div { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-row button { border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: var(--text); border-radius: 8px; padding: 4px 10px; font-size: 13px; }
+#admin-confirm { position: fixed; z-index: 26; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(380px, calc(100% - 32px)); background: var(--panel); border: 1px solid #ff1744; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+#admin-confirm .yes { flex: 1; padding: 10px; border: 0; border-radius: 10px; background: #ff1744; color: #fff; font-weight: 700; }
+
+/* language pickers */
+.head-side { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.lang-pick, .pause-lang { display: inline-flex; align-items: center; gap: 6px; margin: 0; color: var(--muted); font-size: 13px; }
+.lang-pick select, .pause-lang select { display: inline-block; width: auto; margin: 0; padding: 6px 8px; font-size: 14px; }
+.pause-lang { margin-top: 12px; pointer-events: auto; }
+
 /* ---------- HUD ---------- */
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 #crosshair, #hitmarker { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
@@ -223,7 +243,7 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
 </script>
 <script>window.ARENA_OFFLINE = true;</script>
 <script src="models.js"></script>
-<div dir="rtl" lang="he">
+<div>
   <canvas id="game"></canvas>
 
   <!-- HUD -->
@@ -244,18 +264,31 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     <div id="center-msg"></div>
 
     <div id="health"><div id="hp-bar"><div id="hp-fill"></div></div><span id="hp-text">100</span></div>
-    <div id="ammo"><div id="weapon-name">רובה סער</div><div><span id="mag">30</span> <small>/ <span id="mag-max">30</span></small></div><div id="weapon-slots"></div></div>
+    <div id="ammo"><div id="weapon-name"></div><div><span id="mag">30</span> <small>/ <span id="mag-max">30</span></small></div><div id="weapon-slots"></div></div>
     <div id="streak"></div>
 
     <div id="chat">
       <div id="chat-log"></div>
       <div id="quick-menu" class="hidden"></div>
-      <input id="chat-input" class="hidden" maxlength="120" autocomplete="off" placeholder="כתבו הודעה… (Enter לשליחה, Esc לביטול)">
+      <input id="chat-input" class="hidden" maxlength="120" autocomplete="off" data-i18n-ph="hud.chatPh" placeholder="">
     </div>
 
-    <div id="scoreboard" class="hidden"><h2>טבלת ניקוד</h2><table><thead><tr><th>שחקן</th><th>הריגות</th><th>מוות</th><th>פינג</th></tr></thead><tbody></tbody></table></div>
-    <div id="death" class="hidden"><div class="big">נפלת!</div><div id="death-by"></div><div id="death-count"></div></div>
-    <div id="pause" class="hidden"><div class="big">לחצו כדי להמשיך</div><div class="keys">WASD תנועה · רווח קפיצה · עכבר ירי/כוונת · 1-4 נשקים · R טעינה · Tab ניקוד · Enter צ'אט · B הודעות מהירות</div></div>
+    <div id="scoreboard" class="hidden"><h2 data-i18n="hud.scoreboard"></h2><table><thead><tr><th data-i18n="hud.player"></th><th data-i18n="hud.kills"></th><th data-i18n="hud.deaths"></th><th data-i18n="hud.ping"></th></tr></thead><tbody></tbody></table></div>
+    <div id="death" class="hidden"><div class="big" data-i18n="hud.dead"></div><div id="death-by"></div><div id="death-count"></div></div>
+    <div id="pause" class="hidden"><div class="big" data-i18n="hud.pause"></div><div class="keys" data-i18n="hud.pauseKeys"></div><label class="pause-lang" onclick="event.stopPropagation()"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang-game"></select></label></div>
+  </div>
+
+  <!-- Admin panel (staff only; the server checks every action) -->
+  <button id="admin-btn" class="hidden" type="button" data-i18n="admin.panel"></button>
+  <div id="admin-panel" class="hidden" role="dialog" aria-modal="true">
+    <div class="admin-head"><h2 data-i18n="admin.panel"></h2><button id="admin-close" type="button" aria-label="close">✕</button></div>
+    <input id="admin-search" data-i18n-ph="admin.search" autocomplete="off">
+    <div id="admin-list"></div>
+  </div>
+  <div id="admin-confirm" class="hidden" role="alertdialog">
+    <p></p>
+    <input data-i18n-ph="admin.reasonPh" maxlength="100" autocomplete="off">
+    <div class="row"><button class="yes" type="button" data-i18n="admin.yes"></button><button class="no secondary" type="button" data-i18n="admin.cancel"></button></div>
   </div>
 
   <!-- Touch controls (mobile) -->
@@ -276,72 +309,75 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     <div class="menu-shell">
       <header class="menu-head">
         <h1>ARENA <span>RUSH</span></h1>
-        <div id="profile"></div>
+        <div class="head-side">
+          <label class="lang-pick"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang"></select></label>
+          <div id="profile"></div>
+        </div>
       </header>
 
-      <section class="panel char-panel" aria-label="בחירת דמות">
-        <h2>בחירת דמות</h2>
+      <section class="panel char-panel" data-i18n-aria="menu.charSelect">
+        <h2 data-i18n="menu.charSelect"></h2>
         <div class="preview-wrap">
           <canvas id="char-preview" width="480" height="560"></canvas>
-          <button id="char-prev" class="arrow" aria-label="דמות קודמת">›</button>
-          <button id="char-next" class="arrow" aria-label="דמות הבאה">‹</button>
+          <button id="char-prev" class="arrow" data-i18n-aria="menu.prevChar">›</button>
+          <button id="char-next" class="arrow" data-i18n-aria="menu.nextChar">‹</button>
         </div>
         <div id="char-name" class="char-name"></div>
         <div id="char-role" class="char-role"></div>
         <div id="char-list" class="char-list"></div>
       </section>
 
-      <section class="panel play-panel" aria-label="הגדרות משחק">
-        <label>שם שחקן <input id="name" maxlength="16" placeholder="הכינוי שלך" autocomplete="nickname"></label>
+      <section class="panel play-panel" data-i18n-aria="menu.gameSettings">
+        <label><span data-i18n="menu.playerName"></span> <input id="name" maxlength="16" data-i18n-ph="menu.namePh" autocomplete="nickname"></label>
 
         <div class="server-head">
-          <h2>שרת</h2>
-          <button id="servers-refresh" class="link" type="button">רענון</button>
+          <h2 data-i18n="menu.server"></h2>
+          <button id="servers-refresh" class="link" type="button" data-i18n="menu.refresh"></button>
         </div>
-        <div id="servers" class="servers" role="radiogroup" aria-label="בחירת שרת"></div>
+        <div id="servers" class="servers" role="radiogroup" data-i18n-aria="menu.serverList"></div>
 
         <div id="gsi"></div>
         <p id="account"></p>
-        <button id="play">משחק מהיר</button>
+        <button id="play" data-i18n="menu.quickPlay"></button>
         <div class="row online-only">
-          <button id="create" class="secondary">חדר פרטי חדש</button>
+          <button id="create" class="secondary" data-i18n="menu.createRoom"></button>
         </div>
         <div class="row online-only">
-          <input id="code" maxlength="5" placeholder="קוד חדר" autocomplete="off">
-          <button id="join-code" class="secondary">הצטרף</button>
+          <input id="code" maxlength="5" data-i18n-ph="menu.roomCodePh" autocomplete="off">
+          <button id="join-code" class="secondary" data-i18n="menu.join"></button>
         </div>
         <p id="online-count"></p>
         <p id="menu-status"></p>
 
         <details>
-          <summary>הגדרות</summary>
-          <label>רגישות עכבר <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
-          <label>זמן ביום <select id="time"><option value="day">יום</option><option value="night">לילה (ניאון)</option></select></label>
+          <summary data-i18n="menu.settings"></summary>
+          <label><span data-i18n="menu.sensitivity"></span> <input id="sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+          <label><span data-i18n="menu.timeOfDay"></span> <select id="time"><option value="day" data-i18n="menu.day"></option><option value="night" data-i18n="menu.night"></option></select></label>
         </details>
         <details>
-          <summary>שליטה</summary>
+          <summary data-i18n="menu.controls"></summary>
           <ul>
-            <li><b>WASD</b> תנועה · <b>רווח</b> קפיצה</li>
-            <li><b>לחיצה שמאלית</b> ירי · <b>ימנית</b> כוונת / סקופ</li>
-            <li><b>1-4</b> או גלגלת: רובה סער, שוטגאן, צלף, אקדח · <b>R</b> טעינה</li>
-            <li><b>Enter</b> צ'אט · <b>B</b> הודעות מהירות · <b>Tab</b> ניקוד</li>
-            <li>הזמנת חבר: <code>/invite חבר@gmail.com</code> · <code>/room</code> לקוד החדר</li>
-            <li>פקודות צ'אט: <code>/mute שם</code> · <code>/unmute שם</code> · <code>/report שם סיבה</code></li>
+            <li data-i18n="menu.ctrlMove"></li>
+            <li data-i18n="menu.ctrlFire"></li>
+            <li data-i18n="menu.ctrlWeapons"></li>
+            <li data-i18n="menu.ctrlChat"></li>
+            <li data-i18n="menu.ctrlInvite"></li>
+            <li data-i18n="menu.ctrlCmds"></li>
           </ul>
         </details>
-        <p class="safe">🛡️ הצ'אט מסונן: בלי קללות, בלי קישורים ובלי מידע אישי. לעולם אל תשתפו טלפון או כתובת.</p>
+        <p class="safe" data-i18n="menu.safe"></p>
       </section>
     </div>
   </div>
 
   <!-- Friend invitation -->
-  <div id="invite" class="hidden"><span></span><button class="yes">הצטרף</button><button class="no">לא עכשיו</button></div>
+  <div id="invite" class="hidden"><span></span><button class="yes" data-i18n="menu.join"></button><button class="no" data-i18n="hud.notNow"></button></div>
 
   <!-- End of match -->
   <div id="end" class="hidden">
     <div class="menu-card">
       <h2 id="end-title"></h2>
-      <table id="end-board"><thead><tr><th>#</th><th>שחקן</th><th>הריגות</th><th>מוות</th></tr></thead><tbody></tbody></table>
+      <table id="end-board"><thead><tr><th>#</th><th data-i18n="hud.player"></th><th data-i18n="hud.kills"></th><th data-i18n="hud.deaths"></th></tr></thead><tbody></tbody></table>
       <div id="xp-box"><div id="xp-line"></div><div class="xpbar"><div id="xp-fill"></div></div><div id="next-goal"></div></div>
       <p id="end-next"></p>
     </div>

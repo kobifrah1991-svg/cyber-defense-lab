@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 import { createGame } from './shared/game.js';
 import { cleanName } from './shared/chatfilter.js';
+import { createAdmin } from './admin.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 3000;
@@ -94,11 +95,22 @@ function leaveRoom(sess) {
   if (room.members.size === 0) { room.game.stop(); rooms.delete(room.code); }
 }
 
+const admin = createAdmin({ dataDir: process.env.DATA_DIR || path.join(ROOT, 'data'), rooms, sessions });
+
 // ---------- networking ----------
 const wss = new WebSocketServer({ server, maxPayload: 8 * 1024 });
-wss.on('connection', (ws) => {
-  const sess = { ws, user: null, room: null, conn: null, invites: [], send: (m) => ws.readyState === 1 && ws.send(JSON.stringify(m)) };
+wss.on('connection', (ws, req) => {
+  const ip = (process.env.TRUST_PROXY ? String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() : '') || req.socket.remoteAddress;
+  const sess = { ws, ip, user: null, role: 'Player', room: null, conn: null, invites: [], send: (m) => ws.readyState === 1 && ws.send(JSON.stringify(m)) };
   sessions.add(sess);
+  const refuseIfBanned = () => {
+    const ban = admin.activeBan(sess);
+    if (!ban) return false;
+    sess.send({ t: 'kicked', key: 'admin.banned', p: { reason: ban.reason } });
+    setTimeout(() => ws.close(), 100);
+    return true;
+  };
+  if (refuseIfBanned()) return;
 
   ws.on('message', async (data) => {
     let m;
@@ -109,6 +121,8 @@ wss.on('connection', (ws) => {
     switch (m.t) {
       case 'auth': {
         sess.user = m.credential ? await verifyGoogle(m.credential) : null;
+        if (refuseIfBanned()) return;
+        admin.onAuth(sess);
         sess.send({ t: 'authed', user: sess.user && { name: sess.user.name, picture: sess.user.picture, email: sess.user.email }, googleClientId: GOOGLE_CLIENT_ID });
         return;
       }
@@ -134,6 +148,7 @@ wss.on('connection', (ws) => {
         return;
       }
       case 'leaveRoom': leaveRoom(sess); return;
+      case 'admin': admin.handle(sess, m.cmd, m.args); return; // permissions are checked inside, server-side
       case 'join':
         if (sess.user) m.name = sess.user.name; // signed-in players play under their Google first name
         break;

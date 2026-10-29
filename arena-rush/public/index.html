@@ -44,6 +44,19 @@
     <div id="pause" class="hidden"><div class="big" data-i18n="hud.pause"></div><div class="keys" data-i18n="hud.pauseKeys"></div><label class="pause-lang" onclick="event.stopPropagation()"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang-game"></select></label></div>
   </div>
 
+  <!-- Admin panel (staff only; the server checks every action) -->
+  <button id="admin-btn" class="hidden" type="button" data-i18n="admin.panel"></button>
+  <div id="admin-panel" class="hidden" role="dialog" aria-modal="true">
+    <div class="admin-head"><h2 data-i18n="admin.panel"></h2><button id="admin-close" type="button" aria-label="close">✕</button></div>
+    <input id="admin-search" data-i18n-ph="admin.search" autocomplete="off">
+    <div id="admin-list"></div>
+  </div>
+  <div id="admin-confirm" class="hidden" role="alertdialog">
+    <p></p>
+    <input data-i18n-ph="admin.reasonPh" maxlength="100" autocomplete="off">
+    <div class="row"><button class="yes" type="button" data-i18n="admin.yes"></button><button class="no secondary" type="button" data-i18n="admin.cancel"></button></div>
+  </div>
+
   <!-- Touch controls (mobile) -->
   <div id="touch" class="hidden">
     <div id="stick"><div id="stick-knob"></div></div>

@@ -177,6 +177,7 @@ function syncRoster(list) {
   }
   for (const [id, r] of remotes) if (!list.find((p) => p.id === id)) { scene.remove(r.group); remotes.delete(id); }
   updateScoreboard();
+  if (!$('admin-panel').classList.contains('hidden')) renderAdminPanel();
 }
 const nameOf = (id) => (id === me.id ? t('hud.you') : roster.find((p) => p.id === id)?.name || '???');
 const colorOf = (id) => '#' + ((id === me.id ? me.color : roster.find((p) => p.id === id)?.color) ?? 0xffffff).toString(16).padStart(6, '0');
@@ -393,6 +394,7 @@ function closeChat(send) {
   if (send && text) handleChatText(text);
   if (!isTouch) lockPointer();
 }
+const ADMIN_COMMANDS = ['adminlogin', 'whoami', 'heal', 'sethealth', 'giveweapon', 'givemoney', 'kick', 'ban', 'announce', 'teleport'];
 function handleChatText(text) {
   if (text.startsWith('/')) {
     const [cmd, name, ...rest] = text.slice(1).split(' ');
@@ -408,6 +410,8 @@ function handleChatText(text) {
       return net({ t: 'report', name: target.name, reason: rest.join(' ') });
     }
     if (cmd === 'invite') return net({ t: 'invite', email: name || '' });
+    // Admin commands: sent as requests; the server decides whether this player may run them
+    if (ADMIN_COMMANDS.includes(cmd)) return net({ t: 'admin', cmd, args: [name, ...rest].filter((a) => a !== undefined && a !== '') });
     if (cmd === 'room') return addChat({ sys: true, key: roomCode ? 'sys.roomCode' : 'sys.noRoom', p: { code: roomCode } });
     return addChat({ sys: true, key: 'sys.commands' });
   }
@@ -542,6 +546,8 @@ class LocalSocket {
 
 let pinger = null;
 let roomCode = null;
+let myRole = 'Player', kickedNotice = null;
+const ROLE_RANK = { Player: 0, Moderator: 1, Admin: 2, Owner: 3 };
 // action: { t: 'quickMatch' } | { t: 'create' } | { t: 'joinCode', code }
 function connect(name, action = { t: 'quickMatch' }, offline = offlineOnly || !!selectedServer()?.offline) {
   let opened = false;
@@ -559,6 +565,7 @@ function connect(name, action = { t: 'quickMatch' }, offline = offlineOnly || !!
     if (!opened) { $('menu-status').textContent = t('menu.noServer'); connect(name, action, true); }
   };
   ws.onclose = () => {
+    if (kickedNotice) { setTimeout(() => { try { sessionStorage.setItem('arena.notice', kickedNotice); } catch { /* ignore */ } location.reload(); }, 2500); return; }
     if (me.id && !offline) { addChat({ sys: true, key: 'sys.disconnected' }); setTimeout(() => location.reload(), 2500); }
   };
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));
@@ -584,6 +591,15 @@ function onMessage(m) {
       ws.close();
       break;
     case 'invited': showInvite(m.from, m.code); break;
+    case 'role':
+      myRole = m.role;
+      $('admin-btn').classList.toggle('hidden', ROLE_RANK[myRole] < 1);
+      break;
+    case 'kicked':
+      kickedNotice = t(m.key, m.p);
+      $('menu-status').textContent = kickedNotice;
+      addChat({ sys: true, key: m.key, p: m.p });
+      break;
     case 'welcome':
       me.id = m.id; me.color = m.color;
       matchInfo = m.match; killLimit = m.killLimit; quickChat = m.quick;
@@ -734,7 +750,7 @@ function lockPointer() {
 }
 document.addEventListener('pointerlockchange', () => {
   const locked = document.pointerLockElement === canvas;
-  $('pause').classList.toggle('hidden', locked || chatOpen || !me.id || matchInfo.state !== 'playing' || isTouch);
+  $('pause').classList.toggle('hidden', locked || chatOpen || !me.id || matchInfo.state !== 'playing' || isTouch || !$('admin-panel').classList.contains('hidden'));
   if (!locked) { mouseDown = false; me.ads = false; }
 });
 $('pause').addEventListener('click', () => { initAudio(); lockPointer(); });
@@ -762,6 +778,7 @@ document.addEventListener('keydown', (e) => {
   if (!me.id || chatOpen) return;
   if (e.code === 'Tab') { e.preventDefault(); $('scoreboard').classList.remove('hidden'); return; }
   if (e.code === 'Enter' || e.code === 'KeyT') { e.preventDefault(); openChat(); return; }
+  if (e.code === 'F2') { e.preventDefault(); toggleAdminPanel(); return; }
   if (e.code === 'KeyB') { toggleQuick(); return; }
   if (quickOpen && /^Digit[1-6]$/.test(e.code)) { sendQuick(Number(e.code.slice(5)) - 1); return; }
   if (e.code === 'Escape' && quickOpen) { toggleQuick(); return; }
@@ -829,6 +846,61 @@ function setupTouch() {
   hold('t-score', () => $('scoreboard').classList.toggle('hidden'));
 }
 if (isTouch) setupTouch();
+
+// ======================= admin panel =======================
+// Convenience UI for staff. It only sends the same requests as the chat commands;
+// every permission and limit is enforced by the server.
+const PANEL_ACTIONS = [
+  { cmd: 'heal', min: 2 }, { cmd: 'giveweapon', min: 2, arg: 'rifle' }, { cmd: 'teleport', min: 2, arg: '1' },
+  { cmd: 'kick', min: 1, confirm: true }, { cmd: 'ban', min: 2, confirm: true, needsReason: true },
+];
+function renderAdminPanel() {
+  const list = $('admin-list');
+  const q = $('admin-search').value.trim().toLowerCase();
+  list.replaceChildren();
+  for (const p of roster.filter((r) => r.id !== me.id && r.name.toLowerCase().includes(q))) {
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    const name = document.createElement('b');
+    name.textContent = p.name; // bot names already carry their icon
+    const actions = document.createElement('div');
+    for (const a of PANEL_ACTIONS.filter((x) => ROLE_RANK[myRole] >= x.min && !(p.bot && x.confirm))) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = t('admin.act.' + a.cmd);
+      btn.addEventListener('click', () => (a.confirm ? askConfirm(a, p) : net({ t: 'admin', cmd: a.cmd, args: [p.name, a.arg].filter(Boolean) })));
+      actions.appendChild(btn);
+    }
+    row.append(name, actions);
+    list.appendChild(row);
+  }
+}
+function askConfirm(a, p) {
+  const box = $('admin-confirm');
+  box.querySelector('p').textContent = t('admin.confirm', { action: t('admin.act.' + a.cmd), target: p.name });
+  const reason = box.querySelector('input');
+  reason.value = '';
+  reason.classList.toggle('hidden', !a.confirm);
+  box.classList.remove('hidden');
+  box.querySelector('.yes').onclick = () => {
+    if (a.needsReason && !reason.value.trim()) { reason.focus(); return; }
+    net({ t: 'admin', cmd: a.cmd, args: [p.name, ...(a.cmd === 'ban' ? ['60'] : []), ...reason.value.trim().split(' ').filter(Boolean)] });
+    box.classList.add('hidden');
+  };
+  box.querySelector('.no').onclick = () => box.classList.add('hidden');
+}
+function toggleAdminPanel(open = $('admin-panel').classList.contains('hidden')) {
+  if (ROLE_RANK[myRole] < 1) return;
+  $('admin-panel').classList.toggle('hidden', !open);
+  $('pause').classList.add('hidden');
+  if (open) { if (document.pointerLockElement) document.exitPointerLock(); renderAdminPanel(); $('admin-search').focus(); }
+  else if (!isTouch) lockPointer();
+}
+$('admin-btn').addEventListener('click', () => toggleAdminPanel());
+$('admin-close').addEventListener('click', () => toggleAdminPanel(false));
+$('admin-search').addEventListener('input', renderAdminPanel);
+$('admin-search').addEventListener('keydown', (e) => e.stopPropagation());
+$('admin-confirm').querySelector('input').addEventListener('keydown', (e) => e.stopPropagation());
 
 // ======================= language =======================
 // Applies the chosen language to static text (data-i18n attributes), direction and dynamic UI.
@@ -1172,3 +1244,7 @@ requestAnimationFrame(frame);
 
 // Language last: every UI piece it updates exists by now
 applyLang(detectLang(store.get('lang', null)));
+try {
+  const notice = sessionStorage.getItem('arena.notice');
+  if (notice) { $('menu-status').textContent = notice; sessionStorage.removeItem('arena.notice'); }
+} catch { /* storage blocked */ }

@@ -2,7 +2,7 @@
 // Runs inside the Node server (server.js, one instance per room) and, for offline practice, inside the browser.
 import { MAP } from './map.js';
 import { WEAPONS, WEAPON_ORDER, damageAt } from './weapons.js';
-import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles } from './physics.js';
+import { PLAYER, step, rayBox, rayWorld, hitboxes, dirFromAngles, collides } from './physics.js';
 import { filterChat, cleanName, QUICK_CHAT } from './chatfilter.js';
 import { CHARACTERS, characterById } from './characters.js';
 
@@ -366,7 +366,7 @@ export function createGame(opts = {}) {
       sys('sys.left', { name: me.name });
       sendRoster();
     }
-    return { message, close };
+    return { message, close, player: () => me };
   }
 
   function onChat(p, text, quick = false, quickIndex = -1) {
@@ -427,5 +427,42 @@ export function createGame(opts = {}) {
 
   function stop() { clearInterval(timer); timer = null; }
   const humanCount = () => humans().length;
-  return { connect, start, stop, humanCount, config };
+  // ---------- admin hooks ----------
+  // These only perform actions. Who may call them is decided in server.js.
+  const admin = {
+    players: () => [...players.values()],
+    find: (name) => [...players.values()].find((p) => p.name.toLowerCase() === String(name || '').toLowerCase()),
+    heal(p, n) {
+      if (!p.alive) return false;
+      p.hp = Math.min(PLAYER.maxHp, p.hp + n);
+      tell(p, 'admin.healed', { n });
+      return true;
+    },
+    setHealth(p, n) {
+      if (!p.alive) return false;
+      p.hp = Math.max(1, Math.min(PLAYER.maxHp, n));
+      return true;
+    },
+    giveWeapon(p, w) {
+      if (!WEAPONS[w] || !p.alive) return false;
+      p.ammo[w] = WEAPONS[w].mag;
+      p.reloadUntil = 0;
+      send(p, { t: 'ammo', w, n: WEAPONS[w].mag });
+      return true;
+    },
+    // dest: [x, y, z]; refused if it would put the player inside a wall or off the map
+    teleport(p, dest) {
+      if (!p.alive || !Array.isArray(dest) || !dest.every(Number.isFinite)) return false;
+      if (Math.abs(dest[0]) > 31 || Math.abs(dest[2]) > 31 || dest[1] < 0 || dest[1] > 10) return false;
+      if (collides(dest[0], dest[1], dest[2], MAP.boxes)) return false;
+      p.p = dest.slice();
+      p.v = [0, 0, 0];
+      p.history = [];
+      send(p, { t: 'correct', p: p.p });
+      return true;
+    },
+    announce: (text) => sys('admin.announce', { text }),
+  };
+
+  return { connect, start, stop, humanCount, config, admin };
 }

@@ -1,3 +1,4 @@
 node_modules/
 android/build/
 android/*.idsig
+data/
