@@ -407,7 +407,10 @@ export function createGame(opts = {}) {
         me.cosmetics = {};
         for (const slot of ['outfit', 'camo']) if (typeof m.cosmetics?.[slot] === 'string' && itemById(m.cosmetics[slot])?.slot === slot) me.cosmetics[slot] = m.cosmetics[slot];
         me.ws = ws;
-        if (M.teams) assignTeam(me, smallerTeam());
+        // Rejoining after a drop: the server passes back the saved score and team
+        const back = m.restore && typeof m.restore === 'object' ? m.restore : null;
+        if (back) { me.kills = back.kills | 0; me.deaths = back.deaths | 0; me.heads = back.heads | 0; }
+        if (M.teams) assignTeam(me, back && (back.team === 'A' || back.team === 'B') && teamOf(back.team).length < M.perTeam ? back.team : smallerTeam());
         send(me, { t: 'welcome', id: me.id, color: me.color, match: { state: match.state, endsAt: match.endsAt }, killLimit: KILL_LIMIT, quick: QUICK_CHAT, mode, team: me.team });
         sendRoster();
         sys('sys.joined', { name: me.name });
@@ -493,9 +496,12 @@ export function createGame(opts = {}) {
       sys('sys.left', { name: me.name });
       sendRoster();
       if (M.teams) {
-        // A team emptied mid-match: the other side wins
-        if (match.state === 'playing' && (teamOf('A').length === 0 || teamOf('B').length === 0)) endMatch(null, teamOf('A').length ? 'A' : 'B');
-        else checkStart();
+        // A team emptied mid-match: give it 20 s to reconnect, then the other side wins
+        if (match.state === 'playing') {
+          setTimeout(() => {
+            if (match.state === 'playing' && (teamOf('A').length === 0 || teamOf('B').length === 0)) endMatch(null, teamOf('A').length ? 'A' : 'B');
+          }, opts.forfeitMs ?? 20000);
+        } else checkStart();
       }
     }
     return { message, close, player: () => me };

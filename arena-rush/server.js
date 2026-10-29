@@ -111,6 +111,14 @@ function payRewards(results) {
     sess.send({ t: 'reward', reward, profile: economy.profile(economy.get(id)) });
   }
 }
+// Reconnect: a player who drops keeps their room seat and score for 30 seconds
+const RECONNECT_MS = 30000;
+const pendingRejoin = new Map(); // account id -> { code, until, stats }
+function rememberSeat(sess) {
+  const id = economy.accountId(sess), p = sess.conn?.player();
+  if (!id || !p || !sess.room) return;
+  pendingRejoin.set(id, { code: sess.room.code, until: Date.now() + RECONNECT_MS, stats: { kills: p.kills, deaths: p.deaths, heads: p.heads, team: p.team } });
+}
 const sendProfile = (sess) => { const id = economy.accountId(sess); if (id) sess.send({ t: 'profile', profile: economy.profile(economy.get(id)) }); };
 
 // ---------- networking ----------
@@ -181,7 +189,15 @@ wss.on('connection', (ws, req) => {
         sess.send(friend ? { t: 'chat', sys: true, key: 'sys.inviteSent' } : { t: 'chat', sys: true, key: 'sys.inviteOffline', p: { code: sess.room.code } });
         return;
       }
-      case 'leaveRoom': leaveRoom(sess); return;
+      case 'leaveRoom': pendingRejoin.delete(economy.accountId(sess)); leaveRoom(sess); return;
+      case 'rejoin': {
+        const id = economy.accountId(sess), seat = id && pendingRejoin.get(id);
+        const room = seat && seat.until > Date.now() && seat.code === String(m.code || '').toUpperCase() ? rooms.get(seat.code) : null;
+        if (!room || !enterRoom(sess, room)) { sess.send({ t: 'lobbyError', key: 'sys.rejoinFailed' }); return; }
+        pendingRejoin.delete(id);
+        sess.restore = seat.stats; // applied to the join below; never taken from the client
+        return;
+      }
       case 'admin': admin.handle(sess, m.cmd, m.args); return; // permissions are checked inside, server-side
       case 'join': {
         if (sess.user) m.name = sess.user.name; // signed-in players play under their Google first name
@@ -189,6 +205,7 @@ wss.on('connection', (ws, req) => {
         const id = economy.accountId(sess);
         m.cosmetics = id ? economy.cosmetics(economy.get(id)) : {};
         delete m.restore;
+        if (sess.restore) { m.restore = sess.restore; sess.restore = null; }
         break;
       }
     }
@@ -200,7 +217,7 @@ wss.on('connection', (ws, req) => {
     sess.conn?.message(JSON.stringify(m));
   });
 
-  ws.on('close', () => { leaveRoom(sess); sessions.delete(sess); });
+  ws.on('close', () => { rememberSeat(sess); leaveRoom(sess); sessions.delete(sess); });
 });
 
 server.listen(PORT, () => console.log(`Arena Rush running on http://localhost:${PORT}` + (GOOGLE_CLIENT_ID ? ' (Google sign-in on)' : ' (guests only: set GOOGLE_CLIENT_ID for Google sign-in)')));

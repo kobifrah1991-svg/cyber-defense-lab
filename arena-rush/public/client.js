@@ -572,7 +572,13 @@ class LocalSocket {
   close() {}
 }
 
-let pinger = null;
+let pinger = null, reconnectTries = 0;
+function tryReconnect() {
+  if (reconnectTries >= 5) { addChat({ sys: true, key: 'sys.disconnected' }); setTimeout(() => location.reload(), 2000); return; }
+  reconnectTries++;
+  addChat({ sys: true, key: 'sys.reconnecting', p: { n: reconnectTries } });
+  setTimeout(() => connect(lobby.name, { t: 'rejoin', code: roomCode }), 1500);
+}
 let roomCode = null;
 let myRole = 'Player', kickedNotice = null;
 const ROLE_RANK = { Player: 0, Moderator: 1, Admin: 2, Owner: 3 };
@@ -590,10 +596,14 @@ function connect(name, action = { t: 'quickMatch' }, offline = offlineOnly || !!
   };
   ws.onerror = () => {
     // No server reachable: fall back to practice against bots in the browser
+    if (!opened && action.t === 'rejoin') return; // onclose retries
     if (!opened) { $('menu-status').textContent = t('menu.noServer'); connect(name, action, true); }
   };
   ws.onclose = () => {
     if (kickedNotice) { setTimeout(() => { try { sessionStorage.setItem('arena.notice', kickedNotice); } catch { /* ignore */ } location.reload(); }, 2500); return; }
+    // Unexpected drop mid-game: try to get back into the same room with the same score
+    if (me.id && !offline && roomCode) { tryReconnect(); return; }
+    if (!opened && action.t === 'rejoin') { tryReconnect(); return; }
     if (me.id && !offline) { addChat({ sys: true, key: 'sys.disconnected' }); setTimeout(() => location.reload(), 2500); }
   };
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));
@@ -614,6 +624,7 @@ function onMessage(m) {
       net({ t: 'join', name: lobby.name, character: selectedChar });
       break;
     case 'lobbyError':
+      if (m.key === 'sys.rejoinFailed') { try { sessionStorage.setItem('arena.notice', t(m.key)); } catch { /* ignore */ } location.reload(); return; }
       $('menu-status').textContent = t(m.key);
       $('play').disabled = false;
       ws.close();
@@ -641,6 +652,7 @@ function onMessage(m) {
       addChat({ sys: true, key: m.key, p: m.p });
       break;
     case 'welcome':
+      reconnectTries = 0;
       me.id = m.id; me.color = m.color;
       matchInfo = m.match; killLimit = m.killLimit; quickChat = m.quick; gameMode = m.mode || 'ffa';
       $('menu').classList.add('hidden');

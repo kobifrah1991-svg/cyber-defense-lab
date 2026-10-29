@@ -113,6 +113,8 @@ const S = {
   'shop.camo.gold': { he: 'זהב', en: 'Gold', ru: 'Золото', ar: 'ذهبي' },
   'end.reward': { he: '+{credits} 🪙 · +{xp} XP · רמה {level}', en: '+{credits} 🪙 · +{xp} XP · level {level}', ru: '+{credits} 🪙 · +{xp} XP · уровень {level}', ar: '+{credits} 🪙 · +{xp} XP · المستوى {level}' },
   'menu.levelCredits': { he: 'רמה {level} · {xp}/{need} XP · 🪙 {credits}', en: 'Level {level} · {xp}/{need} XP · 🪙 {credits}', ru: 'Уровень {level} · {xp}/{need} XP · 🪙 {credits}', ar: 'المستوى {level} · {xp}/{need} XP · 🪙 {credits}' },
+  'sys.reconnecting': { he: 'החיבור נפל. מתחבר מחדש… ({n}/5)', en: 'Connection lost. Reconnecting… ({n}/5)', ru: 'Связь потеряна. Переподключение… ({n}/5)', ar: 'انقطع الاتصال. إعادة الاتصال… ({n}/5)' },
+  'sys.rejoinFailed': { he: 'לא הצלחנו לחזור לחדר. אפשר להתחיל משחק חדש.', en: 'Could not get back into the room. You can start a new game.', ru: 'Не удалось вернуться в комнату. Можно начать новую игру.', ar: 'تعذّرت العودة إلى الغرفة. يمكنك بدء لعبة جديدة.' },
   'map.neon': { he: 'מחסן ניאון', en: 'Neon Warehouse', ru: 'Неоновый склад', ar: 'مستودع النيون' },
 
   // ---- quick chat (sent as an index, shown in each player's language) ----
