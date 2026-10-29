@@ -23,7 +23,7 @@ npm start          # http://localhost:3000
 אם אין שרת זמין, המשחק עובר לבד ל"אימון נגד בוטים" שרץ כולו בדפדפן (`shared/game.js` רץ גם בשרת וגם בדפדפן).
 
 ## אפליקציית אנדרואיד (APK)
-הקובץ המוכן: `android/ArenaRush.apk` (גרסה 0.2: אימון נגד בוטים, עובד בלי אינטרנט, שליטת מגע, חיילים ונשקים אמיתיים, יום ולילה).
+הקובץ המוכן: `android/ArenaRush.apk` (גרסה 0.7: אימון נגד בוטים, עובד בלי אינטרנט, שליטת מגע, חיילים ונשקים ריאליסטיים, יום ולילה). זה APK לבדיקות. להעלאה ל-Google Play צריך AAB, לפי `docs/STORE_RELEASE.md`.
 
 **התקנה בטלפון:**
 1. מעבירים את `ArenaRush.apk` לטלפון (מייל לעצמך, Google Drive או כבל USB).
@@ -66,3 +66,14 @@ npm start          # http://localhost:3000
 ```
 
 **החלפת דמויות:** שמים את קבצי ה-GLB ב-`public/models/characters/` ומשנים את `file` ב-`shared/characters.js`, למשל `"characters/hero.glb"`. דמות עם שלד Mixamo מקבלת אנימציות הליכה וריצה וידיים על הנשק. ב-APK צריך להוסיף את הקבצים גם ל-`android/entry.js`.
+
+## גרסת מחשב (Windows)
+```bash
+cd arena-rush/desktop
+npm install
+npm run dist      # dist/Arena Rush-<גרסה>-win.zip
+```
+פותחים את ה-zip ומריצים `Arena Rush.exe`. כדי להתחבר לשרת אונליין, מוסיפים אותו ל-`desktop/servers.json`. F11 מעביר למסך מלא.
+
+## הוצאה לחנויות
+המדריך המלא (Steam ו-Google Play, כולל עלויות ועצירות לאישור) נמצא ב-`docs/STORE_RELEASE.md`. טיוטת מדיניות פרטיות נמצאת ב-`docs/PRIVACY_POLICY.md`.

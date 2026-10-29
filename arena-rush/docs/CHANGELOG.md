@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-29 (0.7.0)
+- Reconnect: a player who drops can return within 30 s to the same seat, keeping kills and team.
+- Economy and cosmetic shop: server-side accounts (credits, XP, level, inventory), idempotent purchases, rewards from server match results, Owner `givemoney`.
+- Windows desktop build (Electron).
+- Store release runbook (Steam, Google Play) and privacy policy template.
+- Realistic Rocketbox soldiers (MIT) and CC0 PBR weapons; crosshair stays visible while aiming (except the sniper scope).
+- APK 0.7.
+
 ## 2026-10-29
 - Knife (key 5): server-validated melee arc with line of sight; backstab kills instantly.
 - Team modes 1v1 and 2v2 with a lobby (team choice, ready, countdown), team spawn sides, no friendly fire, team score HUD; a team that empties mid-match forfeits.

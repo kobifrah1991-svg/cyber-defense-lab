@@ -86,6 +86,26 @@ button.link { background: none; border: 0; color: var(--cyan); font-size: 13px; 
   #char-preview { max-height: 38vh; }
 }
 
+/* shop */
+.shop-btn { flex: 0 0 auto; padding: 8px 14px; font-size: 14px; }
+#shop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: rgba(5,6,16,.78); overflow-y: auto; }
+.shop-card-wrap { width: min(640px, 100%); background: var(--panel); border: 1px solid rgba(255,214,0,.4); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.shop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.shop-head h2 { margin: 0; }
+#shop-balance { color: var(--yellow); font-weight: 900; font-size: 18px; }
+.shop-note { margin: 0; color: var(--muted); font-size: 13px; }
+#shop-items h3 { margin: 12px 0 8px; font-size: 15px; color: var(--muted); }
+.shop-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.shop-card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 12px; background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.12); text-align: center; min-width: 0; }
+.shop-card.on { border-color: var(--yellow); }
+.shop-card .swatch { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); }
+.shop-card .swatch.glow { box-shadow: 0 0 14px currentColor; }
+.shop-card small { color: var(--yellow); min-height: 1.2em; font-size: 12px; }
+.shop-card button { width: 100%; border: 0; border-radius: 8px; padding: 8px 4px; font-weight: 700; background: linear-gradient(90deg, var(--pink), #ff6d00); color: #fff; font-size: 13px; }
+.shop-card button:disabled { opacity: .45; }
+#shop-status { color: var(--yellow); margin: 0; min-height: 1.2em; text-align: center; }
+@media (max-width: 520px) { .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* team lobby */
 #lobby { position: fixed; inset: 0; z-index: 15; display: grid; place-items: center; padding: 16px; background: rgba(5,6,16,.72); }
 .lobby-card { width: min(640px, 100%); background: var(--panel); border: 1px solid rgba(255,255,255,.14); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -320,6 +340,17 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
     <div id="pause" class="hidden"><div class="big" data-i18n="hud.pause"></div><div class="keys" data-i18n="hud.pauseKeys"></div><label class="pause-lang" onclick="event.stopPropagation()"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang-game"></select></label></div>
   </div>
 
+  <!-- Skin shop -->
+  <div id="shop" class="hidden" role="dialog" aria-modal="true">
+    <div class="shop-card-wrap">
+      <div class="shop-head"><h2 data-i18n="shop.title"></h2><span id="shop-balance"></span></div>
+      <p class="shop-note" data-i18n="shop.note"></p>
+      <div id="shop-items"></div>
+      <p id="shop-status"></p>
+      <button id="shop-close" class="secondary" type="button" data-i18n="shop.close"></button>
+    </div>
+  </div>
+
   <!-- Team lobby -->
   <div id="lobby" class="hidden">
     <div class="lobby-card">
@@ -370,6 +401,7 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
       <header class="menu-head">
         <h1>ARENA <span>RUSH</span></h1>
         <div class="head-side">
+          <button id="shop-btn" class="secondary shop-btn" type="button">🛒 <span data-i18n="shop.open"></span></button>
           <label class="lang-pick"><span data-i18n="menu.language"></span> <select class="lang-select" id="lang"></select></label>
           <div id="profile"></div>
         </div>

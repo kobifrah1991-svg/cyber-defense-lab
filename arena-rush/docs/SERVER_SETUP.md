@@ -18,7 +18,7 @@ npm start               # http://localhost:3000
 | `BOTS` | לכמה לוחמים הבוטים משלימים את החדר | `4` |
 | `GOOGLE_CLIENT_ID` | מפעיל התחברות עם Google (הוראות ב-`README.md`) | כבוי |
 | `ADMIN_CODE` | קוד סודי לכניסת מפעיל כ-Owner (`/adminlogin`) | כבוי |
-| `DATA_DIR` | תיקייה לחסימות, ללוג אדמין ול-`admins.json` | `data/` |
+| `DATA_DIR` | תיקייה לחשבונות השחקנים (`accounts.json`), לחסימות, ללוג אדמין ול-`admins.json`. בשרת אינטרנט חייבת להיות על דיסק קבוע, אחרת החשבונות יימחקו בכל פריסה | `data/` |
 | `TRUST_PROXY` | כשהשרת מאחורי פרוקסי (Render וכדומה), לוקח IP מ-`X-Forwarded-For` | כבוי |
 
 ## בדיקת תקינות
