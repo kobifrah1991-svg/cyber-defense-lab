@@ -235,14 +235,13 @@ namespace ArenaRush
                 Fill(W / 2, 0, 1, H, new Color(0, 0, 0, 0.8f));
                 Fill(0, H / 2, W, 1, new Color(0, 0, 0, 0.8f));
             }
-            else if (pn.Alive.Value && !(ctrl.Aiming && w.id != "shotgun"))
+            else if (pn.Alive.Value) // crosshair stays while aiming; only the sniper scope replaces it
             {
                 float g = ctrl.SpreadVisual * s, l = 9 * s, t = Mathf.Max(2, 2 * s);
                 Color c = Color.white;
                 Fill(W / 2 - t / 2, H / 2 - g - l, t, l, c); Fill(W / 2 - t / 2, H / 2 + g, t, l, c);
                 Fill(W / 2 - g - l, H / 2 - t / 2, l, t, c); Fill(W / 2 + g, H / 2 - t / 2, l, t, c);
             }
-            else if (pn.Alive.Value) Fill(W / 2 - 2, H / 2 - 2, 4, 4, Color.white);
 
             // Hit marker
             float ha = 1 - (Time.time - hitAt) / 0.2f;

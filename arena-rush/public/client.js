@@ -1306,8 +1306,10 @@ function frame(now) {
   // Viewmodel sway, bob, recoil, reload dip
   const reloading = now < me.reloadUntil;
   const adsK = me.ads ? 1 : 0;
+  // Narrow (portrait) screens: bring the weapon toward the centre so it stays visible
+  const vmX = 0.22 * Math.min(1, camera.aspect / 1.4);
   vmRoot.position.set(
-    0.22 * (1 - adsK) + Math.sin(bob) * 0.012 * (1 - adsK * 0.8),
+    vmX * (1 - adsK) + Math.sin(bob) * 0.012 * (1 - adsK * 0.8),
     -0.2 + adsK * 0.07 + Math.abs(Math.cos(bob)) * 0.01 - (reloading ? 0.15 : 0),
     -0.45 + recoil * 0.25,
   );
@@ -1316,7 +1318,7 @@ function frame(now) {
   vmRoot.visible = me.alive && !sniperScoped;
   flash.position.set(vmRoot.position.x, vmRoot.position.y + 0.03, vmRoot.position.z - muzzleDistance(me.weapon));
   $('scope').classList.toggle('hidden', !sniperScoped);
-  $('crosshair').classList.toggle('hidden', sniperScoped || (me.ads && me.weapon !== 'shotgun'));
+  $('crosshair').classList.toggle('hidden', sniperScoped); // stays visible while aiming; the scope has its own reticle
   const spreadPx = 5 + (Math.hypot(me.v[0], me.v[2]) > 1 ? 6 : 0) + (me.onGround ? 0 : 8) + recoil * 40;
   $('crosshair').style.setProperty('--gap', spreadPx + 'px');
 

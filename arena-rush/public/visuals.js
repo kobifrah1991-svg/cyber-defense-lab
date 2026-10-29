@@ -432,39 +432,33 @@ export function gunMaterials(accent) {
 // ---------- real weapon models (glTF) ----------
 // axis/muzzle: where the barrel points in the source file; length in metres;
 // back/up: where the hand grips, as fractions from the stock end and from the top.
+// The weapon files are already in weapon space: barrel along -Z, grip at the origin, metres.
+// (Prepared that way by the mini-cry project from CC0 sources; see models/CREDITS.md.)
 const WEAPON_MODELS = {
-  rifle: { file: 'rifle.glb', axis: 'x', muzzle: 1, length: 0.86, back: 0.38, up: 0.32 },
-  sniper: { file: 'sniper.glb', axis: 'x', muzzle: 1, length: 1.15, back: 0.3, up: 0.3 },
-  shotgun: { file: 'shotgun.glb', axis: 'z', muzzle: -1, length: 0.95, back: 0.3, up: 0.35 },
-  pistol: { file: 'pistol.glb', axis: 'x', muzzle: 1, length: 0.22, back: 0.3, up: 0.25 },
+  rifle: { file: 'rifle.glb' },
+  shotgun: { file: 'shotgun.glb' },
+  sniper: { file: 'sniper.glb' },
+  pistol: { file: 'pistol.glb' },
+  knife: { file: 'knife.glb' },
 };
 const weaponTemplates = {};
+const muzzles = {};
 
 export async function loadWeapons(base) {
   const loader = new GLTFLoader();
   await Promise.all(Object.entries(WEAPON_MODELS).map(async ([key, cfg]) => {
     const src = (await loader.loadAsync(typeof base === 'function' ? base(cfg.file) : base + cfg.file)).scene;
-    src.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.material.side = THREE.DoubleSide; } });
-    // Turn the barrel to -Z (our forward), scale to real length, put the grip at the origin
-    const turn = new THREE.Group();
-    turn.add(src);
-    if (cfg.axis === 'x') turn.rotation.y = cfg.muzzle > 0 ? Math.PI / 2 : -Math.PI / 2;
-    else if (cfg.muzzle > 0) turn.rotation.y = Math.PI;
-    let box = new THREE.Box3().setFromObject(turn);
-    const size = box.getSize(new THREE.Vector3());
-    turn.scale.setScalar(cfg.length / size.z);
-    box = new THREE.Box3().setFromObject(turn);
-    const len = box.max.z - box.min.z, h = box.max.y - box.min.y;
-    turn.position.set(-(box.min.x + box.max.x) / 2, -(box.max.y - cfg.up * h), -(box.max.z - cfg.back * len));
+    src.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+    const box = new THREE.Box3().setFromObject(src);
+    muzzles[key] = -box.min.z;
     const root = new THREE.Group();
-    root.add(turn);
+    root.add(src);
     weaponTemplates[key] = root;
   }));
 }
 // Distance from the grip to the muzzle, for placing the flash
 export function muzzleDistance(key) {
-  const c = WEAPON_MODELS[key];
-  return weaponTemplates[key] ? c.length * (1 - c.back) : 0.75;
+  return muzzles[key] ?? 0.75;
 }
 export const weaponsReady = () => Object.keys(weaponTemplates).length === Object.keys(WEAPON_MODELS).length;
 
@@ -494,7 +488,7 @@ export function buildGun(key, color, scale = 1) {
 }
 
 // ---------- realistic animated soldier (glTF) ----------
-// Soldier.glb comes from the three.js examples (a Mixamo character with Idle/Walk/Run).
+// Characters are Rocketbox avatars (see shared/characters.js) with separate idle/walk/run clips.
 // Legs and body play the animation; the arms are solved with two-bone IK onto the weapon.
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
@@ -502,13 +496,35 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 // One template per model file, shared by every character that uses it
 const charTemplates = new Map();
 const charDefs = new Map();
+const animSets = new Map(); // anims file key -> { Idle, Walk, Run } clips
 export async function loadCharacters(list, urlFor) {
   const loader = new GLTFLoader();
   const files = [...new Set(list.map((c) => c.file))];
   await Promise.all(files.map(async (file) => {
     const gltf = await loader.loadAsync(urlFor(file));
     const box = new THREE.Box3().setFromObject(gltf.scene);
-    charTemplates.set(file, { scene: gltf.scene, animations: gltf.animations, scale: 1.8 / (box.max.y - box.min.y) });
+    const scale = 1.8 / (box.max.y - box.min.y);
+    charTemplates.set(file, { scene: gltf.scene, animations: gltf.animations, scale, footY: -box.min.y * scale });
+  }));
+  // Separate animation files (e.g. Rocketbox idle/walk/run), shared by characters with the same skeleton
+  const sets = new Map();
+  for (const c of list) if (c.anims) sets.set(JSON.stringify(c.anims), c.anims);
+  await Promise.all([...sets.entries()].map(async ([key, anims]) => {
+    const out = {};
+    await Promise.all(Object.entries(anims).map(async ([name, file]) => {
+      const clip = (await loader.loadAsync(urlFor(file))).animations[0];
+      if (!clip) return;
+      clip.name = name;
+      // Keep the clip in place: lock the root's horizontal travel, keep its vertical bob.
+      // (Movement comes from the game; without this the body walks away from its weapon.)
+      for (const tr of clip.tracks) {
+        if (!/(^|_)Bip01\.position$/.test(tr.name) && !/Hips\.position$/.test(tr.name)) continue;
+        const v = tr.values;
+        for (let i = 3; i < v.length; i += 3) { v[i] = v[0]; v[i + 2] = v[2]; }
+      }
+      out[name] = clip;
+    }));
+    animSets.set(key, out);
   }));
   for (const c of list) charDefs.set(c.id, c);
 }
@@ -555,7 +571,8 @@ export function buildSoldier(color, seed, characterId) {
   const root = new THREE.Group();
   const model = SkeletonUtils.clone(t.scene);
   model.scale.setScalar(t.scale);
-  // This model already faces -Z, like our players
+  model.position.y = t.footY || 0;   // feet on the ground
+  if (def.flip) model.rotation.y = Math.PI; // models authored facing +Z
   const team = new THREE.Color(color);
   model.traverse((o) => {
     if (o.isMesh) {
@@ -567,10 +584,13 @@ export function buildSoldier(color, seed, characterId) {
     }
   });
   root.add(model);
-  // Mixamo names first, then any bone whose name ends the same way (other rigs)
+  // Mixamo names first, then 3ds Max Biped names (Rocketbox: "Bip01 R UpperArm"), then any bone ending the same way
+  const BIPED = { RightArm: 'R_UpperArm', RightForeArm: 'R_Forearm', RightHand: 'R_Hand', LeftArm: 'L_UpperArm', LeftForeArm: 'L_Forearm', LeftHand: 'L_Hand' };
   const bone = (n) => {
     let found = model.getObjectByName('mixamorig' + n);
-    if (!found) model.traverse((o) => { if (!found && o.isBone && o.name.toLowerCase().endsWith(n.toLowerCase())) found = o; });
+    for (const suffix of [BIPED[n], n].filter(Boolean)) {
+      if (!found) model.traverse((o) => { if (!found && o.isBone && o.name.toLowerCase().endsWith(suffix.toLowerCase())) found = o; });
+    }
     return found;
   };
   const bones = {
@@ -579,16 +599,25 @@ export function buildSoldier(color, seed, characterId) {
     spine: bone('Spine2'), neck: bone('Neck'), head: bone('Head'),
   };
   // Team-coloured glowing armband so players are easy to tell apart
-  const band = new THREE.Mesh(new THREE.TorusGeometry(0.06 / t.scale, 0.015 / t.scale, 6, 16), new THREE.MeshBasicMaterial({ color }));
-  band.rotation.x = Math.PI / 2;
-  if (bones.lArm) { bones.lArm.add(band); band.position.y = 0.12 / t.scale; }
+  const band = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.014, 6, 16), new THREE.MeshBasicMaterial({ color }));
+  if (bones.lArm) {
+    model.updateMatrixWorld(true);
+    const ws = bones.lArm.getWorldScale(new THREE.Vector3());
+    bones.lArm.add(band);
+    band.scale.setScalar(1 / ws.x);           // same world size whatever the rig's units
+    band.rotation.y = Math.PI / 2;            // ring around the upper arm (bone axis is X on Biped, Y on Mixamo)
+    const fore = bones.lFore?.position;
+    if (fore) band.position.copy(fore).multiplyScalar(0.35);
+  }
 
   const mixer = new THREE.AnimationMixer(model);
   // Find clips by name, tolerating other naming (e.g. "idle", "Armature|Run")
-  const find = (n) => t.animations.find((a) => a.name.toLowerCase().includes(n.toLowerCase()));
+  const own = def.anims ? animSets.get(JSON.stringify(def.anims)) : null;
+  const pool = own ? Object.values(own) : t.animations;
+  const find = (n) => pool.find((a) => a.name.toLowerCase().includes(n.toLowerCase()));
   const actions = {};
   for (const n of ['Idle', 'Walk', 'Run']) {
-    const c = find(n) || find('Idle') || t.animations[0];
+    const c = find(n) || find('Idle') || pool[0];
     actions[n] = c ? mixer.clipAction(c) : null;
   }
   for (const a of Object.values(actions)) if (a) { a.play(); a.setEffectiveWeight(0); }
@@ -596,10 +625,12 @@ export function buildSoldier(color, seed, characterId) {
   mixer.setTime(seed * 0.37); // desync idle cycles
 
   // Aim pivot at chest height carries the weapon; hands are solved onto it every frame
-  const aim = new THREE.Group(); aim.position.set(0, 1.38, 0); root.add(aim);
-  const gunMount = new THREE.Group(); gunMount.position.set(0.12, -0.12, -0.3); aim.add(gunMount);
-  const grip = new THREE.Object3D(); grip.position.set(0.12, -0.2, -0.27); aim.add(grip);
-  const fore = new THREE.Object3D(); fore.position.set(0.1, -0.13, -0.62); aim.add(fore);
+  // Stock at the right shoulder, right hand on the pistol grip, left hand on the handguard —
+  // all within reach of a ~0.55 m arm
+  const aim = new THREE.Group(); aim.position.set(0, 1.4, 0); root.add(aim);
+  const gunMount = new THREE.Group(); gunMount.position.set(0.09, -0.16, -0.18); aim.add(gunMount);
+  const grip = new THREE.Object3D(); grip.position.set(0.09, -0.21, -0.18); aim.add(grip);
+  const fore = new THREE.Object3D(); fore.position.set(0.05, -0.12, -0.45); aim.add(fore);
   const rPole = new THREE.Object3D(); rPole.position.set(0.6, -0.6, 0.3); aim.add(rPole);
   const lPole = new THREE.Object3D(); lPole.position.set(-0.6, -0.7, -0.2); aim.add(lPole);
 

@@ -56,11 +56,11 @@ const S = {
 
   // ---- characters, weapons, map ----
   'char.assault': { he: 'לוחם סער', en: 'Assault', ru: 'Штурмовик', ar: 'مقاتل اقتحام' },
-  'char.assault.role': { he: 'מאוזן · מתאים לכל טווח', en: 'Balanced · any range', ru: 'Универсал · любая дистанция', ar: 'متوازن · لكل المسافات' },
-  'char.ranger': { he: 'סייר יער', en: 'Ranger', ru: 'Рейнджер', ar: 'حارس الغابة' },
-  'char.ranger.role': { he: 'הסוואה ירוקה · צלף', en: 'Green camo · sniper', ru: 'Зелёный камуфляж · снайпер', ar: 'تمويه أخضر · قنّاص' },
-  'char.urban': { he: 'כוח עירוני', en: 'Urban ops', ru: 'Городской спецназ', ar: 'قوة حضرية' },
-  'char.urban.role': { he: 'מדים כהים · קרב צמוד', en: 'Dark uniform · close combat', ru: 'Тёмная форма · ближний бой', ar: 'زي داكن · قتال قريب' },
+  'char.assault.role': { he: 'קסדה ואפוד מלא · מאוזן', en: 'Helmet and full vest · balanced', ru: 'Шлем и бронежилет · универсал', ar: 'خوذة وسترة كاملة · متوازن' },
+  'char.ranger': { he: 'סייר', en: 'Scout', ru: 'Разведчик', ar: 'كشّاف' },
+  'char.ranger.role': { he: 'כובע שטח · קל ומהיר', en: 'Field cap · light and quick', ru: 'Полевая кепка · лёгкий и быстрый', ar: 'قبعة ميدانية · خفيف وسريع' },
+  'char.urban': { he: 'לוחמת', en: 'Specialist', ru: 'Специалист', ar: 'مقاتلة' },
+  'char.urban.role': { he: 'קסדה ואפוד · קרב בכל טווח', en: 'Helmet and vest · any range', ru: 'Шлем и жилет · любая дистанция', ar: 'خوذة وسترة · لكل المسافات' },
   'weapon.rifle': { he: 'רובה סער', en: 'Assault rifle', ru: 'Штурмовая винтовка', ar: 'بندقية هجومية' },
   'weapon.shotgun': { he: 'שוטגאן', en: 'Shotgun', ru: 'Дробовик', ar: 'بندقية خرطوش' },
   'weapon.sniper': { he: 'צלף', en: 'Sniper', ru: 'Снайперская винтовка', ar: 'قنّاصة' },

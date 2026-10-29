@@ -260,6 +260,16 @@ body.touch #timer { font-size: 18px; padding: 2px 12px; }
 body.touch #leader { font-size: 11px; }
 body.touch #center-msg { top: 30%; font-size: 16px; }
 @media (max-height: 380px) { body.touch #chat { display: none; } body.touch #chat.open { display: block; } }
+/* Phone held upright: stack the status pieces so nothing overlaps */
+@media (orientation: portrait) {
+  body.touch #topbar { top: 64px; }
+  body.touch #health { top: 12px; right: 14px; }
+  body.touch #hp-bar { width: 90px; }
+  body.touch #ammo { top: 120px; }
+  body.touch #killfeed { top: 130px; }
+  body.touch #chat { top: 190px; width: 60vw; }
+  body.touch #streak { top: 46px; }
+}
 
 @media (max-width: 700px) {
   h1 { font-size: 34px; }
@@ -271,7 +281,9 @@ body.touch #center-msg { top: 30%; font-size: 16px; }
   { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }
 </script>
 <script>window.ARENA_OFFLINE = true;</script>
-<script src="models.js"></script>
+<script src="models-characters.js"></script>
+<script src="models-anims.js"></script>
+<script src="models-weapons.js"></script>
 <div>
   <canvas id="game"></canvas>
 
